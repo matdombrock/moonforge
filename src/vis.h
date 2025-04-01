@@ -453,7 +453,7 @@ void vis_loop() {
         printf("🌊 %.2f | %d | %d | %dµs\n", _sys.speed, _sys.tick_num, vtick, (int)_sys.luatime);
         printf("🌘 %s\n", _sys.filepath);
         vtick++;
-        usleep(22 * 1000); // Sleep to reduce CPU usage
+        usleep(44 * 1000); // Sleep to reduce CPU usage
     }
     // Restore terminal settings
     vis_blocking();
