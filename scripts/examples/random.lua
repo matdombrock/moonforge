@@ -7,7 +7,6 @@ local function get_note_name(octave_mod)
   return random_note .. random_octave + (octave_mod or 0)
 end
 
-enable(2)
 enable(3)
 enable(4)
 
@@ -24,4 +23,4 @@ if tick % 32 == 1 then
   note(get_note_name(2), 4)
 end
 
-speed(0.75)
+speed(0.25)

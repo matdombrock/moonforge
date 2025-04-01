@@ -244,6 +244,8 @@ void luaB_cleanup() {
 }
 
 void luaB_run() { 
+    // This is why ticks never == 0
+    // There is a bit of a rounding error
     float seconds = (float)_sys.sample_num / (float)SAMPLE_RATE;
     int tick = floor(seconds * _sys.speed * 128);
     if (tick <= _sys.tick_num) return;

@@ -5,7 +5,7 @@ local tt = tick % 128
 env(8, 0, 16, 1)
 if tt == 1 then
   amp(1.8, 1)
-  note("G3", 1)
+  note("A3", 1)
 elseif tt < 32 then
   detune(-tt / 32, 1)
   amp(1.5-tt / 32, 1)

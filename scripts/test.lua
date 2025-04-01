@@ -1,6 +1,2 @@
-amp(1)
-enable(2)
-enable(3)
-local lfo = math.sin(seconds / 8)
-freq(660 + lfo * 440, 2)
-solo(2)
+enable(4)
+note("C2", 4)
