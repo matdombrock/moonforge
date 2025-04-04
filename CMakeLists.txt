@@ -28,7 +28,6 @@ set(PORTAUDIO_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/portaudio/include)
 # Specify the path to the SDL2 library
 set(SDL2_LIB ${CMAKE_SOURCE_DIR}/SDL2/libSDL2.a)
 set(SDL2_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/SDL2/include)
-
 # Add the executable
 add_executable(moonforge ./src/main.c)
 
@@ -37,7 +36,26 @@ target_include_directories(moonforge PRIVATE ${LUA_INCLUDE_DIR} ${PORTAUDIO_INCL
 
 # Link libraries
 if(APPLE)
-    target_link_libraries(moonforge ${LUA_LIB} ${PORTAUDIO_LIB} ${SDL2_LIB} m "-framework CoreAudio" "-framework AudioUnit" "-framework AudioToolbox" "-framework CoreFoundation" "-framework Carbon")
+    target_link_libraries(moonforge 
+        ${LUA_LIB} 
+        ${PORTAUDIO_LIB} 
+        ${SDL2_LIB} 
+        m 
+        "-framework Cocoa" 
+        "-framework IOKit" 
+        "-framework CoreVideo" 
+        "-framework CoreAudio" 
+        "-framework AudioUnit" 
+        "-framework AudioToolbox" 
+        "-framework CoreFoundation" 
+        "-framework Carbon" 
+        "-framework GameController" 
+        "-framework Metal" 
+        "-framework QuartzCore" 
+        "-framework CoreHaptics" 
+        "-framework ForceFeedback" 
+        "-liconv"
+    )
 endif()
 
 if(UNIX AND NOT APPLE)
