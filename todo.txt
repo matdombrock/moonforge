@@ -1,20 +1,15 @@
 more fx (reverb, delay, bitcrush)
 
-Allow direct DSP
+Allow direct DSP - wavetable function
+cycle every 2 pi = 1hz
+pos = seconds * 2 * pi * freq % (2 * pi)
 
 Limiter
-
-Master volume
 
 examples with import
 
 check if the lua file has changed before reloading (only works for single files)
 
-NEED TO CHANGE THE NAME
-https://en.wikipedia.org/wiki/TidalCycles
-LUA SOUND DESIGN TOY
-LUA WAVE
-MOONFORGE
 
 OPTIMIZATIONS (DONE):
 - Build with -O3 optimization flags (both Lua and PortAudio)
@@ -26,3 +21,10 @@ OPTIMIZATIONS (DONE):
 - Use fast approximations for sin() on macOS
 - Reduce memory allocations and pointer dereferencing
 - Fix clock_gettime() calculations for correct timing
+
+All oscs should be lowpassed at double their freq
+This will ensure they that they complete their cycles
+
+use 360x240 canvas
+
+Cleanup codebase

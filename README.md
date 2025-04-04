@@ -6,6 +6,7 @@ An experimental synthesizer that uses Lua scripts to generate sound in a "live c
 What is it?
 - A modular synthesizer
 - A tracker
+- A lab for exploring generative / procedural music
 - A live coding environment
 - A fun programming toy
 
