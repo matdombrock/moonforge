@@ -25,19 +25,23 @@ set(LUA_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/lua/src)
 set(PORTAUDIO_LIB ${CMAKE_SOURCE_DIR}/portaudio/libportaudio.a)
 set(PORTAUDIO_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/portaudio/include)
 
+# Specify the path to the SDL2 library
+set(SDL2_LIB ${CMAKE_SOURCE_DIR}/SDL2/libSDL2.a)
+set(SDL2_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/SDL2/include)
+
 # Add the executable
 add_executable(moonforge ./src/main.c)
 
 # Include directories
-target_include_directories(moonforge PRIVATE ${LUA_INCLUDE_DIR} ${PORTAUDIO_INCLUDE_DIR})
+target_include_directories(moonforge PRIVATE ${LUA_INCLUDE_DIR} ${PORTAUDIO_INCLUDE_DIR} ${SDL2_INCLUDE_DIR})
 
 # Link libraries
 if(APPLE)
-    target_link_libraries(moonforge ${LUA_LIB} ${PORTAUDIO_LIB} m "-framework CoreAudio" "-framework AudioUnit" "-framework AudioToolbox" "-framework CoreFoundation" "-framework Carbon")
+    target_link_libraries(moonforge ${LUA_LIB} ${PORTAUDIO_LIB} ${SDL2_LIB} m "-framework CoreAudio" "-framework AudioUnit" "-framework AudioToolbox" "-framework CoreFoundation" "-framework Carbon")
 endif()
 
 if(UNIX AND NOT APPLE)
-    target_link_libraries(moonforge ${LUA_LIB} ${PORTAUDIO_LIB} m pthread asound)
+    target_link_libraries(moonforge ${LUA_LIB} ${PORTAUDIO_LIB} ${SDL2_LIB} m pthread asound)
 endif()
 
 # Custom command to create 'out' directory and move binary and scripts

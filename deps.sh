@@ -22,74 +22,42 @@ function lua() {
   mv $target ./lua
 }
 
-# function portaudio() {
-#   rm -rf portaudio
-#   target=pa_stable_v190700_20210406
-#   curl -L -R -O https://files.portaudio.com/archives/$target.tgz
-#   tar zxf $target.tgz # unpacks to ./portaudio
-#   rm -rf $target.tgz
-#   cd portaudio
-#
-#   # Use optimized build flags
-#   if [[ "$(uname)" == "Darwin" ]]; then
-#     # macOS optimizations
-#     cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="-O3 -DNDEBUG"  -DBUILD_SHARED_LIBS=OFF .
-#   else
-#     # Linux optimizations
-#     cmake -DCMAKE_BUILD_TYPE=Release  -DBUILD_SHARED_LIBS=OFF .
-#   fi
-#
-#   make all
-# }
-#
 function portaudio() {
- 
-
   rm -rf portaudio
- 
-
   target=pa_stable_v190700_20210406
- 
-
   curl -L -R -O https://files.portaudio.com/archives/$target.tgz
- 
-
   tar zxf $target.tgz # unpacks to ./portaudio
- 
-
   rm -rf $target.tgz
- 
-
   cd portaudio
- 
-
-  cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF .
- 
-
-  make all
- 
-
-}
-function sdl2() {
-  rm -rf SDL2
-  target=SDL2-2.28.4
-  curl -L -R -O https://www.libsdl.org/release/$target.tar.gz
-  tar zxf $target.tar.gz # unpacks to ./SDL2
-  rm -rf $target.tar.gz
-  cd SDL2
 
   # Use optimized build flags
   if [[ "$(uname)" == "Darwin" ]]; then
     # macOS optimizations
-    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="-O3 -DNDEBUG -fomit-frame-pointer" -DBUILD_SHARED_LIBS=OFF .
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="-O3 -DNDEBUG"  -DBUILD_SHARED_LIBS=OFF -DPA_USE_JACK=OFF .
   else
     # Linux optimizations
-    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="-O3 -DNDEBUG -fomit-frame-pointer" -DBUILD_SHARED_LIBS=OFF .
+    cmake -DCMAKE_BUILD_TYPE=Release  -DBUILD_SHARED_LIBS=OFF -DPA_USE_JACK=OFF .
   fi
 
   make all
 }
 
+
+function sdl2() {
+  rm -rf SDL2
+  rm -rf SDL2-src
+  target=SDL2-2.28.4
+  curl -L -R -O https://www.libsdl.org/release/$target.tar.gz
+  tar zxf $target.tar.gz # unpacks to ./SDL2
+  rm -rf $target.tar.gz
+  mv $target SDL2-src
+  mkdir SDL2
+  cd SDL2
+  cmake -S ../SDL2-src -B .
+  make all
+  cp ./include-config-*/SDL2/SDL_config.h ./include/SDL2/SDL_config.h
+}
+
 # lua
-portaudio
-# sld2
+# portaudio
+sdl2

@@ -85,17 +85,18 @@ int pa_init() {
   printf("Console output mode: %s\n", modes[_sys.output_mode]);
   
   // Use printf and escape sequences instead of system("clear")
-  printf("\033[2J\033[H");
+  /*printf("\033[2J\033[H");*/
 
   if (_sys.output_mode == 2) {
+    printf("is vis");
     vis_init();
     // Start the visualizer loop
     vis_loop();
   }
   
-  printf("Press ENTER to stop the audio...\n");
+  /*printf("Press ENTER to stop the audio...\n");*/
   // Wait for ENTER
-  getchar();
+  /*getchar();*/
 
   err = Pa_StopStream(stream);
   if (err != paNoError) {

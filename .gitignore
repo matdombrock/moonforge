@@ -4,3 +4,5 @@ ascript
 old_build
 lua
 portaudio
+SDL2
+SDL2-src

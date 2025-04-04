@@ -28,3 +28,12 @@ This will ensure they that they complete their cycles
 use 360x240 canvas
 
 Cleanup codebase
+
+
+Implement SDL support for this application. 
+Right now we just need a basic example of creating an SDL window. 
+There should be no lua / API integration yet.
+We need to make sure that the SDL window is created and displayed correctly.
+
+
+ pipewire-jack-audio-connection-kit-devel
