@@ -135,7 +135,7 @@ void synth_get_buffer(Synth_Internal *data, float *out) {
         float samples[OSC_COUNT];
         int enabled_count = 0;
         for (int ii = 0; ii < OSC_COUNT; ii++) {
-            if (!_synth[ii].enabled) {
+            if (!_synth[ii].enabled || _synth[ii].freq == 0 || _synth[ii].wave == 0) {
                 samples[ii] = 0;
                 _vis.rms_buffer[ii][_vis.rms_index] = 0;
                 continue;

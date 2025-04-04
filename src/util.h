@@ -24,6 +24,7 @@ void printc(int color, const char *str) {
 
 void debug(const char *format, ...) {
     if (_sys.output_mode != 1) return;
+    if (_sys.tick_num % 128 != 0) return;
     va_list args;
     va_start(args, format);
     vprintf(format, args);

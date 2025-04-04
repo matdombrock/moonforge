@@ -175,3 +175,5 @@ end
 
 local lfo_amp = 0.5 * math.sin(tick / 2) + 0.5
 amp(0.5 + lfo_amp * 0.5, 5)
+
+bus_amp(0.75)

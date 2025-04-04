@@ -14,6 +14,10 @@ int main(int argc, char *argv[])
         else if (strcmp(argv[2], "v") == 0) {
             _sys.output_mode = 2;
         } 
+        else if (strcmp(argv[2], "vs") == 0) {
+            _sys.output_mode = 2;
+            _sys.stop_on_error = 1;
+        } 
     }   
     synth_init();
     pa_init();

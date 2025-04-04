@@ -96,6 +96,8 @@ The current tick number. This is the basis for creating time based effects.
 
 By default, there are 128 ticks per second. See `speed()` for info about changing this. 
 
+The tick number starts at 0 and increments by 1 every tick.
+
 ## Lua API Functions
 ### `dbg(message)`
 Prints a message to the console if the console output mode is set to debug.
@@ -292,6 +294,7 @@ mem_set(1.0, 1)
 ### `mem_get(mem_index)`
 Gets a value from the memory array at the given index.
 - Values are returned as floats or integers depending on how they were set.
+- The default value for each memory location is `-1.0`.
 - See `mem_set()` for more info.
 ```lua
 -- Get the value at index 1

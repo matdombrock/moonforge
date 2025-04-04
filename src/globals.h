@@ -4,6 +4,7 @@
 // System state
 typedef struct {
     char *filepath;
+    int stop_on_error;
     int sample_num;
     int tick_num;
     float seconds;
@@ -19,6 +20,7 @@ typedef struct {
 
 System _sys = {
     .filepath = "empty",
+    .stop_on_error = 0,
     .sample_num = 0,
     .tick_num = 0,
     .seconds = 0.0f,
@@ -28,7 +30,7 @@ System _sys = {
     .luatimes = {0.0f},
     .luatimes_index = 0,
     .keypress = -1,
-    .memory = {0.0f},
+    .memory = {-1.0f},
 };
 
 // Synth state

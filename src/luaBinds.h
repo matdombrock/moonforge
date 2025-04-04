@@ -15,7 +15,6 @@ int luaB_get_target(lua_State *L, int pnum) {
     int target = luaL_optinteger(L, pnum, 1);
     target -= LUA_INDEX; // Lua indices start at 1 but C indices start at 0
     if (target < 0) {
-        printf("lua warn: Lua indices start at 1. Got: %d\n", target);
         target = 0;
     }
     target = target > OSC_COUNT ? OSC_COUNT : target;
@@ -46,6 +45,9 @@ int luaB_disable(lua_State *L) {
 int luaB_freq(lua_State *L) {
     float val = luaL_checknumber(L, 1);
     int target = luaB_get_target(L, 2); 
+    if (val < 0) {
+        val = 0.0f;
+    }
     _synth[target].freq = val;
     _synth[target].env_pos = 0;
     debug("lua: freq(%f, %d)\n", val, target);
@@ -55,18 +57,27 @@ int luaB_note(lua_State *L) {
     int target = luaB_get_target(L, 2);
 
     if (lua_type(L, 1) == LUA_TSTRING) {
-        const char *note = luaL_checkstring(L, 1);
+        const char *note = luaL_checkstring(L, 1); 
         Note n = note_by_name(note);
         _synth[target].freq = n.freq;
+        if (strcmp(note, "R") == 0) {
+            _synth[target].freq = 0;
+        }
         _synth[target].env_pos = 0;
         debug("lua: note: %s, freq: %f, target: %d\n", note, n.freq, target);
         return 0;
     } 
     else if (lua_type(L, 1) == LUA_TNUMBER) {
         int note = luaL_checkinteger(L, 1);
+        if (note < 0 || note > 127) {
+            note = 0;
+        }
         float freq = 440.0f * powf(2.0f, (note - 69) / 12.0f);
+        if (note == 0) {
+            freq = 0;
+        }
         _synth[target].freq = freq;
-        _synth[target].env_pos = 0;
+        _synth[target].env_pos = 0; 
         debug("lua: note: %d, freq: %f, target: %d\n", note, freq, target);
         return 0;
     }
@@ -77,6 +88,9 @@ int luaB_note(lua_State *L) {
 int luaB_detune(lua_State *L) {
     float val = luaL_checknumber(L, 1); 
     int target = luaB_get_target(L, 2);
+    if (val < 0) {
+        val = 0.0f;
+    }
     _synth[target].detune = val;
     debug("lua: detune(%f, %d)\n", val, target);
     return 0;
@@ -131,7 +145,13 @@ int luaB_env(lua_State *L) {
 int luaB_lowpass(lua_State *L){
     float cutoff = luaL_checknumber(L, 1);
     float resonance = luaL_optnumber(L, 2, 1.0f);
-    int target = luaB_get_target(L, 3);
+    int target = luaB_get_target(L, 3); 
+    if (cutoff < 10.0f) {
+        cutoff = 10.0f;
+    }
+    if (resonance < 0.1f) {
+        resonance = 0.1f;
+    }
     _synth[target].lp_cutoff = cutoff;
     _synth[target].lp_resonance = resonance;
     _synth[target].lp_enabled = 1;
@@ -151,11 +171,9 @@ int luaB_highpass(lua_State *L){
 int luaB_speed(lua_State *L) {
     float val = luaL_checknumber(L, 1);
     if (val <= 0) {
-        printf("lua warn: speed must be greater than 0\n");
         val = 0.001f;
     }
     if (val > 1) {
-        printf("lua warn: speed must be less than or equal to 1\n");
         val = 1.0f;
     }
     _sys.speed = val;
@@ -173,7 +191,6 @@ int luaB_bus_lowpass(lua_State *L) {
 int luaB_bus_amp(lua_State *L) {
     float val = luaL_checknumber(L, 1);
     if (val < 0) {
-        printf("lua warn: bus amp must be greater than or equal to 0\n");
         val = 0.0f;
     }
     _bus.amp = val;
@@ -254,10 +271,12 @@ void luaB_run() {
     debug("\nlua start\n");
     if (clock_gettime(CLOCK_REALTIME, &ts) == -1) {
         perror("clock_gettime");
-        return;
     }
 
     _sys.tick_num = tick;
+    // Offset tick by -1
+    // We want to start at 0
+    tick -= 1;
     debug("tick: %d\n", tick);
     debug("seconds: %f\n", seconds);
 
@@ -279,13 +298,18 @@ void luaB_run() {
 
     if (luaL_dofile(L_global, _sys.filepath) != LUA_OK) {
         fprintf(stderr, "Lua error: %s\n", lua_tostring(L_global, -1));
+        if (_sys.stop_on_error) {
+            fprintf(stderr, "Stopping execution due to Lua error.\n");
+            lua_close(L_global);
+            L_global = NULL;
+            exit(1);
+        }
         lua_pop(L_global, 1); // remove error message from stack
     }
 
     struct timespec ts2;
     if (clock_gettime(CLOCK_REALTIME, &ts2) == -1) {
         perror("clock_gettime");
-        return;
     }
     
     // Calculate the time difference in nano seconds

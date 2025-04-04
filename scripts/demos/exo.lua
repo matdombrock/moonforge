@@ -25,3 +25,5 @@ freq((999 + lfo3 * 999) / div, 6)
 freq(369 * (lfo + lfo2 + lfo3 / 3), 7)
 freq(2 * (369 * (lfo + lfo2 + lfo3 / 3)), 8)
 amp(-0.5 + lfo, 8)
+
+bus_amp(0.75)

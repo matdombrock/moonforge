@@ -22,7 +22,9 @@ if (tick % 256) > 248 then
 end
 
 
-
+if mem_get(1) == -1 then
+  mem_set(1, 1)
+end
 n = math.floor(n / (16 * mem_get(1)))
 n = n % 12
 n = n * 5
