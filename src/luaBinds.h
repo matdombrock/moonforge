@@ -17,6 +17,9 @@ int luaB_get_target(lua_State *L, int pnum) {
     if (target < 0) {
         target = 0;
     }
+    if (target >= OSC_COUNT) {
+        target = OSC_COUNT - 1;
+    }
     target = target > OSC_COUNT ? OSC_COUNT : target;
     return target;
 }
@@ -58,6 +61,8 @@ int luaB_note(lua_State *L) {
 
     if (lua_type(L, 1) == LUA_TSTRING) {
         const char *note = luaL_checkstring(L, 1); 
+        // note_by_name returns a Note struct
+        // if the note is not found, it returns the first note
         Note n = note_by_name(note);
         _synth[target].freq = n.freq;
         if (strcmp(note, "R") == 0) {
@@ -73,9 +78,7 @@ int luaB_note(lua_State *L) {
             note = 0;
         }
         float freq = 440.0f * powf(2.0f, (note - 69) / 12.0f);
-        if (note == 0) {
-            freq = 0;
-        }
+        freq = note == 0 ? 0 : freq;
         _synth[target].freq = freq;
         _synth[target].env_pos = 0; 
         debug("lua: note: %d, freq: %f, target: %d\n", note, freq, target);
@@ -88,9 +91,7 @@ int luaB_note(lua_State *L) {
 int luaB_detune(lua_State *L) {
     float val = luaL_checknumber(L, 1); 
     int target = luaB_get_target(L, 2);
-    if (val < 0) {
-        val = 0.0f;
-    }
+    val = val < 0 ? 0 : val;
     _synth[target].detune = val;
     debug("lua: detune(%f, %d)\n", val, target);
     return 0;
@@ -106,6 +107,8 @@ int luaB_amp(lua_State *L) {
 int luaB_wave(lua_State *L) {
     int val = luaL_checkinteger(L, 1); 
     int target = luaB_get_target(L, 2);
+    val = val < 0 ? 0 : val;
+    val = val > 5 ? 5 : val; // Wrap wave mode
     _synth[target].wave = val;
     debug("lua: wave(%d, %d)\n", val, target);
     return 0;
@@ -122,6 +125,8 @@ int luaB_solo(lua_State *L) {
 int luaB_pan(lua_State *L) {
     float val = luaL_checknumber(L, 1);
     int target = luaB_get_target(L, 2);
+    val = val < -1 ? -1 : val;
+    val = val > 1 ? 1 : val;
     _synth[target].pan = val;
     debug("lua: pan(%f, %d)\n", val, target);
     return 0;
@@ -162,6 +167,8 @@ int luaB_highpass(lua_State *L){
     float cutoff = luaL_checknumber(L, 1);
     float resonance = luaL_optnumber(L, 2, 1.0f);
     int target = luaB_get_target(L, 3);
+    cutoff = cutoff < 10.0f ? 10.0f : cutoff;
+    resonance = resonance < 0.1f ? 0.1f : resonance;
     _synth[target].hp_cutoff = cutoff;
     _synth[target].hp_resonance = resonance;
     _synth[target].hp_enabled = 1;
@@ -170,12 +177,8 @@ int luaB_highpass(lua_State *L){
 }
 int luaB_speed(lua_State *L) {
     float val = luaL_checknumber(L, 1);
-    if (val <= 0) {
-        val = 0.001f;
-    }
-    if (val > 1) {
-        val = 1.0f;
-    }
+    val = val < 0.0 ? 0.0 : val;
+    val = val > 1.0 ? 1.0 : val;
     _sys.speed = val;
     debug("lua: speed(%f)\n", val);
     return 0;
@@ -183,6 +186,8 @@ int luaB_speed(lua_State *L) {
 int luaB_bus_lowpass(lua_State *L) {
     float cutoff = luaL_checknumber(L, 1);
     float resonance = luaL_checknumber(L, 2);
+    cutoff = cutoff < 10.0f ? 10.0f : cutoff;
+    resonance = resonance < 0.1f ? 0.1f : resonance;
     _bus.lp_cutoff = cutoff;
     _bus.lp_resonance = resonance;
     debug("lua: bus_lowpass(%f, %f)\n", cutoff, resonance);
@@ -190,9 +195,7 @@ int luaB_bus_lowpass(lua_State *L) {
 }
 int luaB_bus_amp(lua_State *L) {
     float val = luaL_checknumber(L, 1);
-    if (val < 0) {
-        val = 0.0f;
-    }
+    val = val < 0.0f ? 0.0f : val;
     _bus.amp = val;
     debug("lua: bus_amp(%f)\n", val);
     return 0;
@@ -201,6 +204,8 @@ int luaB_bus_amp(lua_State *L) {
 int luaB_mem_set(lua_State *L) {
     float val = luaL_checknumber(L, 1);
     int index = luaL_optinteger(L, 2, 1);
+    index = index < 0 ? 0 : index;
+    index = index > MEMORY_SIZE ? MEMORY_SIZE : index;
     index -= LUA_INDEX;
     _sys.memory[index] = val;
     debug("lua: mem_set(%d, %f)\n", index, val);
@@ -208,6 +213,8 @@ int luaB_mem_set(lua_State *L) {
 }
 int luaB_mem_get(lua_State *L) {
     int index = luaL_checkinteger(L, 1);
+    index = index < 0 ? 0 : index;
+    index = index > MEMORY_SIZE ? MEMORY_SIZE : index;
     index -= LUA_INDEX;
     if (floor(_sys.memory[index]) == _sys.memory[index]) {
         lua_pushinteger(L, _sys.memory[index]);

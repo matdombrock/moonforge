@@ -7,6 +7,7 @@
 #define OSC_COUNT 8
 #define LUA_TIME_WINDOW 128
 #define RMS_WINDOW (128 * 8) // This is vis
+#define MEMORY_SIZE 128
 #define VIS_WIDTH 24
 #define VIS_HEIGHT 16
 #define VIS_NULL_CHAR L'/'

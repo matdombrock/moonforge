@@ -15,7 +15,7 @@ typedef struct {
     float luatimes[LUA_TIME_WINDOW];
     int luatimes_index;
     char keypress;
-    float memory[16];
+    float memory[MEMORY_SIZE];
 } System;
 
 System _sys = {
