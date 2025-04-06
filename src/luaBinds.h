@@ -5,6 +5,7 @@
 #include "../lua/src/lua.h"
 #include "../lua/src/lauxlib.h"
 #include "../lua/src/lualib.h"
+#include "../SDL2/include/SDL2/SDL.h"
 
 #include "globals.h"
 #include "util.h"
@@ -226,6 +227,67 @@ int luaB_mem_get(lua_State *L) {
     debug("lua: mem_get(%d)\n", index);
     return 1;
 }
+// Vis utils
+int luaB_v_colors[][3] = {
+    {0,0,0},
+    {255,0,0},
+    {0,255,0},
+    {0,0,255},
+    {255,255,0},
+    {255,0,255},
+    {0,255,255},
+    {255,255,255}
+};
+void luaB_v_set_color(int palette_index) {
+    palette_index -= LUA_INDEX; // Lua indices start at 1 but C indices start at 0
+    palette_index = palette_index < 0 ? 0 : palette_index;
+    palette_index = palette_index % 8;
+    int r = luaB_v_colors[palette_index][0];
+    int g = luaB_v_colors[palette_index][1];
+    int b = luaB_v_colors[palette_index][2];
+    SDL_SetRenderDrawColor(_vis.renderer, r, g, b, 255);
+}
+// Vis binds
+int luaB_v_clear(lua_State *L) {
+    if (_vis.render_ready == 1) return 0;
+    int c = luaL_optinteger(L, 1, 1);
+    luaB_v_set_color(c);
+    SDL_RenderClear(_vis.renderer);
+    return 0;
+}
+int luaB_v_rect(lua_State *L) {
+    if (_vis.render_ready == 1) return 0;
+    int x = luaL_checkinteger(L, 1);
+    int y = luaL_checkinteger(L, 2);
+    int w = luaL_checkinteger(L, 3);
+    int h = luaL_checkinteger(L, 4);
+    int c = luaL_checkinteger(L, 5);
+    SDL_Rect rect = {x, y, w, h};
+    luaB_v_set_color(c);
+    SDL_RenderFillRect(_vis.renderer, &rect);
+    return 0;
+}
+int luaB_v_pixel(lua_State *L) {
+    if (_vis.render_ready == 1) return 0;
+    int x = luaL_checkinteger(L, 1);
+    int y = luaL_checkinteger(L, 2);
+    int c = luaL_checkinteger(L, 3);
+    luaB_v_set_color(c);
+    SDL_RenderDrawPoint(_vis.renderer, x, y);
+    return 0;
+}
+int luaB_v_line(lua_State *L) {
+    if (_vis.render_ready == 1) return 0;
+    int x1 = luaL_checkinteger(L, 1);
+    int y1 = luaL_checkinteger(L, 2);
+    int x2 = luaL_checkinteger(L, 3);
+    int y2 = luaL_checkinteger(L, 4);
+    int c = luaL_checkinteger(L, 5);
+    luaB_v_set_color(c);
+    SDL_RenderDrawLine(_vis.renderer, x1, y1, x2, y2);
+    return 0;
+}
+
 void luaB_binds(lua_State *L) {
     lua_register(L, "dbg", luaB_debug);  // Using dbg which is shorter and not a reserved name
     lua_register(L, "enable", luaB_enable);
@@ -245,6 +307,10 @@ void luaB_binds(lua_State *L) {
     lua_register(L, "bus_amp", luaB_bus_amp);
     lua_register(L, "mem_set", luaB_mem_set);
     lua_register(L, "mem_get", luaB_mem_get);
+    lua_register(L, "v_clear", luaB_v_clear);
+    lua_register(L, "v_rect", luaB_v_rect);
+    lua_register(L, "v_pixel", luaB_v_pixel);
+    lua_register(L, "v_line", luaB_v_line);
 }
 
 // Global Lua state to avoid constant reallocation
@@ -273,6 +339,8 @@ void luaB_run() {
     float seconds = (float)_sys.sample_num / (float)SAMPLE_RATE;
     int tick = floor(seconds * _sys.speed * 128);
     if (tick <= _sys.tick_num) return;
+
+    if (_vis.render_ready == 1) return; // Wait for render to finish
 
     struct timespec ts;
     debug("\nlua start\n");
@@ -340,4 +408,6 @@ void luaB_run() {
     
     // Log in microseconds
     debug("lua time: %fµs \n", _sys.luatime);
+
+    if (_sys.tick_num % 4 == 0) _vis.render_ready = 1; // About 30fps
 }

@@ -1,9 +1,12 @@
-if tick % 128 > 64 then
-  note("C4", 1)
-else
-  note("R", 1)
-  -- or
-  -- note(0, 1)
-  -- or
-  -- freq(0, 1)
+v_clear()
+
+for y = 0, 240 do
+  for x = 0, 360 do
+    v_pixel(x, y, 3)
+  end
+end
+for y = 0, 240 do
+  for x = 0, 360 do
+    v_pixel(x, y, 4)
+  end
 end

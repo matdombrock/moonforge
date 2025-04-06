@@ -1,6 +1,6 @@
 #include "../SDL2/include/SDL2/SDL.h"
+#include "globals.h"
 #include <stdio.h>
-SDL_Renderer *renderer;
 SDL_Window *window;
 int vis_init() {
     printf("Initializing SDL...\n");
@@ -12,10 +12,10 @@ int vis_init() {
 
     // Create a window
     window = SDL_CreateWindow("MOONFORGE", 
-                                          SDL_WINDOWPOS_UNDEFINED, 
-                                          SDL_WINDOWPOS_UNDEFINED, 
-                                          360 * 2, 240 * 2, 
-                                          SDL_WINDOW_SHOWN);
+            SDL_WINDOWPOS_UNDEFINED, 
+            SDL_WINDOWPOS_UNDEFINED, 
+            360 * 2, 240 * 2, 
+            SDL_WINDOW_SHOWN);
     if (window == NULL) {
         printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
         SDL_Quit();
@@ -23,16 +23,17 @@ int vis_init() {
     }
 
     // Create a renderer
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    if (renderer == NULL) {
+    _vis.renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (_vis.renderer == NULL) {
         printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
         SDL_DestroyWindow(window);
         SDL_Quit();
         return 1;
     }
     // Set logical size for scaling
-    SDL_RenderSetLogicalSize(renderer, 360, 240);
+    SDL_RenderSetLogicalSize(_vis.renderer, 360, 240);
     printf("SDL initialized successfully!\n");
+    return 0;
 }
 
 int vis_loop() { 
@@ -52,21 +53,16 @@ int vis_loop() {
                 quit = 1;
             }
         }
-
-        // Clear screen
-        SDL_SetRenderDrawColor(renderer, 0x33, 0x33, 0x33, 0xFF);
-        SDL_RenderClear(renderer);
-        // Write the text "moonforge"
-        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-        SDL_Rect rect = { 0, 0, 10, 10 };
-        SDL_RenderFillRect(renderer, &rect);
-
-        // Update screen
-        SDL_RenderPresent(renderer);
+        if (_vis.render_ready) {
+            // Render the visualizer
+            // Update screen
+            SDL_RenderPresent(_vis.renderer);
+            _vis.render_ready = 0;
+        }
     }
 
     // Destroy renderer and window
-    SDL_DestroyRenderer(renderer);
+    SDL_DestroyRenderer(_vis.renderer);
     SDL_DestroyWindow(window);
 
     // Quit SDL subsystems

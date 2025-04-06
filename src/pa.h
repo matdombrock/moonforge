@@ -92,11 +92,16 @@ int pa_init() {
     vis_init();
     // Start the visualizer loop
     vis_loop();
+    /*while(1) {*/
+    /*  printf("f");*/
+    /*}*/
+  }
+  else {
+    printf("Press ENTER to stop the audio...\n");
+    // Wait for ENTER
+    getchar();
   }
   
-  /*printf("Press ENTER to stop the audio...\n");*/
-  // Wait for ENTER
-  /*getchar();*/
 
   err = Pa_StopStream(stream);
   if (err != paNoError) {

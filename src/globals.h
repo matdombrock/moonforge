@@ -1,4 +1,5 @@
 #pragma once
+#include "../SDL2/include/SDL2/SDL.h"
 #include "config.h"
 
 // System state
@@ -72,6 +73,8 @@ typedef struct {
     float rms_bus[2];
     int rms_index;
     float rms_bus_history[2][VIS_RMS_BUS_HIST];
+    SDL_Renderer *renderer;
+    int render_ready;
 } Vis;
 Vis _vis = {
     .rms_buffer = {{0.0f}},
@@ -80,4 +83,6 @@ Vis _vis = {
     .rms_bus = {0.0f},
     .rms_index = 0,
     .rms_bus_history = {{0.0f}},
+    .renderer = NULL,
+    .render_ready = 0,
 };
