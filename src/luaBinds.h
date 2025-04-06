@@ -239,6 +239,7 @@ int luaB_v_colors[][3] = {
     {255,255,255}
 };
 void luaB_v_set_color(int palette_index) {
+    if (_vis.render_ready == 1) return;
     palette_index -= LUA_INDEX; // Lua indices start at 1 but C indices start at 0
     palette_index = palette_index < 0 ? 0 : palette_index;
     palette_index = palette_index % 8;
@@ -409,5 +410,5 @@ void luaB_run() {
     // Log in microseconds
     debug("lua time: %fµs \n", _sys.luatime);
 
-    if (_sys.tick_num % 4 == 0) _vis.render_ready = 1; // About 30fps
+    if (_sys.tick_num % 2 == 0) _vis.render_ready = 1; // About 30fps
 }
