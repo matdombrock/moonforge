@@ -66,6 +66,23 @@ Bus _bus = {
     .lp_resonance = 1.0f,
 };
 
+#define VIS_CMD_BUFFER_SIZE 100000 // Increased from 10000
+
+// Command types for visualization operations
+typedef enum {
+    VIS_CMD_NONE = 0,
+    VIS_CMD_CLEAR,
+    VIS_CMD_RECT,
+    VIS_CMD_PIXEL,
+    VIS_CMD_LINE
+} VisCmdType;
+
+// Command struct for visualization operations
+typedef struct {
+    VisCmdType type;
+    int params[6]; // Enough to store all possible params (x, y, w, h, color, etc.)
+} VisCmd;
+
 typedef struct {
     float rms_buffer[OSC_COUNT][RMS_WINDOW];
     float rms[OSC_COUNT];
@@ -75,6 +92,12 @@ typedef struct {
     float rms_bus_history[2][VIS_RMS_BUS_HIST];
     SDL_Renderer *renderer;
     volatile int render_ready;  // Marked volatile for thread safety
+    
+    // Command buffer for visualization operations
+    VisCmd cmd_buffer[VIS_CMD_BUFFER_SIZE];
+    int cmd_count;
+    int cmd_processed;
+    volatile int cmd_buffer_ready;
 } Vis;
 Vis _vis = {
     .rms_buffer = {{0.0f}},
@@ -85,4 +108,8 @@ Vis _vis = {
     .rms_bus_history = {{0.0f}},
     .renderer = NULL,
     .render_ready = 0,
+    .cmd_buffer = {{0}},
+    .cmd_count = 0,
+    .cmd_processed = 0,
+    .cmd_buffer_ready = 0,
 };

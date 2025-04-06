@@ -247,14 +247,93 @@ void luaB_v_set_color(int palette_index) {
     int b = luaB_v_colors[palette_index][2];
     SDL_SetRenderDrawColor(_vis.renderer, r, g, b, 255);
 }
+// Forward declaration for mutex
+extern pthread_mutex_t vis_mutex;
+
+// Static debug counter to avoid flooding logs
+static int debug_cmd_count = 0;
+static int debug_cmd_warnings = 0;
+
+// Add command to visualization buffer with automatic buffer management
+void vis_add_command(VisCmdType type, int p1, int p2, int p3, int p4, int p5, int p6) {
+    pthread_mutex_lock(&vis_mutex);
+    
+    // If buffer is 90% full, signal to process the commands
+    if (0) {
+    /*if (_vis.cmd_count > (VIS_CMD_BUFFER_SIZE * 0.9)) {*/
+        // Only show the warning message once in a while to avoid flooding
+        if (debug_cmd_warnings++ % 1000 == 0) {
+            printf("Buffer is 90%% full (%d/%d). Processing commands...\n", 
+                  _vis.cmd_count, VIS_CMD_BUFFER_SIZE);
+        }
+        
+        // Signal render thread to process commands immediately
+        _vis.cmd_buffer_ready = 1;
+        
+        // Unlock mutex and give a small time for processing
+        pthread_mutex_unlock(&vis_mutex);
+        
+        // Brief wait to allow visualization thread to process commands
+        // Don't wait too long as we're in the audio thread
+        struct timespec ts;
+        ts.tv_sec = 0;
+        ts.tv_nsec = 500000; // 0.5ms (very brief)
+        nanosleep(&ts, NULL);
+        
+        // Relock mutex to continue
+        pthread_mutex_lock(&vis_mutex);
+    }
+    
+    // Check again if buffer is still full (shouldn't be, but just in case)
+    if (_vis.cmd_count >= VIS_CMD_BUFFER_SIZE) {
+        if (debug_cmd_warnings++ % 1000 == 0) {
+            printf("WARNING: Buffer still full after wait (%d/%d). Dropping command.\n", 
+                  _vis.cmd_count, VIS_CMD_BUFFER_SIZE);
+        }
+        pthread_mutex_unlock(&vis_mutex);
+        return;
+    }
+    
+    // Add command to buffer
+    VisCmd cmd;
+    cmd.type = type;
+    cmd.params[0] = p1;
+    cmd.params[1] = p2;
+    cmd.params[2] = p3;
+    cmd.params[3] = p4;
+    cmd.params[4] = p5;
+    cmd.params[5] = p6;
+    
+    // Debug output (only occasionally to avoid flooding)
+    if (debug_cmd_count++ % 10000 == 0) {
+        if (type == VIS_CMD_CLEAR) {
+            /*printf("Added Clear command with color %d (buffer at %d/%d)\n", */
+            /*       p1, _vis.cmd_count, VIS_CMD_BUFFER_SIZE);*/
+        }
+        else if (type == VIS_CMD_RECT) {
+            /*printf("Added Rect command (%d,%d) %dx%d color %d (buffer at %d/%d)\n", */
+            /*       p1, p2, p3, p4, p5, _vis.cmd_count, VIS_CMD_BUFFER_SIZE);*/
+        }
+        else if (type == VIS_CMD_PIXEL) {
+            /*printf("Added Pixel command at (%d,%d) color %d (buffer at %d/%d)\n", */
+            /*       p1, p2, p3, _vis.cmd_count, VIS_CMD_BUFFER_SIZE);*/
+        }
+    }
+    
+    _vis.cmd_buffer[_vis.cmd_count] = cmd;
+    _vis.cmd_count++;
+    
+    pthread_mutex_unlock(&vis_mutex);
+}
+
 // Vis binds
 int luaB_v_clear(lua_State *L) {
     if (_vis.render_ready == 1) return 0;
     int c = luaL_optinteger(L, 1, 1);
-    luaB_v_set_color(c);
-    SDL_RenderClear(_vis.renderer);
+    vis_add_command(VIS_CMD_CLEAR, c, 0, 0, 0, 0, 0);
     return 0;
 }
+
 int luaB_v_rect(lua_State *L) {
     if (_vis.render_ready == 1) return 0;
     int x = luaL_checkinteger(L, 1);
@@ -262,20 +341,19 @@ int luaB_v_rect(lua_State *L) {
     int w = luaL_checkinteger(L, 3);
     int h = luaL_checkinteger(L, 4);
     int c = luaL_checkinteger(L, 5);
-    SDL_Rect rect = {x, y, w, h};
-    luaB_v_set_color(c);
-    SDL_RenderFillRect(_vis.renderer, &rect);
+    vis_add_command(VIS_CMD_RECT, x, y, w, h, c, 0);
     return 0;
 }
+
 int luaB_v_pixel(lua_State *L) {
     if (_vis.render_ready == 1) return 0;
     int x = luaL_checkinteger(L, 1);
     int y = luaL_checkinteger(L, 2);
     int c = luaL_checkinteger(L, 3);
-    luaB_v_set_color(c);
-    SDL_RenderDrawPoint(_vis.renderer, x, y);
+    vis_add_command(VIS_CMD_PIXEL, x, y, c, 0, 0, 0);
     return 0;
 }
+
 int luaB_v_line(lua_State *L) {
     if (_vis.render_ready == 1) return 0;
     int x1 = luaL_checkinteger(L, 1);
@@ -283,8 +361,7 @@ int luaB_v_line(lua_State *L) {
     int x2 = luaL_checkinteger(L, 3);
     int y2 = luaL_checkinteger(L, 4);
     int c = luaL_checkinteger(L, 5);
-    luaB_v_set_color(c);
-    SDL_RenderDrawLine(_vis.renderer, x1, y1, x2, y2);
+    vis_add_command(VIS_CMD_LINE, x1, y1, x2, y2, c, 0);
     return 0;
 }
 
@@ -409,5 +486,19 @@ void luaB_run() {
     // Log in microseconds
     debug("lua time: %fµs \n", _sys.luatime);
 
-    if (_sys.tick_num % 4 == 0) _vis.render_ready = 1; // About 30fps
+    // Signal command buffer is ready regardless of tick count
+    pthread_mutex_lock(&vis_mutex);
+    // Only set if we have commands to process
+    if (_vis.cmd_count > 0) {
+        _vis.cmd_buffer_ready = 1; // Signal the vis thread that commands are ready
+    }
+    
+    // Only update render ready flag every 4 ticks
+    if (_sys.tick_num % 4 == 0) {
+        _vis.render_ready = 1;     // Signal the vis thread to render frame
+    }
+    pthread_mutex_unlock(&vis_mutex);
+    
+    // Print debug info about the command buffer
+    /*printf("Tick %d: Commands queued: %d\n", _sys.tick_num, _vis.cmd_count);*/
 }
