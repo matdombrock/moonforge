@@ -139,7 +139,11 @@ void vis_process_commands() {
             needToProcessBatch = 1;
             
             // If we're processing in smaller batches, we can present intermediate results
-            if (processedCommands < totalCommands && processedCommands % (batchSize * 2) == 0) {
+            // but only for very large command counts to avoid excessive rendering
+            if (processedCommands < totalCommands && 
+                totalCommands > batchSize * 4 && 
+                processedCommands % (batchSize * 4) == 0) {
+                
                 // Flush any remaining points
                 if (pointCount > 0) {
                     vis_set_color(_vis.renderer, currentPointColor);
@@ -148,10 +152,17 @@ void vis_process_commands() {
                     needToProcessBatch = 0;
                 }
                 
-                // Present the rendered frame for intermediate feedback
-                SDL_RenderPresent(_vis.renderer);
-                /*printf("Processed %d/%d commands, presenting intermediate result\n", */
-                       /*processedCommands, totalCommands);*/
+                // Only present intermediate results if we've processed a significant portion
+                // This reduces unnecessary rendering which can cause flickering
+                static Uint32 last_int_time = 0;
+                Uint32 current_time = SDL_GetTicks();
+                
+                // Limit intermediate presentations to no more than 30 times per second
+                if (current_time - last_int_time >= 33) {
+                    // Present the rendered frame for intermediate feedback
+                    SDL_RenderPresent(_vis.renderer);
+                    last_int_time = current_time;
+                }
             }
         }
         
@@ -189,10 +200,15 @@ int vis_init() {
     }
     pthread_mutex_unlock(&vis_mutex);
     
-    // Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    // Initialize SDL with video and timer subsystems
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
         return 1;
+    }
+
+    // Enable VSync for smooth rendering
+    if (SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1") == SDL_FALSE) {
+        printf("Warning: VSync hint could not be set\n");
     }
 
     // Create a window
@@ -207,20 +223,36 @@ int vis_init() {
         return 1;
     }
 
-    // Create a renderer
+    // Create a renderer with VSync enabled
     pthread_mutex_lock(&vis_mutex);
-    _vis.renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    _vis.renderer = SDL_CreateRenderer(window, -1, 
+                                      SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     pthread_mutex_unlock(&vis_mutex);
     
     if (_vis.renderer == NULL) {
-        printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return 1;
+        printf("VSync renderer could not be created. Trying without VSync. Error: %s\n", SDL_GetError());
+        
+        // Try again without VSync
+        pthread_mutex_lock(&vis_mutex);
+        _vis.renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+        pthread_mutex_unlock(&vis_mutex);
+        
+        if (_vis.renderer == NULL) {
+            printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return 1;
+        }
     }
+
     // Set logical size for scaling
     SDL_RenderSetLogicalSize(_vis.renderer, 360, 240);
-    printf("SDL initialized successfully!\n");
+    
+    // Enable blending for smoother rendering
+    SDL_SetRenderDrawBlendMode(_vis.renderer, SDL_BLENDMODE_BLEND);
+    
+    printf("SDL initialized successfully with renderer flags: %d\n", 
+           SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     return 0;
 }
 
@@ -265,19 +297,32 @@ int vis_loop() {
         
         // Process commands again if needed
         if (shouldRender) {
-            vis_process_commands();
+            // Create a static variable to track frame timing
+            static Uint32 last_frame_time = 0;
+            Uint32 current_time = SDL_GetTicks();
             
-            // Present the frame
-            SDL_RenderPresent(_vis.renderer);
-            
-            // Reset the render ready flag
-            pthread_mutex_lock(&vis_mutex);
-            _vis.render_ready = 0;
-            pthread_mutex_unlock(&vis_mutex);
+            // Only render at 60fps max (16.6ms per frame)
+            // This prevents overrendering which can cause flickering
+            if (current_time - last_frame_time >= 16) {
+                // Process any pending commands
+                vis_process_commands();
+                
+                // Present the frame (will sync with VSync if enabled)
+                SDL_RenderPresent(_vis.renderer);
+                
+                // Update last frame time
+                last_frame_time = current_time;
+                
+                // Reset the render ready flag
+                pthread_mutex_lock(&vis_mutex);
+                _vis.render_ready = 0;
+                pthread_mutex_unlock(&vis_mutex);
+            }
         }
         
-        // Add a small sleep to prevent the thread from consuming too much CPU
-        SDL_Delay(1); // Extremely short sleep for better responsiveness
+        // Use SDL_Delay to prevent too much CPU usage
+        // Let SDL handle the timing for us - this will work better with VSync
+        SDL_Delay(5); // Slightly longer delay to better sync with monitor refresh
     }
 
     // Cleanup
