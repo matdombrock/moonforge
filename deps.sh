@@ -58,6 +58,6 @@ function sdl2() {
   cp ./include-config-*/SDL2/SDL_config.h ./include/SDL2/SDL_config.h
 }
 
-# lua
-# portaudio
+lua
+portaudio
 sdl2
