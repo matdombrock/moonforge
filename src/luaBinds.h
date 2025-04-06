@@ -356,6 +356,9 @@ void luaB_run() {
     debug("tick: %d\n", tick);
     debug("seconds: %f\n", seconds);
 
+    if (_sys.tick_num % 2 == 0) _vis.render_ready = 1; // About 30fps
+
+
     // Initialize Lua state if needed
     if (L_global == NULL) {
         luaB_init();
@@ -371,6 +374,8 @@ void luaB_run() {
     lua_setglobal(L_global, "tick");
     lua_pushstring(L_global, &_sys.keypress);
     lua_setglobal(L_global, "keypress");
+    lua_pushboolean(L_global, !_vis.render_ready);
+    lua_setglobal(L_global, "vframe");
 
     if (luaL_dofile(L_global, _sys.filepath) != LUA_OK) {
         fprintf(stderr, "Lua error: %s\n", lua_tostring(L_global, -1));
@@ -409,6 +414,4 @@ void luaB_run() {
     
     // Log in microseconds
     debug("lua time: %fµs \n", _sys.luatime);
-
-    if (_sys.tick_num % 2 == 0) _vis.render_ready = 1; // About 30fps
 }

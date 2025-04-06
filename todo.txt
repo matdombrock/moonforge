@@ -41,3 +41,7 @@ We need to make sure that the SDL window is created and displayed correctly.
 
  Is it possible to call SDL code directly from the lua binds or do I need to make some kind of scrtiping array that holds the functions to call?
  At the end of each (or each odd) audio tick it could trigger the SDL to render with its given state
+
+
+ All vis functions need to work with floats
+ its faster to get to an int in c than lua
