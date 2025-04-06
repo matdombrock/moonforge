@@ -65,17 +65,16 @@ int vis_loop() {
         // Lock mutex before accessing shared resources
         if (_vis.render_ready) {
             pthread_mutex_lock(&vis_mutex);
-            /*for (int y = 0; y < 240; y++) {*/
-            /*    for (int x = 0; x < 360; x++) {*/
-            /*        // Set pixel color*/
-            /*        int c = 0;*/
-            /*        if (x % 8 == 0 && y % 8 == 0) {*/
-            /*            c = 255; // Example: set color to white for every 8x8 block*/
-            /*        }*/
-            /*        SDL_SetRenderDrawColor(_vis.renderer, c, c, c, c);*/
-            /*        SDL_RenderDrawPoint(_vis.renderer, x, y);*/
-            /*    }*/
-            /*}*/
+            for (int y = 0; y < 240; y++) {
+                for (int x = 0; x < 360; x++) {
+                    // Set pixel color
+                    if (x % 16 == 0 && y % 16 == 0) {
+                        SDL_SetRenderDrawColor(_vis.renderer, 55, 55, 55, 55);
+                        SDL_RenderDrawPoint(_vis.renderer, x, y);
+                    }
+                    
+                }
+            }
             SDL_RenderPresent(_vis.renderer);
             _vis.render_ready = 0;
             pthread_mutex_unlock(&vis_mutex);
