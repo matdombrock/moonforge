@@ -74,7 +74,7 @@ typedef struct {
     int rms_index;
     float rms_bus_history[2][VIS_RMS_BUS_HIST];
     SDL_Renderer *renderer;
-    int render_ready;
+    volatile int render_ready;  // Marked volatile for thread safety
 } Vis;
 Vis _vis = {
     .rms_buffer = {{0.0f}},

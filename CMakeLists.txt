@@ -41,6 +41,7 @@ if(APPLE)
         ${PORTAUDIO_LIB} 
         ${SDL2_LIB} 
         m 
+        pthread
         "-framework Cocoa" 
         "-framework IOKit" 
         "-framework CoreVideo" 

@@ -1,6 +1,7 @@
 #pragma once
 #include <math.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include "luaBinds.h"
 #include "globals.h"
 
@@ -130,14 +131,43 @@ float synth_highpass(int index, float input, float cutoff, float dt) {
 }
 
 
+extern pthread_mutex_t vis_mutex; // Declare the mutex from vis.h
+
 void synth_get_buffer(Synth_Internal *data, float *out) {
+  // Get local copy of rms_index to reduce lock time
+  int local_rms_index;
+  
+  pthread_mutex_lock(&vis_mutex);
+  local_rms_index = _vis.rms_index;
+  pthread_mutex_unlock(&vis_mutex);
+  
+  // Create local buffers to minimize lock time
+  float local_rms_buffer[OSC_COUNT][RMS_WINDOW];
+  float local_rms_buffer_bus[2][RMS_WINDOW];
+  
+  // Copy existing buffer data if needed
+  if (local_rms_index > 0) {
+    pthread_mutex_lock(&vis_mutex);
+    for (int ii = 0; ii < OSC_COUNT; ii++) {
+      for (int j = 0; j < local_rms_index; j++) {
+        local_rms_buffer[ii][j] = _vis.rms_buffer[ii][j];
+      }
+    }
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < local_rms_index; j++) {
+        local_rms_buffer_bus[i][j] = _vis.rms_buffer_bus[i][j];
+      }
+    }
+    pthread_mutex_unlock(&vis_mutex);
+  }
+  
   for (int i = 0; i < BUFFER_SIZE; i++) {
         float samples[OSC_COUNT];
         int enabled_count = 0;
         for (int ii = 0; ii < OSC_COUNT; ii++) {
             if (!_synth[ii].enabled || _synth[ii].freq == 0 || _synth[ii].wave == 0) {
                 samples[ii] = 0;
-                _vis.rms_buffer[ii][_vis.rms_index] = 0;
+                local_rms_buffer[ii][local_rms_index] = 0;
                 continue;
             }
             enabled_count++;
@@ -150,7 +180,7 @@ void synth_get_buffer(Synth_Internal *data, float *out) {
             }
             sample *= _synth[ii].amp;
             samples[ii] = sample;
-            _vis.rms_buffer[ii][_vis.rms_index] = sample;
+            local_rms_buffer[ii][local_rms_index] = sample;
         }
         float mixL = 0;
         float mixR = 0;
@@ -178,8 +208,8 @@ void synth_get_buffer(Synth_Internal *data, float *out) {
         mixL *= _bus.amp * fadein;
         mixR *= _bus.amp * fadein;
         // Add to bus rms_buffer
-        _vis.rms_buffer_bus[0][_vis.rms_index] = mixL;
-        _vis.rms_buffer_bus[1][_vis.rms_index] = mixR;
+        local_rms_buffer_bus[0][local_rms_index] = mixL;
+        local_rms_buffer_bus[1][local_rms_index] = mixR;
         /**out++ = mix;*/
         out[i * 2] = mixL; // Left
         out[i * 2 + 1] = mixR; // Right
@@ -192,35 +222,108 @@ void synth_get_buffer(Synth_Internal *data, float *out) {
             }
         }
         //
-        _vis.rms_index++;
+        local_rms_index++;
         _sys.sample_num++;
     }
-    // Calculate RMS
-    if (_vis.rms_index >= RMS_WINDOW) {
+    
+    // Calculate RMS if needed
+    if (local_rms_index >= RMS_WINDOW) {
+        float local_rms[OSC_COUNT];
+        float local_rms_bus[2];
+        float local_rms_bus_history[2][VIS_RMS_BUS_HIST];
+        
+        // Calculate oscillator RMS values
         for (int i = 0; i < OSC_COUNT; i++) {
             float sum = 0.0f;
             for (int j = 0; j < RMS_WINDOW; j++) {
-                sum += _vis.rms_buffer[i][j] * _vis.rms_buffer[i][j];
+                sum += local_rms_buffer[i][j] * local_rms_buffer[i][j];
             }
-            _vis.rms[i] = sqrtf(sum / RMS_WINDOW);
+            local_rms[i] = sqrtf(sum / RMS_WINDOW);
         }
+        
         // Calculate bus RMS
         float sumL = 0.0f;
         float sumR = 0.0f;
         for (int i = 0; i < RMS_WINDOW; i++) {
-            sumL += _vis.rms_buffer_bus[0][i] * _vis.rms_buffer_bus[0][i];
-            sumR += _vis.rms_buffer_bus[1][i] * _vis.rms_buffer_bus[1][i];
+            sumL += local_rms_buffer_bus[0][i] * local_rms_buffer_bus[0][i];
+            sumR += local_rms_buffer_bus[1][i] * local_rms_buffer_bus[1][i];
         }
-        _vis.rms_bus[0] = sqrtf(sumL / RMS_WINDOW);
-        _vis.rms_bus[1] = sqrtf(sumR / RMS_WINDOW);
-        _vis.rms_index = 0;
-        // _vis.rms_bus_history uses a FILO pattern
+        local_rms_bus[0] = sqrtf(sumL / RMS_WINDOW);
+        local_rms_bus[1] = sqrtf(sumR / RMS_WINDOW);
+        
+        // Copy existing history data for updating
+        pthread_mutex_lock(&vis_mutex);
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < VIS_RMS_BUS_HIST; j++) {
+                local_rms_bus_history[i][j] = _vis.rms_bus_history[i][j];
+            }
+        }
+        pthread_mutex_unlock(&vis_mutex);
+        
+        // Update history using FILO pattern
         for (int i = 0; i < (VIS_RMS_BUS_HIST - 1); i++) {
-            _vis.rms_bus_history[0][i] = _vis.rms_bus_history[0][i + 1];
-            _vis.rms_bus_history[1][i] = _vis.rms_bus_history[1][i + 1];
+            local_rms_bus_history[0][i] = local_rms_bus_history[0][i + 1];
+            local_rms_bus_history[1][i] = local_rms_bus_history[1][i + 1];
         }
-        _vis.rms_bus_history[0][VIS_RMS_BUS_HIST - 1] = _vis.rms_bus[0];
-        _vis.rms_bus_history[1][VIS_RMS_BUS_HIST - 1] = _vis.rms_bus[1];
+        local_rms_bus_history[0][VIS_RMS_BUS_HIST - 1] = local_rms_bus[0];
+        local_rms_bus_history[1][VIS_RMS_BUS_HIST - 1] = local_rms_bus[1];
+        
+        // Now update all the visualization data at once with a lock
+        pthread_mutex_lock(&vis_mutex);
+        
+        // Update RMS values
+        for (int i = 0; i < OSC_COUNT; i++) {
+            _vis.rms[i] = local_rms[i];
+        }
+        
+        // Update bus RMS values
+        _vis.rms_bus[0] = local_rms_bus[0];
+        _vis.rms_bus[1] = local_rms_bus[1];
+        
+        // Update history
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < VIS_RMS_BUS_HIST; j++) {
+                _vis.rms_bus_history[i][j] = local_rms_bus_history[i][j];
+            }
+        }
+        
+        // Update the buffers
+        for (int ii = 0; ii < OSC_COUNT; ii++) {
+            for (int j = 0; j < RMS_WINDOW; j++) {
+                _vis.rms_buffer[ii][j] = local_rms_buffer[ii][j];
+            }
+        }
+        
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < RMS_WINDOW; j++) {
+                _vis.rms_buffer_bus[i][j] = local_rms_buffer_bus[i][j];
+            }
+        }
+        
+        // Reset index and set render flag
+        _vis.rms_index = 0;
+        
+        pthread_mutex_unlock(&vis_mutex);
+    } else {
+        // Update buffers and index
+        pthread_mutex_lock(&vis_mutex);
+        
+        // Update the buffers
+        for (int ii = 0; ii < OSC_COUNT; ii++) {
+            for (int j = 0; j < local_rms_index; j++) {
+                _vis.rms_buffer[ii][j] = local_rms_buffer[ii][j];
+            }
+        }
+        
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < local_rms_index; j++) {
+                _vis.rms_buffer_bus[i][j] = local_rms_buffer_bus[i][j];
+            }
+        }
+        
+        _vis.rms_index = local_rms_index;
+        
+        pthread_mutex_unlock(&vis_mutex);
     }
 }
 

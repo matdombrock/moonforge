@@ -88,13 +88,20 @@ int pa_init() {
   /*printf("\033[2J\033[H");*/
 
   if (_sys.output_mode == 2) {
-    printf("is vis");
-    vis_init();
-    // Start the visualizer loop
-    vis_loop();
-    /*while(1) {*/
-    /*  printf("f");*/
-    /*}*/
+    printf("Starting visualizer in separate thread...\n");
+    // Start the visualizer in a separate thread
+    if (vis_start_thread() != 0) {
+      fprintf(stderr, "Failed to start visualizer thread\n");
+    } else {
+      printf("Visualizer thread started successfully\n");
+    }
+    printf("Press ENTER to stop the audio...\n");
+    // Wait for ENTER
+    getchar();
+    // Signal the visualizer thread to stop
+    vis_stop_thread();
+    // Give the thread a moment to clean up
+    Pa_Sleep(500);
   }
   else {
     printf("Press ENTER to stop the audio...\n");
