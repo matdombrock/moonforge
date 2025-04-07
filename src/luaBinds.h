@@ -286,11 +286,10 @@ void luaB_v_set_color(int palette_index) {
 }
 // Vis binds
 int luaB_v_clear(lua_State *L) {
-    pthread_mutex_lock(&vis_mutex);
     if (_vis.render_ready == 1 || _vis.renderer == NULL) {
-        pthread_mutex_unlock(&vis_mutex);
         return 0;
     }
+    pthread_mutex_lock(&vis_mutex);
     int c = luaL_optinteger(L, 1, 1);
     luaB_v_set_color(c);
     SDL_RenderClear(_vis.renderer);
@@ -298,11 +297,10 @@ int luaB_v_clear(lua_State *L) {
     return 0;
 }
 int luaB_v_rect(lua_State *L) {
-    pthread_mutex_lock(&vis_mutex);
     if (_vis.render_ready == 1 || _vis.renderer == NULL) {
-        pthread_mutex_unlock(&vis_mutex);
         return 0;
     }
+    pthread_mutex_lock(&vis_mutex);
     int x = (int)luaL_checknumber(L, 1);
     int y = (int)luaL_checknumber(L, 2);
     int w = (int)luaL_checknumber(L, 3);
@@ -315,11 +313,10 @@ int luaB_v_rect(lua_State *L) {
     return 0;
 }
 int luaB_v_pixel(lua_State *L) {
-    pthread_mutex_lock(&vis_mutex);
     if (_vis.render_ready == 1 || _vis.renderer == NULL) {
-        pthread_mutex_unlock(&vis_mutex);
         return 0;
     }
+    pthread_mutex_lock(&vis_mutex);
     int x = (int)luaL_checknumber(L, 1);
     int y = (int)luaL_checknumber(L, 2);
     int c = (int)luaL_checknumber(L, 3);
@@ -329,11 +326,10 @@ int luaB_v_pixel(lua_State *L) {
     return 0;
 }
 int luaB_v_line(lua_State *L) {
-    pthread_mutex_lock(&vis_mutex);
     if (_vis.render_ready == 1 || _vis.renderer == NULL) {
-        pthread_mutex_unlock(&vis_mutex);
         return 0;
     }
+    pthread_mutex_lock(&vis_mutex);
     int x1 = (int)luaL_checknumber(L, 1);
     int y1 = (int)luaL_checknumber(L, 2);
     int x2 = (int)luaL_checknumber(L, 3);
