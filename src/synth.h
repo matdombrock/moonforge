@@ -131,7 +131,7 @@ float synth_highpass(int index, float input, float cutoff, float dt) {
 }
 
 
-extern pthread_mutex_t vis_mutex; // Declare the mutex from vis.h
+extern pthread_mutex_t vis_mutex; // Declare the mutex for thread synchronization
 
 void synth_get_buffer(Synth_Internal *data, float *out) {
   // Get local copy of rms_index to reduce lock time
@@ -302,6 +302,9 @@ void synth_get_buffer(Synth_Internal *data, float *out) {
         
         // Reset index and set render flag
         _vis.rms_index = 0;
+        
+        // Signal to the main thread that data is ready to be rendered
+        _vis.render_ready = 1;
         
         pthread_mutex_unlock(&vis_mutex);
     } else {

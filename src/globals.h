@@ -19,21 +19,6 @@ typedef struct {
     float memory[MEMORY_SIZE];
 } System;
 
-System _sys = {
-    .filepath = "empty",
-    .stop_on_error = 0,
-    .sample_num = 0,
-    .tick_num = 0,
-    .seconds = 0.0f,
-    .output_mode = 0,
-    .speed = 1.0f,
-    .luatime = 0.0f,
-    .luatimes = {0.0f},
-    .luatimes_index = 0,
-    .keypress = -1,
-    .memory = {-1.0f},
-};
-
 // Synth state
 typedef struct {
     float freq;
@@ -53,18 +38,11 @@ typedef struct {
     int enabled;
 } Synth;
 
-Synth _synth[OSC_COUNT]; // Initialized in synth.h
-
 typedef struct {
     float amp;
     float lp_cutoff;
     float lp_resonance;
 } Bus;
-Bus _bus = {
-    .amp = 1.0f,
-    .lp_cutoff = 20000.0f,
-    .lp_resonance = 1.0f,
-};
 
 typedef struct {
     float rms_buffer[OSC_COUNT][RMS_WINDOW];
@@ -76,6 +54,32 @@ typedef struct {
     SDL_Renderer *renderer;
     volatile int render_ready;  // Marked volatile for thread safety
 } Vis;
+
+#ifdef GLOBALS_IMPLEMENTATION
+// Define globals only in main.c
+System _sys = {
+    .filepath = "empty",
+    .stop_on_error = 0,
+    .sample_num = 0,
+    .tick_num = 0,
+    .seconds = 0.0f,
+    .output_mode = 0,
+    .speed = 1.0f,
+    .luatime = 0.0f,
+    .luatimes = {0.0f},
+    .luatimes_index = 0,
+    .keypress = -1,
+    .memory = {-1.0f},
+};
+
+Synth _synth[OSC_COUNT]; // Initialized in synth.h
+
+Bus _bus = {
+    .amp = 1.0f,
+    .lp_cutoff = 20000.0f,
+    .lp_resonance = 1.0f,
+};
+
 Vis _vis = {
     .rms_buffer = {{0.0f}},
     .rms = {0.0f},
@@ -86,3 +90,10 @@ Vis _vis = {
     .renderer = NULL,
     .render_ready = 0,
 };
+#else
+// Declare as extern for other files
+extern System _sys;
+extern Synth _synth[OSC_COUNT]; 
+extern Bus _bus;
+extern Vis _vis;
+#endif

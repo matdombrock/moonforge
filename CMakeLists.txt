@@ -29,7 +29,10 @@ set(PORTAUDIO_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/portaudio/include)
 set(SDL2_LIB ${CMAKE_SOURCE_DIR}/SDL2/libSDL2.a)
 set(SDL2_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/SDL2/include)
 # Add the executable
-add_executable(moonforge ./src/main.c)
+add_executable(moonforge 
+    ./src/main.c 
+    ./src/vis.c
+)
 
 # Include directories
 target_include_directories(moonforge PRIVATE ${LUA_INCLUDE_DIR} ${PORTAUDIO_INCLUDE_DIR} ${SDL2_INCLUDE_DIR})
