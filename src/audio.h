@@ -1,7 +1,7 @@
 #pragma once
 #include <stdio.h>
 #include <math.h>
-#include <SDL2/SDL.h>
+#include "../SDL2/include/SDL2/SDL.h"
 
 #include "config.h"
 #include "util.h"
@@ -89,8 +89,8 @@ int pa_init() {
         
         // Main loop - handle visualization on the main thread
         while (vis_is_running()) {
+            SDL_Delay(1); // Sleep for a short time to avoid busy waiting
             vis_update();
-            /*SDL_Delay(16); // ~60fps*/
         }
         
         // Cleanup visualization

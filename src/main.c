@@ -1,5 +1,5 @@
 #include <string.h>
-#include "pa.h" // Contains SDL audio implementation
+#include "audio.h" // Contains SDL audio implementation
 #include "synth.h"
 #include "config.h"
 #include "globals.h"
