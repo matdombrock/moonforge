@@ -9,7 +9,7 @@
 #include "vis.h"
 
 // Audio callback for SDL
-void sdl_audio_callback(void *userdata, Uint8 *stream, int len) {
+void mf_callback(void *userdata, Uint8 *stream, int len) {
     Synth_Internal *data = (Synth_Internal *)userdata;
     float *out = (float *)stream;
     
@@ -20,7 +20,7 @@ void sdl_audio_callback(void *userdata, Uint8 *stream, int len) {
     synth_get_buffer(data, out);
 }
 
-int pa_init() {
+int mf_init() {
     Synth_Internal data;
     SDL_AudioSpec want, have;
     SDL_AudioDeviceID dev;
@@ -56,7 +56,7 @@ int pa_init() {
     want.format = AUDIO_F32;
     want.channels = 2;
     want.samples = BUFFER_SIZE;
-    want.callback = sdl_audio_callback;
+    want.callback = mf_callback;
     want.userdata = &data;
     
     // Open the audio device
@@ -85,11 +85,10 @@ int pa_init() {
     printf("Console output mode: %s\n", modes[_sys.output_mode]);
     
     if (_sys.output_mode == 2) {
-        printf("Running visualization on main thread...\n");
         
         // Main loop - handle visualization on the main thread
         while (vis_is_running()) {
-            SDL_Delay(1); // Sleep for a short time to avoid busy waiting
+            SDL_Delay(5); // Sleep for a short time to avoid busy waiting
             vis_update();
         }
         

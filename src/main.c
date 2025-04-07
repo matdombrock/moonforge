@@ -1,5 +1,5 @@
 #include <string.h>
-#include "audio.h" // Contains SDL audio implementation
+#include "mf.h" // Contains SDL audio implementation
 #include "synth.h"
 #include "config.h"
 #include "globals.h"
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     
     // Initialize synth and start audio system
     synth_init();
-    pa_init(); // This now handles both audio and visualization
+    mf_init(); // This now handles both audio and visualization
     
     printf("exiting...\n");
     return 0;

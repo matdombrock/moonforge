@@ -78,8 +78,8 @@ void vis_update() {
         /*    }*/
         /*}*/
         SDL_RenderPresent(_vis.renderer);
-        _vis.render_ready = 0;
         pthread_mutex_unlock(&vis_mutex);
+        _vis.render_ready = 0;
     }
 }
 
