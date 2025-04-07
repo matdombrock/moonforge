@@ -17,6 +17,12 @@ What isn't it?
 - A "serious" audio tool
 - Lab equipment
 
+### Technical Overview
+- Audio system using SDL
+- Visualization with SDL
+- Lua scripting interface for sound generation and graphics manipulation
+- Cross-platform support
+
 ### Scripting Example
 ```lua
 -- Set the waveform for the first voice to square
@@ -68,7 +74,7 @@ Example:
 ```
 
 - `d` - Debug mode
-- `v` - Visual mode (experimental and not fully functional)
+- `v` - Visual mode (experimental)
 
 # Scripting
 - Oscillator numbers start at 1.
@@ -98,6 +104,17 @@ The current tick number. This is the basis for creating time based effects.
 By default, there are 128 ticks per second. See `speed()` for info about changing this. 
 
 The tick number starts at 0 and increments by 1 every tick.
+
+## Visual API Globals
+
+### `v_frame`
+The current visual frame number. This is incremented every visual frame.
+
+### `v_width`
+The width of the visualization window in pixels.
+
+### `v_height`
+The height of the visualization window in pixels.
 
 ## Lua API Functions
 ### `dbg(message)`
@@ -323,6 +340,35 @@ bus_amp(0.5)
 
 *Range Float: `0.0 -> 1.0`*
 
+## Visual API Functions
+
+### `v_clear(color)`
+Clears the visualization window with the specified color.
+```lua
+-- Clear the visualization window with color 1
+v_clear(1)
+```
+
+### `v_rect(x, y, width, height, color)`
+Draws a rectangle on the visualization window.
+```lua
+-- Draw a rectangle at (10, 10) with width 20 and height 20 and color 2
+v_rect(10, 10, 20, 20, 2)
+```
+
+### `v_pixel(x, y, color)`
+Draws a pixel on the visualization window.
+```lua
+-- Draw a pixel at (10, 10) with color 3
+v_pixel(10, 10, 3)
+```
+
+### `v_line(x1, y1, x2, y2, color)`
+Draws a line on the visualization window.
+```lua
+-- Draw a line from (10, 10) to (20, 20) with color 4
+v_line(10, 10, 20, 20, 4)
+```
+
 ### Examples
 See the `scripts` directory for examples.
-

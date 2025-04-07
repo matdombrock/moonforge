@@ -9,36 +9,24 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_FLAGS_RELEASE "-O3")
 set(CMAKE_BUILD_TYPE Release)
 
-# if(APPLE)
-#     # Include directories
-#     include_directories(/opt/homebrew/Cellar/portaudio/19.7.0/include)
-#
-#     # Link directories
-#     link_directories(/opt/homebrew/Cellar/portaudio/19.7.0/lib)
-# endif()
-
 # Specify the path to the Lua library
 set(LUA_LIB ${CMAKE_SOURCE_DIR}/lua/src/liblua.a)
 set(LUA_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/lua/src)
 
-# Specify the path to the PortAudio library
-set(PORTAUDIO_LIB ${CMAKE_SOURCE_DIR}/portaudio/libportaudio.a)
-set(PORTAUDIO_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/portaudio/include)
-
 # Specify the path to the SDL2 library
 set(SDL2_LIB ${CMAKE_SOURCE_DIR}/SDL2/libSDL2.a)
 set(SDL2_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/SDL2/include)
+
 # Add the executable
 add_executable(moonforge ./src/main.c)
 
 # Include directories
-target_include_directories(moonforge PRIVATE ${LUA_INCLUDE_DIR} ${PORTAUDIO_INCLUDE_DIR} ${SDL2_INCLUDE_DIR})
+target_include_directories(moonforge PRIVATE ${LUA_INCLUDE_DIR} ${SDL2_INCLUDE_DIR})
 
 # Link libraries
 if(APPLE)
     target_link_libraries(moonforge 
         ${LUA_LIB} 
-        ${PORTAUDIO_LIB} 
         ${SDL2_LIB} 
         m 
         pthread
@@ -60,7 +48,7 @@ if(APPLE)
 endif()
 
 if(UNIX AND NOT APPLE)
-    target_link_libraries(moonforge ${LUA_LIB} ${PORTAUDIO_LIB} ${SDL2_LIB} m pthread asound)
+    target_link_libraries(moonforge ${LUA_LIB} ${SDL2_LIB} m pthread asound)
 endif()
 
 # Custom command to create 'out' directory and move binary and scripts

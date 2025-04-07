@@ -1,125 +1,112 @@
 #pragma once
 #include <stdio.h>
 #include <math.h>
-#include <portaudio.h>
+#include <SDL2/SDL.h>
 
 #include "config.h"
 #include "util.h"
 #include "synth.h"
 #include "vis.h"
 
-
-static int pa_callback(const void *input_buffer, void *output_buffer,
-        unsigned long buffer_size,
-        const PaStreamCallbackTimeInfo *time_info,
-        PaStreamCallbackFlags status_flags,
-        void *user_data)
-{
-    Synth_Internal *data = (Synth_Internal *)user_data;
-    float *out = (float *)output_buffer;
-    // Run Lua
-    synth_lua(); 
+// Audio callback for SDL
+void sdl_audio_callback(void *userdata, Uint8 *stream, int len) {
+    Synth_Internal *data = (Synth_Internal *)userdata;
+    float *out = (float *)stream;
+    
+    // Run Lua to process the next audio frame
+    synth_lua();
+    
     // Generate samples
-    synth_get_buffer(data, out); 
-    return paContinue;
+    synth_get_buffer(data, out);
 }
 
 int pa_init() {
-  PaError err;
-  PaStream *stream;
-  Synth_Internal data;
-  for (int i = 0; i < OSC_COUNT; i++) {
-    data.phase[i] = 0.0f;
-  }
-  
-  // Initialize Lua state at startup
-  luaB_init();
-  
-  debug("pa: init\n");
-  err = Pa_Initialize();
-  if (err != paNoError) {
-    fprintf(stderr, "PortAudio error: %s\n", Pa_GetErrorText(err));
-    return 1;
-  }
-  
-  // Set PortAudio host API for macOS
-  #ifdef __APPLE__
-  PaHostApiIndex hostApiIndex = Pa_HostApiTypeIdToHostApiIndex(paCoreAudio);
-  if (hostApiIndex != paHostApiNotFound) {
-    const PaHostApiInfo *hostApiInfo = Pa_GetHostApiInfo(hostApiIndex);
-    if (hostApiInfo && hostApiInfo->defaultOutputDevice != paNoDevice) {
-      // Get device info to optimize buffer settings
-      const PaDeviceInfo *deviceInfo = Pa_GetDeviceInfo(hostApiInfo->defaultOutputDevice);
-      if (deviceInfo) {
-        debug("pa: using CoreAudio with optimal settings\n");
-      }
+    Synth_Internal data;
+    SDL_AudioSpec want, have;
+    SDL_AudioDeviceID dev;
+    
+    // Initialize phase values
+    for (int i = 0; i < OSC_COUNT; i++) {
+        data.phase[i] = 0.0f;
     }
-  }
-  #endif
-  
-  debug("pa: open default stream\n");
-  err = Pa_OpenDefaultStream(&stream,
-      0,          // input channels
-      2,          // output channels
-      paFloat32,  // 32-bit floating point output
-      (float)SAMPLE_RATE / DOWNSAMPLE,
-      BUFFER_SIZE,
-      pa_callback,
-      &data);
-  if (err != paNoError) {
-    fprintf(stderr, "PortAudio error: %s\n", Pa_GetErrorText(err));
-    Pa_Terminate();
-    return 1;
-  }
-
-  debug("pa: start stream\n");
-  err = Pa_StartStream(stream);
-  if (err != paNoError) {
-    fprintf(stderr, "PortAudio error: %s\n", Pa_GetErrorText(err));
-    Pa_CloseStream(stream);
-    Pa_Terminate();
-    return 1;
-  }
-  printf("------- AUDIO SYSTEM STARTED -------\n");
-  char modes[][32] = {"none", "debug", "visualizer"};
-  printf("Console output mode: %s\n", modes[_sys.output_mode]);
-  
-  if (_sys.output_mode == 2) {
-    printf("Starting visualizer in separate thread...\n");
-    // Start the visualizer in a separate thread
-    if (vis_start_thread() != 0) {
-      fprintf(stderr, "Failed to start visualizer thread\n");
+    
+    // Initialize Lua state at startup
+    luaB_init();
+    
+    debug("sdl: init\n");
+    
+    // If in visualization mode, initialize the visualization first
+    // which will also initialize SDL audio and video subsystems
+    if (_sys.output_mode == 2) {
+        if (vis_init() != 0) {
+            fprintf(stderr, "Failed to initialize visualization\n");
+            return 1;
+        }
     } else {
-      printf("Visualizer thread started successfully\n");
+        // Otherwise just initialize SDL audio
+        if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+            fprintf(stderr, "SDL initialization failed: %s\n", SDL_GetError());
+            return 1;
+        }
     }
-    printf("Press ENTER to stop the audio...\n");
-    // Wait for ENTER
-    getchar();
-    // Signal the visualizer thread to stop
-    vis_stop_thread();
-    // Give the thread a moment to clean up
-    Pa_Sleep(500);
-  }
-  else {
-    printf("Press ENTER to stop the audio...\n");
-    // Wait for ENTER
-    getchar();
-  }
-  
-
-  err = Pa_StopStream(stream);
-  if (err != paNoError) {
-    fprintf(stderr, "PortAudio error: %s\n", Pa_GetErrorText(err));
-  }
-
-  err = Pa_CloseStream(stream);
-  if (err != paNoError) {
-    fprintf(stderr, "PortAudio error: %s\n", Pa_GetErrorText(err));
-  }
-
-  // Clean up Lua state
-  luaB_cleanup();
-  
-  Pa_Terminate();
-  return 0;
+    
+    // Setup the audio specification
+    SDL_zero(want);
+    want.freq = (int)SAMPLE_RATE / DOWNSAMPLE;
+    want.format = AUDIO_F32;
+    want.channels = 2;
+    want.samples = BUFFER_SIZE;
+    want.callback = sdl_audio_callback;
+    want.userdata = &data;
+    
+    // Open the audio device
+    debug("sdl: open audio device\n");
+    dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
+    if (dev == 0) {
+        fprintf(stderr, "SDL_OpenAudioDevice failed: %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+    
+    // Check if we got the format we requested
+    if (have.format != want.format) {
+        fprintf(stderr, "SDL_OpenAudioDevice couldn't get requested format\n");
+        SDL_CloseAudioDevice(dev);
+        SDL_Quit();
+        return 1;
+    }
+    
+    // Start playing audio
+    debug("sdl: start audio playback\n");
+    SDL_PauseAudioDevice(dev, 0);
+    
+    printf("------- AUDIO SYSTEM STARTED -------\n");
+    char modes[][32] = {"none", "debug", "visualizer"};
+    printf("Console output mode: %s\n", modes[_sys.output_mode]);
+    
+    if (_sys.output_mode == 2) {
+        printf("Running visualization on main thread...\n");
+        
+        // Main loop - handle visualization on the main thread
+        while (vis_is_running()) {
+            vis_update();
+            /*SDL_Delay(16); // ~60fps*/
+        }
+        
+        // Cleanup visualization
+        vis_cleanup();
+    } else {
+        printf("Press ENTER to stop the audio...\n");
+        // Wait for ENTER
+        getchar();
+    }
+    
+    // Stop audio playback
+    SDL_CloseAudioDevice(dev);
+    
+    // Clean up Lua state
+    luaB_cleanup();
+    
+    SDL_Quit();
+    return 0;
 }
