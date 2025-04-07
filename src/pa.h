@@ -84,9 +84,6 @@ int pa_init() {
   char modes[][32] = {"none", "debug", "visualizer"};
   printf("Console output mode: %s\n", modes[_sys.output_mode]);
   
-  // Use printf and escape sequences instead of system("clear")
-  /*printf("\033[2J\033[H");*/
-
   if (_sys.output_mode == 2) {
     printf("Starting visualizer in separate thread...\n");
     // Start the visualizer in a separate thread

@@ -227,16 +227,26 @@ int luaB_mem_get(lua_State *L) {
     debug("lua: mem_get(%d)\n", index);
     return 1;
 }
+int luaB_get(lua_State *L) {
+    const char *key = luaL_checkstring(L, 1);
+    int index = (int)luaL_optnumber(L, 2, 1);
+    index -= LUA_INDEX; // Lua indices start at 1 but C indices start at 0
+    index = index < 0 ? 0 : index;
+    float res = -1;
+    if (strcmp(key, "bus_rms") == 0) {
+        index = index > 1 ? 1 : index;
+        res = _vis.rms_bus[index];
+    }
+    else if (strcmp(key, "rms") == 0) {
+        index = index > OSC_COUNT ? OSC_COUNT : index;
+        res = _vis.rms[index];
+    }
+    debug("lua: get(%s, %i)\n", key, index);
+    lua_pushnumber(L, res);
+    return 1;
+}
 // Vis utils
 int luaB_v_colors[][3] = {
-    /*{33,44,33},*/
-    /*{255,128,64},*/
-    /*{128,255,64},*/
-    /*{64,128,255},*/
-    /*{200,255,66},*/
-    /*{200,66,200},*/
-    /*{66,200,200},*/
-    /*{233,255,233}*/
     {22,33,22},
     {33,55,33},
     {33,77,33},
@@ -322,6 +332,7 @@ void luaB_binds(lua_State *L) {
     lua_register(L, "bus_amp", luaB_bus_amp);
     lua_register(L, "mem_set", luaB_mem_set);
     lua_register(L, "mem_get", luaB_mem_get);
+    lua_register(L, "get", luaB_get);
     lua_register(L, "v_clear", luaB_v_clear);
     lua_register(L, "v_rect", luaB_v_rect);
     lua_register(L, "v_pixel", luaB_v_pixel);
@@ -389,7 +400,7 @@ void luaB_run() {
     lua_pushstring(L_global, &_sys.keypress);
     lua_setglobal(L_global, "keypress");
     lua_pushnumber(L_global, floor(_sys.tick_num / 2));
-    lua_setglobal(L_global, "vframe");
+    lua_setglobal(L_global, "v_frame");
     lua_pushnumber(L_global, VIS_WIDTH);
     lua_setglobal(L_global, "v_width");
     lua_pushnumber(L_global, VIS_HEIGHT);
@@ -398,7 +409,7 @@ void luaB_run() {
     if (luaL_dofile(L_global, _sys.filepath) != LUA_OK) {
         fprintf(stderr, "Lua error: %s\n", lua_tostring(L_global, -1));
         if (_sys.stop_on_error) {
-            fprintf(stderr, "Stoppalette_indexg execution due to Lua error.\n");
+            fprintf(stderr, "Stopping execution due to Lua error.\n");
             lua_close(L_global);
             L_global = NULL;
             exit(1);
