@@ -58,3 +58,32 @@ else
   lfo_amp_lead = lfo_amp_lead2
 end
 amp(lfo_amp_lead - 0.65, 4)
+
+
+
+v_clear()
+local downscale = 8
+local lfo_vis = 3 + math.floor(0.5 * math.sin(tick / 256) + 0.5) * 8
+local lfo_vis2 = math.floor(lfo_amp_lead * 8)
+if tick % 3 ~= 0 then lfo_vis2 = 0 end
+if tick % lead_time_h > lead_start  then
+  downscale = 18 - lfo_vis2 + 2
+  local tt = math.floor(tick / 16)
+  for y = 0, 240 / downscale do
+    for x = 0, 360 / downscale do
+      v_rect(-4 + x * downscale, y * downscale, downscale, downscale, (lfo_vis2 + tt + x * y % (lfo_vis2 + 1)) - (8 - lfo_vis2 * 2))
+    end
+  end
+else
+  local tt = math.floor(tick / 128)
+  local tt2 = math.floor(tick / 1024)
+  for y = 0, 240 / downscale do
+    for x = 0, 360 / downscale do
+      if x % 2 == 0 and y % 3 == 0 then
+        v_rect(-4 + x * downscale, y * downscale, downscale, downscale, tt + tt2 + x + y % 9)
+      else
+        v_rect(-4 + x * downscale, y * downscale, downscale, downscale, tt + tt2 + x * y % 9)
+      end
+    end
+  end
+end

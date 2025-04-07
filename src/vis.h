@@ -19,7 +19,7 @@ int vis_init() {
     window = SDL_CreateWindow("MOONFORGE", 
             SDL_WINDOWPOS_UNDEFINED, 
             SDL_WINDOWPOS_UNDEFINED, 
-            360 * 2, 240 * 2, 
+            360 * 3, 240 * 3, 
             SDL_WINDOW_SHOWN);
     if (window == NULL) {
         printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
