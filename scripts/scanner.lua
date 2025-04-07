@@ -1,7 +1,7 @@
 local lfo = 0.5 + math.sin(tick / 256) * 0.5
 for y = 0, v_height do
   for x = 0, v_width do
-    local c = (tick / 128) + (lfo * 32) + (x - (v_width / 2)) / y % 8
+    local c = (tick / 128) + (lfo * 32) + (x - (v_width / 2)) / y % 16
     v_pixel(x, y, c)
   end
 end

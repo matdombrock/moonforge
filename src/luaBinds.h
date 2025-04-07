@@ -251,10 +251,20 @@ int luaB_v_colors[][3] = {
     {33,55,33},
     {33,77,33},
     {33,99,33},
+    {33,122,33},
+    {33,144,33},
+    {33,166,33},
+    {33,188,33},
+    
+    {99,55,33},
+    {99,77,33},
+    {99,99,33},
     {99,122,33},
     {99,144,33},
     {99,166,33},
-    {99,188,33}
+    {99,188,33},
+
+    {128,200,128}
 };
 //
 // Lua has a luaL_checkinteger function
@@ -266,7 +276,7 @@ void luaB_v_set_color(int palette_index) {
     if (_vis.render_ready == 1) return;
     palette_index -= LUA_INDEX; // Lua indices start at 1 but C indices start at 0
     palette_index = palette_index < 0 ? 0 : palette_index;
-    palette_index = palette_index % 8;
+    palette_index = palette_index % 16;
     int r = luaB_v_colors[palette_index][0];
     int g = luaB_v_colors[palette_index][1];
     int b = luaB_v_colors[palette_index][2];
