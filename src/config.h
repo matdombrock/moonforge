@@ -8,8 +8,8 @@
 #define LUA_TIME_WINDOW 128
 #define RMS_WINDOW (128 * 8) // This is vis
 #define MEMORY_SIZE 128
-#define VIS_WIDTH 24
-#define VIS_HEIGHT 16
+#define VIS_WIDTH 240
+#define VIS_HEIGHT 136
 #define VIS_NULL_CHAR L'/'
 #define VIS_ENABLE_INPUT 0
 #define VIS_BUS_N 16

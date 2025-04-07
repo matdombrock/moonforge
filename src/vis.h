@@ -19,7 +19,7 @@ int vis_init() {
     window = SDL_CreateWindow("MOONFORGE", 
             SDL_WINDOWPOS_UNDEFINED, 
             SDL_WINDOWPOS_UNDEFINED, 
-            360 * 3, 240 * 3, 
+            VIS_WIDTH * 3, VIS_HEIGHT * 3, 
             SDL_WINDOW_SHOWN);
     if (window == NULL) {
         printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
@@ -39,7 +39,7 @@ int vis_init() {
         return 1;
     }
     // Set logical size for scaling
-    SDL_RenderSetLogicalSize(_vis.renderer, 360, 240);
+    SDL_RenderSetLogicalSize(_vis.renderer, VIS_WIDTH, VIS_HEIGHT);
     printf("SDL initialized successfully!\n");
     return 0;
 }

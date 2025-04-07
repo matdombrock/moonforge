@@ -246,6 +246,12 @@ int luaB_v_colors[][3] = {
     {99,166,33},
     {99,188,33}
 };
+//
+// Lua has a luaL_checkinteger function
+// But usually we use (int)luaL_checknumber
+// Because this allows for more speed and flexibility on the lua end
+// Lua's math.floor() is kind of slow
+//
 void luaB_v_set_color(int palette_index) {
     if (_vis.render_ready == 1) return;
     palette_index -= LUA_INDEX; // Lua indices start at 1 but C indices start at 0
@@ -266,11 +272,11 @@ int luaB_v_clear(lua_State *L) {
 }
 int luaB_v_rect(lua_State *L) {
     if (_vis.render_ready == 1) return 0;
-    int x = luaL_checkinteger(L, 1);
-    int y = luaL_checkinteger(L, 2);
-    int w = luaL_checkinteger(L, 3);
-    int h = luaL_checkinteger(L, 4);
-    int c = luaL_checkinteger(L, 5);
+    int x = (int)luaL_checknumber(L, 1);
+    int y = (int)luaL_checknumber(L, 2);
+    int w = (int)luaL_checknumber(L, 3);
+    int h = (int)luaL_checknumber(L, 4);
+    int c = (int)luaL_checknumber(L, 5);
     SDL_Rect rect = {x, y, w, h};
     luaB_v_set_color(c);
     SDL_RenderFillRect(_vis.renderer, &rect);
@@ -278,20 +284,20 @@ int luaB_v_rect(lua_State *L) {
 }
 int luaB_v_pixel(lua_State *L) {
     if (_vis.render_ready == 1) return 0;
-    int x = luaL_checkinteger(L, 1);
-    int y = luaL_checkinteger(L, 2);
-    int c = luaL_checkinteger(L, 3);
+    int x = (int)luaL_checknumber(L, 1);
+    int y = (int)luaL_checknumber(L, 2);
+    int c = (int)luaL_checknumber(L, 3);
     luaB_v_set_color(c);
     SDL_RenderDrawPoint(_vis.renderer, x, y);
     return 0;
 }
 int luaB_v_line(lua_State *L) {
     if (_vis.render_ready == 1) return 0;
-    int x1 = luaL_checkinteger(L, 1);
-    int y1 = luaL_checkinteger(L, 2);
-    int x2 = luaL_checkinteger(L, 3);
-    int y2 = luaL_checkinteger(L, 4);
-    int c = luaL_checkinteger(L, 5);
+    int x1 = (int)luaL_checknumber(L, 1);
+    int y1 = (int)luaL_checknumber(L, 2);
+    int x2 = (int)luaL_checknumber(L, 3);
+    int y2 = (int)luaL_checknumber(L, 4);
+    int c  = (int)luaL_checknumber(L, 5);
     luaB_v_set_color(c);
     SDL_RenderDrawLine(_vis.renderer, x1, y1, x2, y2);
     return 0;
@@ -382,13 +388,17 @@ void luaB_run() {
     lua_setglobal(L_global, "tick");
     lua_pushstring(L_global, &_sys.keypress);
     lua_setglobal(L_global, "keypress");
-    lua_pushboolean(L_global, !_vis.render_ready);
+    lua_pushnumber(L_global, floor(_sys.tick_num / 2));
     lua_setglobal(L_global, "vframe");
+    lua_pushnumber(L_global, VIS_WIDTH);
+    lua_setglobal(L_global, "v_width");
+    lua_pushnumber(L_global, VIS_HEIGHT);
+    lua_setglobal(L_global, "v_height");
 
     if (luaL_dofile(L_global, _sys.filepath) != LUA_OK) {
         fprintf(stderr, "Lua error: %s\n", lua_tostring(L_global, -1));
         if (_sys.stop_on_error) {
-            fprintf(stderr, "Stopping execution due to Lua error.\n");
+            fprintf(stderr, "Stoppalette_indexg execution due to Lua error.\n");
             lua_close(L_global);
             L_global = NULL;
             exit(1);
