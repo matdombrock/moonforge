@@ -1,14 +1,18 @@
+#pragma once
 #include "../SDL2/include/SDL2/SDL.h"
 #include "globals.h"
 #include <stdio.h>
 #include <pthread.h>
 
-SDL_Window *window;
-volatile int vis_thread_running = 0;
+// Shared mutex for synchronizing between audio and visualization
 pthread_mutex_t vis_mutex = PTHREAD_MUTEX_INITIALIZER;
+static SDL_Window *window = NULL;
+static volatile int vis_running = 0;
 
+// Initialize SDL and create a window and renderer (now runs on main thread)
 int vis_init() {
     printf("Initializing SDL...\n");
+    
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
@@ -38,12 +42,16 @@ int vis_init() {
         SDL_Quit();
         return 1;
     }
+    
     // Set logical size for scaling
     SDL_RenderSetLogicalSize(_vis.renderer, VIS_WIDTH, VIS_HEIGHT);
     printf("SDL initialized successfully!\n");
+    
+    vis_running = 1;
     return 0;
 }
 
+// Main visualization loop (runs on main thread)
 int vis_loop() { 
     // Main loop flag
     int quit = 0;
@@ -52,38 +60,44 @@ int vis_loop() {
     SDL_Event e;
 
     // While application is running
-    while (!quit && vis_thread_running) {
+    while (!quit && vis_running) {
         // Handle events on queue
         while (SDL_PollEvent(&e) != 0) {
             // User requests quit
             if (e.type == SDL_QUIT) {
                 quit = 1;
-                vis_thread_running = 0;
+                vis_running = 0;
             }
         }
         
         // Lock mutex before accessing shared resources
         if (_vis.render_ready) {
             pthread_mutex_lock(&vis_mutex);
-            for (int y = 0; y < 240; y++) {
-                for (int x = 0; x < 360; x++) {
-                    // Set pixel color
-                    if (x % 16 == 0 && y % 16 == 0) {
-                        SDL_SetRenderDrawColor(_vis.renderer, 55, 55, 55, 55);
-                        SDL_RenderDrawPoint(_vis.renderer, x, y);
+            if (_vis.renderer) {
+                for (int y = 0; y < 240; y++) {
+                    for (int x = 0; x < 360; x++) {
+                        // Set pixel color
+                        if (x % 16 == 0 && y % 16 == 0) {
+                            SDL_SetRenderDrawColor(_vis.renderer, 55, 55, 55, 55);
+                            SDL_RenderDrawPoint(_vis.renderer, x, y);
+                        }
                     }
-                    
                 }
+                SDL_RenderPresent(_vis.renderer);
             }
-            SDL_RenderPresent(_vis.renderer);
             _vis.render_ready = 0;
             pthread_mutex_unlock(&vis_mutex);
         }
         
-        // Add a small sleep to prevent the thread from consuming too much CPU
-        /*SDL_Delay(10);*/
+        // Add a small sleep to prevent consuming too much CPU
+        SDL_Delay(10);
     }
 
+    return 0;
+}
+
+// Clean up SDL resources
+void vis_cleanup() {
     // Cleanup
     pthread_mutex_lock(&vis_mutex);
     if (_vis.renderer) {
@@ -98,33 +112,4 @@ int vis_loop() {
     }
 
     SDL_Quit();
-    return 0;
-}
-
-// Thread function for visualization
-void* vis_thread_func(void* arg) {
-    vis_init();
-    vis_loop();
-    return NULL;
-}
-
-// Function to start visualization in a separate thread
-int vis_start_thread() {
-    pthread_t thread_id;
-    vis_thread_running = 1;
-    
-    int result = pthread_create(&thread_id, NULL, vis_thread_func, NULL);
-    if (result != 0) {
-        printf("Error creating visualization thread: %d\n", result);
-        return 1;
-    }
-    
-    // Detach the thread so it can clean up its resources when it exits
-    pthread_detach(thread_id);
-    return 0;
-}
-
-// Function to stop visualization thread
-void vis_stop_thread() {
-    vis_thread_running = 0;
 }

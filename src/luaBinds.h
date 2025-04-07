@@ -5,11 +5,13 @@
 #include "../lua/src/lua.h"
 #include "../lua/src/lauxlib.h"
 #include "../lua/src/lualib.h"
-#include "../SDL2/include/SDL2/SDL.h"
 
 #include "globals.h"
 #include "util.h"
 #include "notes.h"
+
+// Forward declare the mutex from vis.h
+extern pthread_mutex_t vis_mutex;
 
 // Lua util
 int luaB_get_target(lua_State *L, int pnum) {
@@ -273,7 +275,7 @@ int luaB_v_colors[][3] = {
 // Lua's math.floor() is kind of slow
 //
 void luaB_v_set_color(int palette_index) {
-    if (_vis.render_ready == 1) return;
+    if (_vis.render_ready == 1 || _vis.renderer == NULL) return;
     palette_index -= LUA_INDEX; // Lua indices start at 1 but C indices start at 0
     palette_index = palette_index < 0 ? 0 : palette_index;
     palette_index = palette_index % 16;
@@ -284,14 +286,23 @@ void luaB_v_set_color(int palette_index) {
 }
 // Vis binds
 int luaB_v_clear(lua_State *L) {
-    if (_vis.render_ready == 1) return 0;
+    pthread_mutex_lock(&vis_mutex);
+    if (_vis.render_ready == 1 || _vis.renderer == NULL) {
+        pthread_mutex_unlock(&vis_mutex);
+        return 0;
+    }
     int c = luaL_optinteger(L, 1, 1);
     luaB_v_set_color(c);
     SDL_RenderClear(_vis.renderer);
+    pthread_mutex_unlock(&vis_mutex);
     return 0;
 }
 int luaB_v_rect(lua_State *L) {
-    if (_vis.render_ready == 1) return 0;
+    pthread_mutex_lock(&vis_mutex);
+    if (_vis.render_ready == 1 || _vis.renderer == NULL) {
+        pthread_mutex_unlock(&vis_mutex);
+        return 0;
+    }
     int x = (int)luaL_checknumber(L, 1);
     int y = (int)luaL_checknumber(L, 2);
     int w = (int)luaL_checknumber(L, 3);
@@ -300,19 +311,29 @@ int luaB_v_rect(lua_State *L) {
     SDL_Rect rect = {x, y, w, h};
     luaB_v_set_color(c);
     SDL_RenderFillRect(_vis.renderer, &rect);
+    pthread_mutex_unlock(&vis_mutex);
     return 0;
 }
 int luaB_v_pixel(lua_State *L) {
-    if (_vis.render_ready == 1) return 0;
+    pthread_mutex_lock(&vis_mutex);
+    if (_vis.render_ready == 1 || _vis.renderer == NULL) {
+        pthread_mutex_unlock(&vis_mutex);
+        return 0;
+    }
     int x = (int)luaL_checknumber(L, 1);
     int y = (int)luaL_checknumber(L, 2);
     int c = (int)luaL_checknumber(L, 3);
     luaB_v_set_color(c);
     SDL_RenderDrawPoint(_vis.renderer, x, y);
+    pthread_mutex_unlock(&vis_mutex);
     return 0;
 }
 int luaB_v_line(lua_State *L) {
-    if (_vis.render_ready == 1) return 0;
+    pthread_mutex_lock(&vis_mutex);
+    if (_vis.render_ready == 1 || _vis.renderer == NULL) {
+        pthread_mutex_unlock(&vis_mutex);
+        return 0;
+    }
     int x1 = (int)luaL_checknumber(L, 1);
     int y1 = (int)luaL_checknumber(L, 2);
     int x2 = (int)luaL_checknumber(L, 3);
@@ -320,6 +341,7 @@ int luaB_v_line(lua_State *L) {
     int c  = (int)luaL_checknumber(L, 5);
     luaB_v_set_color(c);
     SDL_RenderDrawLine(_vis.renderer, x1, y1, x2, y2);
+    pthread_mutex_unlock(&vis_mutex);
     return 0;
 }
 

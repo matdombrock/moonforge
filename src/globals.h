@@ -1,6 +1,7 @@
 #pragma once
 #include "../SDL2/include/SDL2/SDL.h"
 #include "config.h"
+#include <pthread.h>
 
 // System state
 typedef struct {

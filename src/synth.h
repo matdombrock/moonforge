@@ -131,7 +131,7 @@ float synth_highpass(int index, float input, float cutoff, float dt) {
 }
 
 
-extern pthread_mutex_t vis_mutex; // Declare the mutex from vis.h
+// Mutex is now declared in luaBinds.h
 
 void synth_get_buffer(Synth_Internal *data, float *out) {
   // Get local copy of rms_index to reduce lock time
