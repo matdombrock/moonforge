@@ -6,3 +6,5 @@ lua
 portaudio
 SDL2
 SDL2-src
+SDL2_ttf
+SDL2_ttf-src
