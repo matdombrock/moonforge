@@ -394,16 +394,14 @@ void luaB_run() {
 
     if (_vis.render_ready == 1) return; // Wait for render to finish
 
+    /*printf("tick: %d\n", _sys.tick_num);*/
+   
     struct timespec ts;
     debug("\nlua start\n");
     if (clock_gettime(CLOCK_REALTIME, &ts) == -1) {
         perror("clock_gettime");
     }
 
-    _sys.tick_num = tick;
-    // Offset tick by -1
-    // We want to start at 0
-    tick -= 1;
     debug("tick: %d\n", tick);
     debug("seconds: %f\n", seconds);
 
@@ -421,7 +419,7 @@ void luaB_run() {
     // Pass system variables to Lua
     lua_pushnumber(L_global, seconds);
     lua_setglobal(L_global, "seconds");
-    lua_pushnumber(L_global, tick);
+    lua_pushnumber(L_global, _sys.tick_num);
     lua_setglobal(L_global, "tick");
     lua_pushstring(L_global, &_sys.keypress);
     lua_setglobal(L_global, "keypress");
@@ -469,4 +467,7 @@ void luaB_run() {
     
     // Log in microseconds
     debug("lua time: %fµs \n", _sys.luatime);
+
+    _sys.tick_num++;
+    /*printf("tick num: %i\n", _sys.tick_num);*/
 }
