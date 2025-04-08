@@ -245,6 +245,20 @@ int luaB_get(lua_State *L) {
     lua_pushnumber(L, res);
     return 1;
 }
+int luaB_get_rms_bus_history(lua_State *L) {
+    lua_newtable(L); // Create a new table on the Lua stack
+    for (int i = 0; i < 2; i++) {
+        lua_pushinteger(L, i + 1); // Push the row index (Lua tables are 1-based)
+        lua_newtable(L); // Create a new table for the row
+        for (int j = 0; j < 32; j++) {
+            lua_pushinteger(L, j + 1); // Push the column index
+            lua_pushnumber(L, _vis.rms_bus_history[i][j]); // Push the value
+            lua_settable(L, -3); // Set the value in the row table
+        }
+        lua_settable(L, -3); // Set the row table in the main table
+    }
+    return 1; // Return the table
+}
 // Vis utils
 int luaB_v_colors[][3] = {
     {22,33,22},
@@ -255,7 +269,7 @@ int luaB_v_colors[][3] = {
     {33,144,33},
     {33,166,33},
     {33,188,33},
-    
+
     {99,55,33},
     {99,77,33},
     {99,99,33},
@@ -265,6 +279,7 @@ int luaB_v_colors[][3] = {
     {99,188,33},
 
     {128,200,128}
+
 };
 //
 // Lua has a luaL_checkinteger function
@@ -342,6 +357,7 @@ void luaB_binds(lua_State *L) {
     lua_register(L, "bus_amp", luaB_bus_amp);
     lua_register(L, "mem_set", luaB_mem_set);
     lua_register(L, "mem_get", luaB_mem_get);
+    lua_register(L, "get_bus_rms_hist", luaB_get_rms_bus_history);
     lua_register(L, "get", luaB_get);
     lua_register(L, "v_clear", luaB_v_clear);
     lua_register(L, "v_rect", luaB_v_rect);
