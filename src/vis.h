@@ -68,15 +68,15 @@ void vis_update() {
     // Lock mutex before accessing shared resources
     if (_vis.render_ready) {
         pthread_mutex_lock(&vis_mutex);
-        /*for (int y = 0; y < 240; y++) {*/
-        /*    for (int x = 0; x < 360; x++) {*/
-        /*        // Set pixel color*/
-        /*        if (x % 16 == 0 && y % 16 == 0) {*/
-        /*            SDL_SetRenderDrawColor(_vis.renderer, 55, 55, 55, 55);*/
-        /*            SDL_RenderDrawPoint(_vis.renderer, x, y);*/
-        /*        }*/
-        /*    }*/
-        /*}*/
+        for (int y = 0; y < 240; y++) {
+            for (int x = 0; x < 360; x++) {
+                // Set pixel color
+                if (x % 16 == 0 && y % 16 == 0) {
+                    SDL_SetRenderDrawColor(_vis.renderer, 155, 155, 155, 155);
+                    SDL_RenderDrawPoint(_vis.renderer, x, y);
+                }
+            }
+        }
         SDL_RenderPresent(_vis.renderer);
         pthread_mutex_unlock(&vis_mutex);
         _vis.render_ready = 0;

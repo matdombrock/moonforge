@@ -10,7 +10,5 @@
 #define MEMORY_SIZE 128
 #define VIS_WIDTH 240
 #define VIS_HEIGHT 136
-#define VIS_NULL_CHAR L'/'
-#define VIS_ENABLE_INPUT 0
 #define VIS_BUS_N 16
 #define VIS_RMS_BUS_HIST 32
