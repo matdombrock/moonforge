@@ -1,45 +1,13 @@
 #include <math.h>
 #include <portaudio.h>
-#include <math.h>
 #include <string.h>
-
-
 #include <lauxlib.h>
 #include <lua.h>
 #include <lualib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include "mf.h"
 
-#define SAMPLE_RATE 44100
-#define FRAMES_PER_BUFFER 256
-#define TABLE_SIZE 200
-#define AMPLITUDE 0.25
-#define A4 440.0f
-#define OSC_COUNT 2
-
-typedef struct {
-  float sine[TABLE_SIZE];
-  float square[TABLE_SIZE];
-  float triangle[TABLE_SIZE];
-  float saw[TABLE_SIZE];
-  // float noise[TABLE_SIZE];
-} paWaveData;
-enum Wave { SINE, SQUARE, TRIANGLE, SAW, NOISE };
-
-typedef struct {
-  float freq;
-  float phase;
-  float amp;
-  enum Wave wave;
-} mfOsc;
-
-typedef struct {
-  int exit;
-} mfFlags;
-
-typedef struct {
-  mfOsc osc[OSC_COUNT];
-  mfFlags flags; 
-} mfState;
 mfState state = {};
 
 int mf_beat_to_ticks(float bpm, float beat) {
@@ -201,17 +169,47 @@ int luaopen_mf(lua_State *L) {
     return 1; // Return the library table
 }
 
+lua_State *mf_lua_init(char *script_path) {
+  lua_State *L = luaL_newstate();
+  luaL_openlibs(L);
+  // luaL_requiref(L, "mf", luaopen_mf, 1); // Load mf module
+  lua_pushglobaltable(L);
+  luaL_setfuncs(L, mf_funcs, 0);
+  lua_pop(L, 1); // Remove mf module from stack
+  if (luaL_dofile(L, script_path) != LUA_OK) {
+    fprintf(stderr, "Error running Lua script: %s\n", lua_tostring(L, -1));
+    lua_pop(L, 1); // Remove error message from stack
+  }
+  return L;
+}
+
 //////
 
-void mf_setup() {
-  // mf_mute_all(); // Mute all oscillators initially
-  // //
-  // mf_amp_set(0, 0.5f); // Set amplitude for oscillator 0
-  // mf_wave_set(0, SAW); // Set wave type for oscillator 0
-  // //
-  // mf_amp_set(1, 0.5f);    // Set amplitude for oscillator 0
-  // mf_wave_set(1, SAW);    // Set wave type for oscillator 0
-  // mf_freq_set(0, 439.0f); // Set frequency for oscillator 0
+mf_wave_data mf_init() {
+  // Initialize oscillators
+  for (int i = 0; i < OSC_COUNT; i++) {
+    state.osc[i].freq = 440.0f;
+    state.osc[i].phase = 0.0f;
+    state.osc[i].amp = 0.25f; // Set default amplitude
+    state.osc[i].wave = SINE; // Set default wave type
+  }
+  // Set up flags
+  state.flags.exit = 0;
+
+
+  // Init wave data
+  mf_wave_data data;
+  for (int i = 0; i < TABLE_SIZE; i++) {
+    data.sine[i] =
+        AMPLITUDE * (float)sin((double)i / (double)TABLE_SIZE * M_PI * 2);
+    data.square[i] = (i < TABLE_SIZE / 2) ? AMPLITUDE : -AMPLITUDE;
+    data.triangle[i] =
+        AMPLITUDE * (1.0f - 2.0f * fabsf((float)i / (float)TABLE_SIZE - 0.5f));
+    data.saw[i] = AMPLITUDE * (2.0f * (float)i / (float)TABLE_SIZE - 1.0f);
+    data.noise[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f
+    - 1.0f);
+  }
+  return data; // Success
 }
 
 int tick = 0;
@@ -226,24 +224,10 @@ int mf_run_lua(lua_State *L) {
   return 0;
 }
 
-lua_State *mf_lua_init() {
-  lua_State *L = luaL_newstate();
-  luaL_openlibs(L);
-  // luaL_requiref(L, "mf", luaopen_mf, 1); // Load mf module
-  lua_pushglobaltable(L);
-  luaL_setfuncs(L, mf_funcs, 0);
-  lua_pop(L, 1); // Remove mf module from stack
-  if (luaL_dofile(L, "../mf_lua.lua") != LUA_OK) {
-    fprintf(stderr, "Error running Lua script: %s\n", lua_tostring(L, -1));
-    lua_pop(L, 1); // Remove error message from stack
-  }
-  return L;
-}
-
-void mf_loop(int tick) {
+void mf_loop(char *script_path) {
   static lua_State *L = NULL;
   if (!L) {
-    L = mf_lua_init();
+    L = mf_lua_init(script_path);
   }
   mf_run_lua(L); // Call Lua main function on each loop iteration
 }

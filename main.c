@@ -1,11 +1,14 @@
 #include "mf.h"
-// #include "user.h"
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "const.h"
+
 static int paCallback(const void *inputBuffer, void *outputBuffer,
                       unsigned long framesPerBuffer,
                       const PaStreamCallbackTimeInfo *timeInfo,
                       PaStreamCallbackFlags statusFlags, void *userData) {
-  paWaveData *data = (paWaveData *)userData;
+  mf_wave_data *data = (mf_wave_data *)userData;
   float *out = (float *)outputBuffer;
   unsigned int i;
   for (i = 0; i < framesPerBuffer; i++) {
@@ -40,40 +43,31 @@ static int paCallback(const void *inputBuffer, void *outputBuffer,
   return paContinue;
 }
 
-int main(void) {
-  // Initialize oscillators
-  for (int i = 0; i < OSC_COUNT; i++) {
-    state.osc[i].freq = 440.0f;
-    state.osc[i].phase = 0.0f;
-    state.osc[i].amp = 0.25f; // Set default amplitude
-    state.osc[i].wave = SINE; // Set default wave type
+int main(int argc, char *argv[]) {
+  if (argc < 2) {
+    fprintf(stderr, "Usage: %s <lua_script>\n", argv[0]);
+    return 1;
   }
-  // Set up flags
-  state.flags.exit = 0;
+  char *script_path = argv[1];
+  printf("Lua script to run: %s\n", script_path);
+  // Check if Lua script exists
+  FILE *file = fopen(script_path, "r");
+  if (!file) {
+    fprintf(stderr, "Error: Lua script '%s' not found.\n", script_path);
+    return 1;
+  }
+  fclose(file);
 
-  paWaveData data;
-  for (int i = 0; i < TABLE_SIZE; i++) {
-    data.sine[i] =
-        AMPLITUDE * (float)sin((double)i / (double)TABLE_SIZE * M_PI * 2);
-    data.square[i] = (i < TABLE_SIZE / 2) ? AMPLITUDE : -AMPLITUDE;
-    data.triangle[i] =
-        AMPLITUDE * (1.0f - 2.0f * fabsf((float)i / (float)TABLE_SIZE - 0.5f));
-    data.saw[i] = AMPLITUDE * (2.0f * (float)i / (float)TABLE_SIZE - 1.0f);
-    // data.noise[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f
-    // - 1.0f);
-  }
+  mf_wave_data data = mf_init();
   Pa_Initialize();
   PaStream *stream;
   Pa_OpenDefaultStream(&stream, 0, 1, paFloat32, SAMPLE_RATE, FRAMES_PER_BUFFER,
                        paCallback, &data);
   Pa_StartStream(stream);
 
-  mf_setup();
-  int tick = 0;
   while (state.flags.exit == 0) {
     Pa_Sleep(1); // Keep playing indefinitely
-    mf_loop(tick);
-    tick++;
+    mf_loop(script_path); // Call the Lua loop function
   }
 
   Pa_StopStream(stream);

@@ -8,4 +8,4 @@ cd build
 cmake ..
 make -j$(nproc)
 
-./mf
+./mf $1

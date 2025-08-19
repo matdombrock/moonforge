@@ -15,7 +15,8 @@ typedef struct {
   float square[TABLE_SIZE];
   float triangle[TABLE_SIZE];
   float saw[TABLE_SIZE];
-} paWaveData;
+  float noise[TABLE_SIZE];
+} mf_wave_data;
 
 enum Wave { SINE, SQUARE, TRIANGLE, SAW, NOISE };
 
@@ -45,7 +46,7 @@ int mf_amp_set(int osc_num, float amp);
 int mf_amp_change(int osc_num, float amp_mod);
 int mf_mute_all();
 
-int mf_init_lua();
+mf_wave_data mf_init();
+int mf_init_lua(char *script_path);
 int mf_run_lua(lua_State *L);
-void mf_setup();
-void mf_loop(int tick);
+void mf_loop(char *script_path);
