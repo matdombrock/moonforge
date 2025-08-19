@@ -1,0 +1,25 @@
+{
+  "workspace": {
+    "library": [
+      "./lua",
+      "/usr/share/nvim/runtime/lua",
+      "/usr/share/nvim/runtime/lua/vim",
+      "/usr/share/nvim/runtime/lua/vim/lsp"
+    ],
+    "checkThirdParty": false
+  },
+  "Lua": {
+    "diagnostics": {
+      "globals": [
+        "beat_to_ticks",
+        "wave_set", 
+        "freq_set",
+        "freq_change",
+        "amp_set",
+        "amp_change",
+        "mute_all",
+        ""
+      ]
+    }
+  }
+}
