@@ -1,5 +1,7 @@
 #pragma once
 #include <portaudio.h>
+#include <lua.h>
+#include <lualib.h>
 
 #define SAMPLE_RATE 44100
 #define FRAMES_PER_BUFFER 256
@@ -43,3 +45,7 @@ int mf_amp_set(int osc_num, float amp);
 int mf_amp_change(int osc_num, float amp_mod);
 int mf_mute_all();
 
+int mf_init_lua();
+int mf_run_lua(lua_State *L);
+void mf_setup();
+void mf_loop(int tick);
