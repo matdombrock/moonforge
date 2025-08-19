@@ -8,7 +8,11 @@
 #include <stdlib.h>
 #include "mf.h"
 
-mfState state = {};
+mf_state state = {};
+
+///////
+/// Core functions
+///////
 
 int mf_beat_to_ticks(float bpm, float beat) {
   float ticks_per_second = 1000.0f; // 1 tick = 1 ms
@@ -74,7 +78,9 @@ int mf_mute_all() {
   return 0; // Success
 }
 
-//////
+///////
+/// Lua bindings
+///////
 
 static int l_mf_lua_index(int input) {
   return input - 1; // Lua uses 1-based indexing, C uses 0-based
@@ -169,10 +175,13 @@ int luaopen_mf(lua_State *L) {
     return 1; // Return the library table
 }
 
+///////
+/// System functions
+///////
+
 lua_State *mf_lua_init(char *script_path) {
   lua_State *L = luaL_newstate();
   luaL_openlibs(L);
-  // luaL_requiref(L, "mf", luaopen_mf, 1); // Load mf module
   lua_pushglobaltable(L);
   luaL_setfuncs(L, mf_funcs, 0);
   lua_pop(L, 1); // Remove mf module from stack
@@ -182,8 +191,6 @@ lua_State *mf_lua_init(char *script_path) {
   }
   return L;
 }
-
-//////
 
 mf_wave_data mf_init() {
   // Initialize oscillators

@@ -25,19 +25,20 @@ typedef struct {
   float phase;
   float amp;
   enum Wave wave;
-} mfOsc;
+} mf_osc;
 
 typedef struct {
   int exit;
-} mfFlags;
+} mf_flags;
 
 typedef struct {
-  mfOsc osc[OSC_COUNT];
-  mfFlags flags;
-} mfState;
+  mf_osc osc[OSC_COUNT];
+  mf_flags flags;
+} mf_state;
 
-extern mfState state;
+extern mf_state state;
 
+// User functions
 int mf_beat_to_ticks(float bpm, float beat);
 int mf_wave_set(int osc_num, enum Wave wave);
 int mf_freq_set(int osc_num, float freq);
@@ -46,6 +47,7 @@ int mf_amp_set(int osc_num, float amp);
 int mf_amp_change(int osc_num, float amp_mod);
 int mf_mute_all();
 
+// System functions
 mf_wave_data mf_init();
 int mf_init_lua(char *script_path);
 int mf_run_lua(lua_State *L);
