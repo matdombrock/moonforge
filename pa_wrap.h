@@ -1,6 +1,6 @@
 // This file contains the PortAudio wrapper functions for audio playback.
 // In thoery this is all that would need to be replaced to use a different
-// audio library, such as SDL or OpenAL.
+// audio library, such as SDL, OpenAL or a custom audio system.
 
 #pragma once
 #include <math.h>
@@ -8,6 +8,7 @@
 #include "const.h"
 #include "mf.h"
 
+// Main function handling the audio synthesis callback.
 int paw_callback(const void *inputBuffer, void *outputBuffer,
                  unsigned long framesPerBuffer,
                  const PaStreamCallbackTimeInfo *timeInfo,
