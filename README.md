@@ -1,7 +1,7 @@
-# M O O N F O R G E
+# ☾ M O O N F O R G E ☽
 ![mf_logo](doc/mf.png)
 
-Moonforge is a minimalist audio lab written in C. It's scripted via it's built-in Lua interpreter using the [MF Lua API Docs](doc/API.md). 
+Moonforge is a minimalist audio lab written in C. It's scripted via it's built-in Lua interpreter using the [MF Lua API](doc/API.md). 
 
 ## Build & Package
 ### Requirements:
