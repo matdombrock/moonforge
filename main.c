@@ -2,7 +2,6 @@
 #include "mf.h"
 #include <math.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 static int paCallback(const void *inputBuffer, void *outputBuffer,
                       unsigned long framesPerBuffer,
@@ -64,31 +63,10 @@ static int paCallback(const void *inputBuffer, void *outputBuffer,
   return paContinue;
 }
 
-int main(int argc, char *argv[]) {
-  if (argc < 2) {
-    fprintf(stderr, "Usage: %s <lua_script>\n", argv[0]);
-    return 1;
+void print_startup_info(char *script_path) {
+  if (PRINT_STARTUP_INFO == 0) {
+    return; // Skip printing if flag is set to 0
   }
-  char *script_path = argv[1];
-  printf("Lua script to run: %s\n", script_path);
-  // Check if Lua script exists
-  FILE *file = fopen(script_path, "r");
-  if (!file) {
-    fprintf(stderr, "Error: Lua script '%s' not found.\n", script_path);
-    return 1;
-  }
-  fclose(file);
-
-  // mf_wave_data data = mf_init();
-  mf_init();
-  Pa_Initialize();
-  PaStream *stream;
-  Pa_OpenDefaultStream(&stream, 0, 2, paFloat32, SAMPLE_RATE, FRAMES_PER_BUFFER,
-                       paCallback, &wave_data);
-  Pa_StartStream(stream);
-
-  // Clear the console
-  printf("\033[H\033[J");
   printf(COL_YELLOW);
   printf(" ☾ R E P L I C A T S ☽ \n");
 
@@ -119,19 +97,49 @@ int main(int argc, char *argv[]) {
   printf("Version %s\n", VERSION);
   printf(COL_CYAN);
   printf("File: %s\n", script_path);
-  printf(COL_MAGENTA);
-  printf("Sample Rate: %d\n", SAMPLE_RATE);
-  printf("Frames per Buffer: %d\n", FRAMES_PER_BUFFER);
-  printf("Oscillators: %d\n", OSC_COUNT);
-  printf("Wave Table Size: %d\n", TABLE_SIZE);
-  printf("Tuning: %f (Hz)\n", A4);
-  printf("Tick Wait: %d ms\n", TICK_WAIT);
-  printf(COL_CYAN);
+  if (PRINT_STARTUP_CONSTS) {
+    printf(COL_MAGENTA);
+    printf("Sample Rate: %d\n", SAMPLE_RATE);
+    printf("Frames per Buffer: %d\n", FRAMES_PER_BUFFER);
+    printf("Oscillators: %d\n", OSC_COUNT);
+    printf("Wave Table Size: %d\n", TABLE_SIZE);
+    printf("Tuning: %f (Hz)\n", A4);
+    printf("Tick Wait: %d ms\n", TICK_WAIT);
+  }
+  printf(COL_RED);
   printf("Press Ctrl+C to exit.\n");
   printf(COL_GREEN);
   printf("\n");
   printf("Starting audio...\n");
   printf(COL_RESET);
+}
+
+int main(int argc, char *argv[]) {
+  if (argc < 2) {
+    fprintf(stderr, "%sUsage: %s <lua_script>%s\n", COL_RED, argv[0], COL_RESET);
+    return 1;
+  }
+  char *script_path = argv[1];
+  // Check if Lua script exists
+  FILE *file = fopen(script_path, "r");
+  if (!file) {
+    fprintf(stderr, "%sError: Lua script '%s' not found.%s\n", COL_RED, script_path, COL_RESET);
+    return 1;
+  }
+  fclose(file);
+
+  // mf_wave_data data = mf_init();
+  mf_init();
+  Pa_Initialize();
+  PaStream *stream;
+  Pa_OpenDefaultStream(&stream, 0, 2, paFloat32, SAMPLE_RATE, FRAMES_PER_BUFFER,
+                       paCallback, &wave_data);
+  Pa_StartStream(stream);
+
+  // Clear the console
+  printf("\033[H\033[J");
+
+  print_startup_info(script_path);
 
   while (state.flags.exit == 0) {
     mf_loop(script_path); // Call the Lua loop function

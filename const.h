@@ -8,6 +8,9 @@
 #define TICK_WAIT 1
 #define RAND_MAX 32767
 
+#define PRINT_STARTUP_INFO 1
+#define PRINT_STARTUP_CONSTS 1
+
 // Console color codes for terminal output
 #define COL_RED "\033[31m"
 #define COL_GREEN "\033[32m"
