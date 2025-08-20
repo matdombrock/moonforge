@@ -1,5 +1,4 @@
 #pragma once
-#include <portaudio.h>
 #include <lua.h>
 #include <lualib.h>
 #include "const.h"
