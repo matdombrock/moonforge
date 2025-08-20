@@ -15,9 +15,10 @@ mf_state state = {};
 ///////
 
 int mf_beat_to_ticks(float bpm, float beat) {
+  beat = beat - 1.0f;
   float ticks_per_second = 1000.0f; // 1 tick = 1 ms
   float seconds_per_beat = 60.0f / bpm;
-  return round(beat * seconds_per_beat * ticks_per_second);
+  return floor(beat * seconds_per_beat * ticks_per_second);
 }
 
 int mf_wave_set(int osc_num, enum Wave wave) {

@@ -10,17 +10,25 @@ freq_set(1, 440)
 freq_set(2, 439)
 
 local track_len = 4
-local bpm = 120
+local bpm = 420
 
 -- Main loop
 function Loop(tick)
-  local tt = tick % beat_to_ticks(bpm, track_len)
-  if beat_to_ticks(bpm, 1) == tt then
-    print("1")
+  local tt = mfl.track_tic(tick, bpm, track_len)
+  if mfl.on_beat(tt, bpm, 1) then
+    amp_set(1, 0.5)
+    amp_set(2, 0.5)
     freq_change(1, 100)
   end
-  if beat_to_ticks(bpm, 4) == tt then
-    print("4")
+  if mfl.on_beat(tt, bpm, 2) then
+    mute_all()
+  end
+  if mfl.on_beat(tt, bpm, 3) then
+    amp_set(1, 0.5)
+    amp_set(2, 0.5)
     freq_change(1, -100)
+  end
+  if mfl.on_beat(tt, bpm, 4) then
+    mute_all()
   end
 end
