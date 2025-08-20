@@ -8,6 +8,6 @@ cd build
 cmake ..
 make -j$(nproc)
 
-cp ../mflib.lua .
+cp ../lua_include/mflib.lua .
 
 ./mf $1

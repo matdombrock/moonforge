@@ -1,18 +1,19 @@
+#include "const.h"
 #include "mf.h"
 #include <math.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include "const.h"
 
 static int paCallback(const void *inputBuffer, void *outputBuffer,
                       unsigned long framesPerBuffer,
                       const PaStreamCallbackTimeInfo *timeInfo,
                       PaStreamCallbackFlags statusFlags, void *userData) {
+
   mf_wave_data *data = (mf_wave_data *)userData;
   float *out = (float *)outputBuffer;
   unsigned int i;
   for (i = 0; i < framesPerBuffer; i++) {
-    float sample_mix = 0.0f;
+    float sample_mix_l = 0.0f;
+    float sample_mix_r = 0.0f;
     for (int osc = 0; osc < OSC_COUNT; osc++) {
       float sample = 0.0f;
       float freq =
@@ -34,14 +35,15 @@ static int paCallback(const void *inputBuffer, void *outputBuffer,
         sample += 0.0f;
         break;
       }
-      sample *= state.osc[osc].amp;
-      sample_mix += sample; // Mix the samples from all oscillators
+      float amp = state.osc[osc].amp;
+      sample_mix_l += sample * amp * state.osc[osc].amp_l;
+      sample_mix_r += sample * amp * state.osc[osc].amp_r;
       state.osc[osc].phase =
           fmod(state.osc[osc].phase + freq * (A4 * TABLE_SIZE / SAMPLE_RATE),
                TABLE_SIZE);
     }
-    // *out++ = sample_mix / OSC_COUNT; // Average the samples from all oscillators
-    *out++ = sample_mix;
+    *out++ = sample_mix_l; // Left
+    *out++ = sample_mix_r; // Right
   }
   return paContinue;
 }
@@ -64,7 +66,7 @@ int main(int argc, char *argv[]) {
   mf_wave_data data = mf_init();
   Pa_Initialize();
   PaStream *stream;
-  Pa_OpenDefaultStream(&stream, 0, 1, paFloat32, SAMPLE_RATE, FRAMES_PER_BUFFER,
+  Pa_OpenDefaultStream(&stream, 0, 2, paFloat32, SAMPLE_RATE, FRAMES_PER_BUFFER,
                        paCallback, &data);
   Pa_StartStream(stream);
 

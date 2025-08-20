@@ -18,6 +18,8 @@ typedef struct {
   float freq;
   float phase;
   float amp;
+  float amp_l;
+  float amp_r;
   enum Wave wave;
 } mf_osc;
 
@@ -41,6 +43,7 @@ float mf_freq_get(int osc_num);
 int mf_amp_set(int osc_num, float amp);
 int mf_amp_change(int osc_num, float amp_mod);
 float mf_amp_get(int osc_num);
+int mf_pan_set(int osc_num, float pan_l, float pan_r);
 int mf_mute_all();
 
 // System functions

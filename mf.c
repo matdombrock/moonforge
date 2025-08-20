@@ -86,6 +86,18 @@ float mf_amp_get(int osc_num) {
   return state.osc[osc_num].amp; // Return the amplitude of the specified oscillator
 }
 
+int mf_pan_set(int osc_num, float pan_l, float pan_r) {
+  if (osc_num < 0 || osc_num >= OSC_COUNT) {
+    return -1; // Invalid oscillator index
+  }
+  if (pan_l < 0.0f || pan_l > 1.0f || pan_r < 0.0f || pan_r > 1.0f) {
+    return -2; // Invalid panning values
+  }
+  state.osc[osc_num].amp_l = pan_l; // Set left channel amplitude
+  state.osc[osc_num].amp_r = pan_r; // Set right channel amplitude
+  return 0; // Success
+}
+
 int mf_mute_all() {
   for (int i = 0; i < OSC_COUNT; i++) {
     state.osc[i].amp = 0.0f; // Mute all oscillators
@@ -190,6 +202,16 @@ static int l_mf_amp_get(lua_State *L) {
     return 1; // Return the number of results
 }
 
+static int l_mf_pan_set(lua_State *L) {
+    int osc_num = luaL_checkinteger(L, 1);
+    osc_num = l_mf_lua_index(osc_num);
+    float pan_l = luaL_checknumber(L, 2);
+    float pan_r = luaL_checknumber(L, 3);
+    int result = mf_pan_set(osc_num, pan_l, pan_r);
+    lua_pushinteger(L, result);
+    return 1; // Return the number of results
+}
+
 static int l_mf_mute_all(lua_State *L) {
     int result = mf_mute_all();
     lua_pushinteger(L, result);
@@ -205,6 +227,7 @@ static const struct luaL_Reg mf_funcs[] = {
     {"amp_set", l_mf_amp_set},
     {"amp_change", l_mf_amp_change},
     {"amp_get", l_mf_amp_get},
+    {"pan_set", l_mf_pan_set},
     {"mute_all", l_mf_mute_all},
     {NULL, NULL} // Sentinel
 };
@@ -237,6 +260,8 @@ mf_wave_data mf_init() {
     state.osc[i].freq = 440.0f;
     state.osc[i].phase = 0.0f;
     state.osc[i].amp = 0.0f; // Set default amplitude
+    state.osc[i].amp_l = 1.0f;
+    state.osc[i].amp_r = 1.0f;
     state.osc[i].wave = SINE; // Set default wave type
   }
   // Set up flags

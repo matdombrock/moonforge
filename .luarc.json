@@ -19,6 +19,7 @@
         "amp_set",
         "amp_change",
         "amp_get",
+        "pan_set",
         "mute_all",
         ""
       ]

@@ -1,3 +1,5 @@
+-- A collection of utility functions for music and sound processing
+
 local mfl = {}
 
 function mfl.test()
@@ -5,7 +7,7 @@ function mfl.test()
 end
 
 -- Returns a tick modulo relative to the track length
-function mfl.track_tic(tick, bpm, track_len)
+function mfl.track_tick(tick, bpm, track_len)
   local tt = tick % beat_to_ticks(bpm, track_len + 1)
   return tt
 end
