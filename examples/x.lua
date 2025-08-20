@@ -1,4 +1,4 @@
-local mfl = require("mflib")
+local mfl = require("util.mflib")
 
 amp_set(1, 0.5)
 freq_set(1, 840)
