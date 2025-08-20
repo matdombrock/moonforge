@@ -23,6 +23,7 @@
         "pan_get_r",
         "lowpass_set",
         "lowpass_get",
+        "delay_set",
         "mute_all",
         "wavetable_write",
         "exit",

@@ -71,6 +71,13 @@ Sets the a lowpass filter on the target oscillator.
 Returns the current lowpass cutoff for the target oscillator.
 - `osc_num` - target oscillator
 
+### `delay_set(osc_num, delay_time, feedback, mix)`
+Set a delay line on the target oscillator. 
+- `osc_num` - target oscillator
+- `delay_time` - delay time in ms
+- `feedback` - line feedback (0->1)
+- `mix` - wet/dry mix (0->1)
+
 ### `mute_all()`
 Mutes all oscillators.
 

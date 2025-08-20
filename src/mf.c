@@ -8,6 +8,7 @@
 #include <string.h>
 #include "mf.h"
 #include "lowpass.h"
+#include "delay.h"
 
 mf_state state = {}; // Global state
 mf_wave_data wave_data; // Global wave data
@@ -106,6 +107,18 @@ float mf_lowpass_get(int osc_num) {
     return -1; // Invalid oscillator index
   }
   return state.osc[osc_num].lp.cutoff;
+}
+
+int mf_delay_set(int osc_num, int delay_samples, float feedback, float mix) {
+  if (osc_num < 0 || osc_num >= OSC_COUNT) {
+    return -1; // Invalid oscillator index
+  }
+  if (delay_samples < 0 || feedback < 0.0f || feedback >= 1.0f || mix < 0.0f ||
+      mix > 1.0f) {
+    return -2; // Invalid delay parameters
+  }
+  delay_set(&state.osc[osc_num].delay, delay_samples, feedback, mix);
+  return 0; // Success
 }
 
 int mf_mute_all() {
@@ -276,6 +289,17 @@ static int l_mf_lowpass_get(lua_State *L) {
   return 1; // 
 }
 
+static int l_mf_delay_set(lua_State *L) {
+  int osc_num = luaL_checkinteger(L, 1);
+  osc_num = _l_mf_lua_index(osc_num);
+  int delay_samples = luaL_checkinteger(L, 2);
+  float feedback = luaL_checknumber(L, 3);
+  float mix = luaL_checknumber(L, 4);
+  int result = mf_delay_set(osc_num, delay_samples, feedback, mix);
+  lua_pushinteger(L, result);
+  return 1; // 
+}
+
 static int l_mf_mute_all(lua_State *L) {
   int result = mf_mute_all();
   lua_pushinteger(L, result);
@@ -328,6 +352,7 @@ static const struct luaL_Reg mf_funcs[] = {
     {"pan_get_r", l_mf_pan_get_r},
     {"lowpass_set", l_mf_lowpass_set},
     {"lowpass_get", l_mf_lowpass_get},
+    {"delay_set", l_mf_delay_set},
     {"mute_all", l_mf_mute_all},
     {"wavetable_write", l_mf_wavetable_write},
     {"exit", l_mf_exit},
@@ -371,6 +396,7 @@ int mf_init() {
     state.osc[i].amp_r = 1.0f;
     state.osc[i].wave = SINE; // Set default wave type
     lowpass_init(&state.osc[i].lp, 20000.0f); // Initialize lowpass filter
+    delay_init(&state.osc[i].delay, 1, 0.0, 0.0); // Initialize delay
   }
   // Set up flags
   state.flags.exit = 0;

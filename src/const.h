@@ -1,7 +1,7 @@
 #pragma once
 #define VERSION "0.1.0"
 #define SAMPLE_RATE 44100
-#define FRAMES_PER_BUFFER 256
+#define FRAMES_PER_BUFFER 1024
 #define TABLE_SIZE 256
 #define A4 440.0f
 #define OSC_COUNT 8

@@ -5,6 +5,7 @@
 #pragma once
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "const.h"
 #include "as.h"
 #include "mf.h"
@@ -59,10 +60,14 @@ int as_synthesis_callback(const void *inputBuffer, void *outputBuffer,
       }
       // Apply lowpass filter
       sample = lowpass_process(&state.osc[osc].lp, sample);
+      // Apply delay
+      // sample = delay_process(&state.osc[osc].delay, sample);
       // Apply panning and amplitude
       float amp = state.osc[osc].amp;
       sample_mix_l += sample * amp * state.osc[osc].amp_l;
       sample_mix_r += sample * amp * state.osc[osc].amp_r;
+      sample_mix_l = delay_process(&state.osc[osc].delay, sample_mix_l);
+      sample_mix_r = delay_process(&state.osc[osc].delay, sample_mix_r);
       state.osc[osc].phase =
           fmod(state.osc[osc].phase + freq * (A4 * TABLE_SIZE / SAMPLE_RATE),
                TABLE_SIZE);

@@ -3,6 +3,7 @@
 #include <lualib.h>
 #include "const.h"
 #include "lowpass.h"
+#include "delay.h"
 
 typedef struct {
   float sine[TABLE_SIZE];
@@ -24,6 +25,7 @@ typedef struct {
   float amp_l;
   float amp_r;
   Lowpass_Filter lp;
+  Delay delay;
   enum Wave wave;
 } mf_osc;
 
@@ -52,6 +54,8 @@ int mf_pan_set(int osc_num, float pan_l, float pan_r);
 float mf_pan_get_l(int osc_num);
 float mf_pan_get_r(int osc_num);
 int mf_lowpass_set(int osc_num, float cutoff);
+float mf_lowpass_get(int osc_num);
+int mf_delay_set(int osc_num, int delay_samples, float feedback, float mix);
 int mf_wavetable_write(enum Wave wave, float *data);
 int mf_mute_all();
 int mf_exit();

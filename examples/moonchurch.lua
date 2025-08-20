@@ -1,26 +1,34 @@
 local mfl = require("util.mflib")
 
 local cut = 800 -- Cutoff frequency for lowpass filter
+local delay_len = 70000
+local delay_feedback = 0.1
+local delay_mix = 0.2
 wave_set(1, "CA")
 pan_set(1, 1, 0)
 lowpass_set(1, cut)
+delay_set(1, delay_len, delay_feedback, delay_mix)
 
 wave_set(2, "CA")
 pan_set(2, 0, 1)
 lowpass_set(2, cut)
+delay_set(2, delay_len, delay_feedback, delay_mix)
 
 wave_set(3, "CA")
 lowpass_set(3, cut)
+delay_set(3, delay_len, delay_feedback, delay_mix)
 
 wave_set(4, "NOISE")
-amp_set(4, 0.05)
+amp_set(4, 0.025)
 pan_set(4, 1, 0)
 lowpass_set(4, cut)
+delay_set(4, delay_len, delay_feedback, delay_mix * 1.5)
 
 wave_set(5, "NOISE")
-amp_set(5, 0.05)
+amp_set(5, 0.025)
 pan_set(5, 0, 1)
 lowpass_set(5, cut)
+delay_set(5, delay_len, delay_feedback, delay_mix * 1.5)
 
 local function init_wavetable()
   local down = math.random(1, 4)
