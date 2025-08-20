@@ -2,9 +2,13 @@ local mfl = require("util.mflib")
 
 amp_set(1, 0.5)
 wave_set(1, "SQUARE")
+delay_set(1, 84000, 0.1, 0.2)
+lowpass_set(1, 8000)
 
 amp_set(2, 0.5)
 wave_set(2, "SAW")
+delay_set(2, 420000, 0.4, 0.2)
+lowpass_set(2, 8000)
 
 local bpm = 80
 local section_len = 4
