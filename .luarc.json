@@ -24,7 +24,7 @@
         "lowpass_set",
         "lowpass_get",
         "mute_all",
-        "custom_wave_set",
+        "wavetable_write",
         "exit",
       ]
     }

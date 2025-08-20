@@ -1,10 +1,18 @@
 # Lua API
 
+Moonforge provides a minimal Lua API which can be abstracted to enable more advanced behaviors.
+
+These are the core API functions which call C code directly.
+
 ## Global Constants
-- `TABLE_SIZE` - the amount of samples in a wavetable
-- `TICK_WAIT` - the time in ms between each tick
+
+There are a few contants available to the Lua runtime:
+- `TABLE_SIZE` - amount of samples in a wavetable
+- `TICK_WAIT` - time in ms between each tick
 
 ## Wave Names
+
+When a function calls for a `wave_name` parameter, it may be one of the following:
 - `"SINE"` - sine wave
 - `"SQUARE"` - square wave
 - `"TRIANGLE"` - triangle wave
@@ -66,8 +74,8 @@ Returns the current lowpass cutoff for the target oscillator.
 ### `mute_all()`
 Mutes all oscillators.
 
-### `custom_wave_set(wave_name, data)`
-Sets a custom wavetable.
+### `wavetable_write(wave_name, data)`
+Writes a custom wavetable. It is only possible to write to custom wavetables ("CA", "CB", "CC", "CD").
 - `wave_name` - the name of the waveform to use
 - `data` - An array of `TABLE_LENGTH` sample values (-1->1)
 

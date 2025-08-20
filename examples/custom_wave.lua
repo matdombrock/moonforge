@@ -1,20 +1,12 @@
-local mfl = require("mflib")
+local mfl = require("util.mflib")
 
-mfl.make_wave("CA", function(x)
-  local sin = math.sin(x)
-  -- Add some randomness to the square wave
-  sin = sin + mfl.noise(1)
-  if sin > 1 then
-    sin = 1
-  elseif sin < -1 then
-    sin = -1
-  end
-  return sin
+-- Create a custom wave "CA" using a mathematical function
+mfl.wavetable_make("CA", function(x)
+  return math.sin(x) * math.sin(x * 2) * math.sin(x * 3)
 end)
 
-wave_set(1, "CA")
-amp_set(1, 0.5)
-freq_set(1, 440)
+amp_set(1, 1)     -- Set the amplitude of oscillator 1 to 1
+wave_set(1, "CA") -- Set the wave of oscillator 1 to the custom wave "CA"
 
 function Loop(tick)
 end

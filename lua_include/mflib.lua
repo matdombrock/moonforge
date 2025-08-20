@@ -102,13 +102,13 @@ function mfl.fade(osc_num, target_amp, speed)
 end
 
 -- Supply a wave function where x is in the range [0, 2π]
-function mfl.make_wave(wave_name, wave_fn)
+function mfl.wavetable_make(wave_name, wave_fn)
   local wav = {}
   for i = 1, TABLE_SIZE do
     local x = (i - 1) / TABLE_SIZE * math.pi * 2
     wav[i] = wave_fn(x)
   end
-  custom_wave_set(wave_name, wav)
+  wavetable_write(wave_name, wav)
 end
 
 -- Generate a noise sample
@@ -127,6 +127,16 @@ function mfl.amp_change(osc_num, change)
   local current_amp = amp_get(osc_num)
   local new_amp = current_amp + change
   amp_set(osc_num, new_amp)
+end
+
+function mfl.randomF(min, max)
+  -- Generate a random float between min and max
+  return math.random() * (max - min) + min
+end
+
+function mfl.warble(osc_num, tick, time, amp)
+  local mod = math.sin(tick / time)
+  mfl.freq_change(osc_num, (mod / time) * amp)
 end
 
 return mfl

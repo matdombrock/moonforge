@@ -115,7 +115,7 @@ int mf_mute_all() {
   return 0; // Success
 }
 
-int mf_custom_wave_set(enum Wave wave, float *data) {
+int mf_wavetable_write(enum Wave wave, float *data) {
   if (wave < CA || wave > CD) {
     return -2; // Invalid custom wave type
   }
@@ -282,7 +282,7 @@ static int l_mf_mute_all(lua_State *L) {
   return 1; // 
 }
 
-static int l_mf_custom_wave_set(lua_State *L) {
+static int l_mf_wavetable_write(lua_State *L) {
   const char *waveStr = luaL_checkstring(L, 1);
   enum Wave wave;
 
@@ -306,7 +306,7 @@ static int l_mf_custom_wave_set(lua_State *L) {
     lua_pop(L, 1);
   }
   //
-  int result = mf_custom_wave_set(wave, data);
+  int result = mf_wavetable_write(wave, data);
   lua_pushinteger(L, result);
   return 1; // 
 }
@@ -329,7 +329,7 @@ static const struct luaL_Reg mf_funcs[] = {
     {"lowpass_set", l_mf_lowpass_set},
     {"lowpass_get", l_mf_lowpass_get},
     {"mute_all", l_mf_mute_all},
-    {"custom_wave_set", l_mf_custom_wave_set},
+    {"wavetable_write", l_mf_wavetable_write},
     {"exit", l_mf_exit},
     {NULL, NULL} // Sentinel
 };
