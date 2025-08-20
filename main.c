@@ -91,14 +91,27 @@ int main(int argc, char *argv[]) {
   printf("\033[H\033[J");
   printf(COL_YELLOW);
   printf(" ☾ R E P L I C A T S ☽ \n");
+
+  // printf("█▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█\n");
+  // printf("██...................██\n");
+  // printf("█.......▄▄▄▄▄▄........█\n");
+  // printf("█......▀...▀████▄.....█\n");
+  // printf("█............████▄....█\n");
+  // printf("█............████▀....█\n");
+  // printf("█......▄...▄████▀.....█\n");
+  // printf("█.......▀▀▀▀▀▀........█\n");
+  // printf("██...................██\n");
+  // printf("█▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█\n");
+
+  char *moon_color = COL_WHITE;
   printf("█▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█\n");
   printf("██...................██\n");
-  printf("█.......▄▄▄▄▄▄........█\n");
-  printf("█......▀...▀████▄.....█\n");
-  printf("█............████▄....█\n");
-  printf("█............████▀....█\n");
-  printf("█......▄...▄████▀.....█\n");
-  printf("█.......▀▀▀▀▀▀........█\n");
+  printf("█.......%s▄▄▄▄▄▄%s........█\n", moon_color, COL_YELLOW);
+  printf("█......%s▀%s...%s▀████▄%s.....█\n", moon_color, COL_YELLOW, moon_color, COL_YELLOW);
+  printf("█............%s████▄%s....█\n", moon_color, COL_YELLOW);
+  printf("█............%s████▀%s....█\n", moon_color, COL_YELLOW);
+  printf("█......%s▄%s...%s▄████▀%s.....█\n", moon_color, COL_YELLOW, moon_color, COL_YELLOW);
+  printf("█.......%s▀▀▀▀▀▀%s........█\n", moon_color, COL_YELLOW);
   printf("██...................██\n");
   printf("█▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█\n");
   printf(" ☾ M O O N F O R G E ☽ \n");
