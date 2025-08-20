@@ -4,5 +4,5 @@
 #define TABLE_SIZE 200
 #define AMPLITUDE 0.25
 #define A4 440.0f
-#define OSC_COUNT 2
+#define OSC_COUNT 8
 #define RAND_MAX 32767

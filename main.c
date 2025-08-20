@@ -12,8 +12,9 @@ static int paCallback(const void *inputBuffer, void *outputBuffer,
   float *out = (float *)outputBuffer;
   unsigned int i;
   for (i = 0; i < framesPerBuffer; i++) {
-    float sample = 0.0f;
+    float sample_mix = 0.0f;
     for (int osc = 0; osc < OSC_COUNT; osc++) {
+      float sample = 0.0f;
       float freq =
           state.osc[osc].freq / A4; // Adjust rate for sine wave frequency
       switch (state.osc[osc].wave) {
@@ -34,11 +35,13 @@ static int paCallback(const void *inputBuffer, void *outputBuffer,
         break;
       }
       sample *= state.osc[osc].amp;
+      sample_mix += sample; // Mix the samples from all oscillators
       state.osc[osc].phase =
           fmod(state.osc[osc].phase + freq * (A4 * TABLE_SIZE / SAMPLE_RATE),
                TABLE_SIZE);
     }
-    *out++ = sample / OSC_COUNT; // Average the samples from all oscillators
+    // *out++ = sample_mix / OSC_COUNT; // Average the samples from all oscillators
+    *out++ = sample_mix;
   }
   return paContinue;
 }
@@ -65,8 +68,12 @@ int main(int argc, char *argv[]) {
                        paCallback, &data);
   Pa_StartStream(stream);
 
+  // Clear the console
+  printf("\033[H\033[J");
+  printf("MOONFORGE\n");
+
   while (state.flags.exit == 0) {
-    Pa_Sleep(1); // Keep playing indefinitely
+    Pa_Sleep(1);
     mf_loop(script_path); // Call the Lua loop function
   }
 

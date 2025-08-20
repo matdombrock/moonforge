@@ -2,13 +2,7 @@
 #include <portaudio.h>
 #include <lua.h>
 #include <lualib.h>
-
-#define SAMPLE_RATE 44100
-#define FRAMES_PER_BUFFER 256
-#define TABLE_SIZE 200
-#define AMPLITUDE 0.25
-#define A4 440.0f
-#define OSC_COUNT 2
+#include "const.h"
 
 typedef struct {
   float sine[TABLE_SIZE];
@@ -43,8 +37,10 @@ int mf_beat_to_ticks(float bpm, float beat);
 int mf_wave_set(int osc_num, enum Wave wave);
 int mf_freq_set(int osc_num, float freq);
 int mf_freq_change(int osc_num, float freq_mod);
+float mf_freq_get(int osc_num);
 int mf_amp_set(int osc_num, float amp);
 int mf_amp_change(int osc_num, float amp_mod);
+float mf_amp_get(int osc_num);
 int mf_mute_all();
 
 // System functions

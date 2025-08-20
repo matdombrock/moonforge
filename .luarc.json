@@ -15,8 +15,10 @@
         "wave_set", 
         "freq_set",
         "freq_change",
+        "freq_get",
         "amp_set",
         "amp_change",
+        "amp_get",
         "mute_all",
         ""
       ]
