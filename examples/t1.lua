@@ -27,7 +27,6 @@ local function bass(tt)
   end
   if mfl.on_beat(tt, bpm, 3) then
     release_bass = false
-    -- mfl.note_set(1, "C#6")
     mfl.note_random(1, { "C3", "D3", "E3", "F3", "G3", "A3", "B3" })
   end
   if mfl.on_beat(tt, bpm, 4) then

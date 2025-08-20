@@ -50,6 +50,7 @@ int mf_amp_change(int osc_num, float amp_mod);
 float mf_amp_get(int osc_num);
 int mf_pan_set(int osc_num, float pan_l, float pan_r);
 int mf_mute_all();
+int mf_exit();
 
 // System functions
 int mf_init();

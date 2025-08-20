@@ -133,11 +133,16 @@ int mf_custom_wave_set(enum Wave wave, float *data) {
   return 0;                       // Success
 }
 
+int mf_exit() {
+  state.flags.exit = 1; // Set exit flag
+  return 0;            // Success
+}
+
 ///////
 /// Lua bindings
 ///////
 
-static int l_mf_lua_index(int input) {
+static int _l_mf_lua_index(int input) {
   return input - 1; // Lua uses 1-based indexing, C uses 0-based
 }
 
@@ -151,7 +156,7 @@ static int l_mf_beat_to_ticks(lua_State *L) {
 
 static int l_mf_wave_set(lua_State *L) {
   int osc_num = luaL_checkinteger(L, 1);
-  osc_num = l_mf_lua_index(osc_num);
+  osc_num = _l_mf_lua_index(osc_num);
   const char *waveStr = luaL_checkstring(L, 2);
   enum Wave wave;
 
@@ -184,7 +189,7 @@ static int l_mf_wave_set(lua_State *L) {
 
 static int l_mf_freq_set(lua_State *L) {
   int osc_num = luaL_checkinteger(L, 1);
-  osc_num = l_mf_lua_index(osc_num);
+  osc_num = _l_mf_lua_index(osc_num);
   float freq = luaL_checknumber(L, 2);
   int result = mf_freq_set(osc_num, freq);
   lua_pushinteger(L, result);
@@ -193,7 +198,7 @@ static int l_mf_freq_set(lua_State *L) {
 
 static int l_mf_freq_change(lua_State *L) {
   int osc_num = luaL_checkinteger(L, 1);
-  osc_num = l_mf_lua_index(osc_num);
+  osc_num = _l_mf_lua_index(osc_num);
   float freqMod = luaL_checknumber(L, 2);
   int result = mf_freq_change(osc_num, freqMod);
   lua_pushinteger(L, result);
@@ -202,7 +207,7 @@ static int l_mf_freq_change(lua_State *L) {
 
 static int l_mf_freq_get(lua_State *L) {
   int osc_num = luaL_checkinteger(L, 1);
-  osc_num = l_mf_lua_index(osc_num);
+  osc_num = _l_mf_lua_index(osc_num);
   float freq = mf_freq_get(osc_num);
   if (freq < 0) {
     return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
@@ -213,7 +218,7 @@ static int l_mf_freq_get(lua_State *L) {
 
 static int l_mf_amp_set(lua_State *L) {
   int osc_num = luaL_checkinteger(L, 1);
-  osc_num = l_mf_lua_index(osc_num);
+  osc_num = _l_mf_lua_index(osc_num);
   float amp = luaL_checknumber(L, 2);
   int result = mf_amp_set(osc_num, amp);
   lua_pushinteger(L, result);
@@ -222,7 +227,7 @@ static int l_mf_amp_set(lua_State *L) {
 
 static int l_mf_amp_change(lua_State *L) {
   int osc_num = luaL_checkinteger(L, 1);
-  osc_num = l_mf_lua_index(osc_num);
+  osc_num = _l_mf_lua_index(osc_num);
   float ampMod = luaL_checknumber(L, 2);
   int result = mf_amp_change(osc_num, ampMod);
   lua_pushinteger(L, result);
@@ -231,7 +236,7 @@ static int l_mf_amp_change(lua_State *L) {
 
 static int l_mf_amp_get(lua_State *L) {
   int osc_num = luaL_checkinteger(L, 1);
-  osc_num = l_mf_lua_index(osc_num);
+  osc_num = _l_mf_lua_index(osc_num);
   float amp = mf_amp_get(osc_num);
   if (amp < 0) {
     return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
@@ -242,7 +247,7 @@ static int l_mf_amp_get(lua_State *L) {
 
 static int l_mf_pan_set(lua_State *L) {
   int osc_num = luaL_checkinteger(L, 1);
-  osc_num = l_mf_lua_index(osc_num);
+  osc_num = _l_mf_lua_index(osc_num);
   float pan_l = luaL_checknumber(L, 2);
   float pan_r = luaL_checknumber(L, 3);
   int result = mf_pan_set(osc_num, pan_l, pan_r);
@@ -285,6 +290,12 @@ static int l_mf_custom_wave_set(lua_State *L) {
   return 1; // Return the number of results
 }
 
+static int l_mf_exit(lua_State *L) {
+  int result = mf_exit();
+  lua_pushinteger(L, result);
+  return 1; // Return the number of results
+}
+
 static const struct luaL_Reg mf_funcs[] = {
     {"beat_to_ticks", l_mf_beat_to_ticks},
     {"wave_set", l_mf_wave_set},
@@ -297,6 +308,7 @@ static const struct luaL_Reg mf_funcs[] = {
     {"pan_set", l_mf_pan_set},
     {"mute_all", l_mf_mute_all},
     {"custom_wave_set", l_mf_custom_wave_set},
+    {"exit", l_mf_exit},
     {NULL, NULL} // Sentinel
 };
 
