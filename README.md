@@ -30,14 +30,17 @@ Final packaged build files will be in `./dist`.
 ## Lua Scripting
 All Lua scripts must contain a `Loop(tick)` function. The `tick` value represents the current iteration of the main loop. 
 
+A basic script might look like this:
 ```lua
-amp_set(1, 1)
+-- Setup
+amp_set(1, 1) -- Set the amp of the first osc to 1
+-- Main loop
 function Loop(tick)
     print(tick)
 end
 ```
 
-For scripting examples see the [./examples](examples) directory.
+For scripting examples see the [examples](examples) directory.
 
 ## Lua API
 See the [MF Lua API Docs](doc/API.md) for core API functions.
