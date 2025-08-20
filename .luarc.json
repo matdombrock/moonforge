@@ -18,6 +18,7 @@
         "amp_set",
         "amp_get",
         "pan_set",
+        "lowpass_set",
         "mute_all",
         "custom_wave_set",
         "exit",

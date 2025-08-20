@@ -56,6 +56,9 @@ int as_synthesis_callback(const void *inputBuffer, void *outputBuffer,
         sample += 0.0f;
         break;
       }
+      // Apply lowpass filter
+      sample = lowpass_process(&state.osc[osc].lp, sample);
+      // Apply panning and amplitude
       float amp = state.osc[osc].amp;
       sample_mix_l += sample * amp * state.osc[osc].amp_l;
       sample_mix_r += sample * amp * state.osc[osc].amp_r;

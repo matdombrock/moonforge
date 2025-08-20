@@ -1,14 +1,9 @@
 local mfl = require("util.mflib")
 
+wave_set(1, "SQUARE")
 amp_set(1, 0.5)
-freq_set(1, 840)
+freq_set(1, 440)
 
 function Loop(tick)
-  if mfl.on_beat(tick, 120, 1) then
-    freq_set(1, 440)
-  end
-  if tick > 1000 then
-    exit()
-  end
-  -- print("Tick: " .. tick)
+  lowpass_set(1, 10000 - math.sin(tick / 100) * 9000)
 end

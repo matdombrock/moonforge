@@ -41,10 +41,15 @@ Returns the current amplitude for the given oscillator.
 - `osc_num` - target oscillator
 
 ### `pan_set(osc_num, pan_l, pan_r)` 
-Sets the pan for the given oscillator. Does enforce inverse values.
+Sets the pan for the given oscillator. Does not enforce inverse values.
 - `osc_num` - target oscillator
 - `pan_l` - target amplitude for the left channel
 - `pan_r` - target amplitude for the right channel
+
+### `lowpass_set(osc_num, cutoff)`
+Sets the a lowpass filter on the target oscillator.
+- `osc_num` - target oscillator
+- `cutoff` - cutoff frequency (Hz)
 
 ### `mute_all()`
 Mutes all oscillators.

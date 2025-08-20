@@ -2,6 +2,7 @@
 #include <lua.h>
 #include <lualib.h>
 #include "const.h"
+#include "lowpass.h"
 
 typedef struct {
   float sine[TABLE_SIZE];
@@ -23,6 +24,7 @@ typedef struct {
   float amp;
   float amp_l;
   float amp_r;
+  Lowpass_Filter lp;
   enum Wave wave;
 } mf_osc;
 

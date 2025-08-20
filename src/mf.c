@@ -1,4 +1,3 @@
-#include "mf.h"
 #include <lauxlib.h>
 #include <lua.h>
 #include <lualib.h>
@@ -7,6 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "mf.h"
+#include "lowpass.h"
 
 mf_state state = {}; // Global state
 mf_wave_data wave_data; // Global wave data
@@ -73,6 +74,17 @@ int mf_pan_set(int osc_num, float pan_l, float pan_r) {
   state.osc[osc_num].amp_l = pan_l; // Set left channel amplitude
   state.osc[osc_num].amp_r = pan_r; // Set right channel amplitude
   return 0;                         // Success
+}
+
+int mf_lowpass_set(int osc_num, float cutoff) {
+  if (osc_num < 0 || osc_num >= OSC_COUNT) {
+    return -1; // Invalid oscillator index
+  }
+  if (cutoff < 20.0f || cutoff > 20000.0f) {
+    return -2; // Invalid cutoff frequency
+  }
+  lowpass_set(&state.osc[osc_num].lp, cutoff); // Initialize lowpass filter
+  return 0; // Success
 }
 
 int mf_mute_all() {
@@ -201,6 +213,15 @@ static int l_mf_pan_set(lua_State *L) {
   return 1; // Return the number of results
 }
 
+static int l_mf_lowpass_set(lua_State *L) {
+  int osc_num = luaL_checkinteger(L, 1);
+  osc_num = _l_mf_lua_index(osc_num);
+  float cutoff = luaL_checknumber(L, 2);
+  int result = mf_lowpass_set(osc_num, cutoff);
+  lua_pushinteger(L, result);
+  return 1; // Return the number of results
+}
+
 static int l_mf_mute_all(lua_State *L) {
   int result = mf_mute_all();
   lua_pushinteger(L, result);
@@ -249,6 +270,7 @@ static const struct luaL_Reg mf_funcs[] = {
     {"amp_set", l_mf_amp_set},
     {"amp_get", l_mf_amp_get},
     {"pan_set", l_mf_pan_set},
+    {"lowpass_set", l_mf_lowpass_set},
     {"mute_all", l_mf_mute_all},
     {"custom_wave_set", l_mf_custom_wave_set},
     {"exit", l_mf_exit},
@@ -291,6 +313,7 @@ int mf_init() {
     state.osc[i].amp_l = 1.0f;
     state.osc[i].amp_r = 1.0f;
     state.osc[i].wave = SINE; // Set default wave type
+    lowpass_init(&state.osc[i].lp, 20000.0f); // Initialize lowpass filter
   }
   // Set up flags
   state.flags.exit = 0;
