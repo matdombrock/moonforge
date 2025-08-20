@@ -6,7 +6,6 @@
 #define A4 440.0f
 #define OSC_COUNT 8
 #define TICK_WAIT 1
-#define RAND_MAX 32767
 
 #define PRINT_STARTUP_INFO 1
 #define PRINT_STARTUP_CONSTS 1

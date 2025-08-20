@@ -12,9 +12,19 @@ lowpass_set(2, cut)
 wave_set(3, "CA")
 lowpass_set(3, cut)
 
+wave_set(4, "NOISE")
+amp_set(4, 0.05)
+pan_set(4, 1, 0)
+lowpass_set(4, cut)
+
+wave_set(5, "NOISE")
+amp_set(5, 0.05)
+pan_set(5, 0, 1)
+lowpass_set(5, cut)
+
 local function init_wavetable()
   local down = math.random(1, 4)
-  local harms = math.random(2, 8) -- Random number of harmonics between 1 and 8
+  local harms = math.random(2, 8)
   print("Harmonics: " .. harms)
   print("Down: " .. down)
   mfl.wavetable_make("CA", function(x)
@@ -35,7 +45,8 @@ local release = { false, false }
 local off = { 0, 0, 0 }
 
 function Loop(tick)
-  local tt = mfl.track_tick(tick, bpm, 4) -- Assuming bpm is 60 and track length is 4 beats
+  bpm = bpm + math.sin(tick / 10000) * 0.01 -- Slowly increase BP
+  local tt = mfl.track_tick(tick, bpm, 4)
   if mfl.on_beat(tt, bpm, 1) then
     init_wavetable()
     mfl.note_random(1, { "C3", "C4" }) -- Set note for oscillator 1
@@ -91,4 +102,7 @@ function Loop(tick)
   mfl.warble(1, tt, 222, 0.9)
   mfl.warble(2, tt, 300, 0.6)
   mfl.warble(3, tt, 333, 1.6)
+
+  amp_set(4, math.sin(1000 - (tick / 1000)) * 0.2) -- Set noise amplitude
+  amp_set(5, math.sin((tt / 1000)) * 0.1)          -- Set noise amplitude
 end

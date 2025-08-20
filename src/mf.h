@@ -9,7 +9,6 @@ typedef struct {
   float square[TABLE_SIZE];
   float triangle[TABLE_SIZE];
   float saw[TABLE_SIZE];
-  float noise[TABLE_SIZE];
   float ca[TABLE_SIZE]; // Custom audio data
   float cb[TABLE_SIZE]; // Custom audio data
   float cc[TABLE_SIZE]; // Custom audio data

@@ -381,11 +381,10 @@ int mf_init() {
     wave_data.square[i] = (i < TABLE_SIZE / 2) ? 1 : -1;
     wave_data.triangle[i] = (1.0f - 2.0f * fabsf((float)i / (float)TABLE_SIZE - 0.5f));
     wave_data.saw[i] = (2.0f * (float)i / (float)TABLE_SIZE - 1.0f);
-    wave_data.noise[i] = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
-    wave_data.ca[i] = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
-    wave_data.cb[i] = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
-    wave_data.cc[i] = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
-    wave_data.cd[i] = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
+    wave_data.ca[i] = 0;
+    wave_data.cb[i] = 0; 
+    wave_data.cc[i] = 0; 
+    wave_data.cd[i] = 0; 
   }
   return 0; // Success
 }

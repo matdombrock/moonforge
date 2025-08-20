@@ -8,6 +8,8 @@ int main(int argc, char *argv[]) {
   // Handle arguments
   char *script_path = util_get_args(argc, argv);
 
+  srand(99); // Seed the random number generator
+
   // Init the global state
   mf_init();
 

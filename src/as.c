@@ -4,6 +4,7 @@
 
 #pragma once
 #include <math.h>
+#include <stdlib.h>
 #include "const.h"
 #include "as.h"
 #include "mf.h"
@@ -38,7 +39,7 @@ int as_synthesis_callback(const void *inputBuffer, void *outputBuffer,
         sample += data->saw[(int)state.osc[osc].phase];
         break;
       case NOISE:
-        sample += data->noise[(int)state.osc[osc].phase];
+        sample += ((float)random() / (float)RAND_MAX) * 2.0f - 1.0f;
         break;
       case CA:
         sample += data->ca[(int)state.osc[osc].phase];
