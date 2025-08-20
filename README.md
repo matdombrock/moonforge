@@ -31,4 +31,6 @@ Final packaged build files will be in `./dist`.
 See the [MF Lua API Docs](doc/API.md) for core API functions.
 
 ## Higher Level Libraries
-This project also includes [`mflib.lua`](lua_include/mflib.lua) which contains wrapper functions around the main API which make it easier to work with. 
+This project also includes [`mflib.lua`](lua_include/mflib.lua) which contains wrapper functions around the core API which make it easier to work with. 
+
+The `mflib.lua` library is written in pure Lua, so anything it does can be done manually. Users are encouraged to write their own wrapper libraries (for fun). 
