@@ -1,6 +1,6 @@
 // This file contains the PortAudio wrapper functions for audio playback.
 // In thoery this is all that would need to be replaced to use a different
-// audio library, such as SDL, OpenAL or a custom audio system.
+// audio library, such as SDL, OpenAL, JUCE or a custom audio system.
 
 #pragma once
 #include <math.h>
