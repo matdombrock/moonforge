@@ -17,7 +17,7 @@ mf_wave_data wave_data; // Global wave data
 
 int mf_beat_to_ticks(float bpm, float beat) {
   beat = beat - 1.0f;
-  float ticks_per_second = 1000.0f; // 1 tick = 1 ms
+  float ticks_per_second = 1000.0f / TICK_WAIT; // 1 tick = 1 ms
   float seconds_per_beat = 60.0f / bpm;
   return floor(beat * seconds_per_beat * ticks_per_second);
 }

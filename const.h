@@ -6,3 +6,4 @@
 #define A4 440.0f
 #define OSC_COUNT 8
 #define RAND_MAX 32767
+#define TICK_WAIT 1

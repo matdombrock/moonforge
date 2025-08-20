@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
   printf("MOONFORGE\n");
 
   while (state.flags.exit == 0) {
-    Pa_Sleep(1);
+    Pa_Sleep(TICK_WAIT);
     mf_loop(script_path); // Call the Lua loop function
   }
 
