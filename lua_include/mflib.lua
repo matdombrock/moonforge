@@ -12,6 +12,7 @@ function mfl.track_tick(tick, bpm, track_len)
   return tt
 end
 
+-- Returns true if the tick is on the given beat
 function mfl.on_beat(tick, bpm, beat)
   if beat_to_ticks(bpm, beat) == tick then
     return true
@@ -19,11 +20,13 @@ function mfl.on_beat(tick, bpm, beat)
   return false
 end
 
+-- MIDI note to frequency conversion
 function mfl.midi_to_freq(note)
   -- Convert MIDI note number to frequency
   return 440 * 2 ^ ((note - 69) / 12)
 end
 
+-- Music note to frequency conversion
 function mfl.note_to_freq(note)
   -- Convert note name (with optional #/b) to frequency
   local base_freqs = {
@@ -56,6 +59,7 @@ function mfl.note_to_freq(note)
   end
 end
 
+-- Set the frequency of an oscillator based on a note name
 function mfl.note_set(osc_num, note)
   -- Set the frequency of an oscillator based on a note name
   local freq = mfl.note_to_freq(note)
@@ -66,6 +70,7 @@ function mfl.note_set(osc_num, note)
   end
 end
 
+-- Set a random note from the provided list
 function mfl.note_random(osc_num, notes)
   -- Set the frequency of an oscillator to a random note from a list
   if #notes > 0 then
@@ -76,6 +81,7 @@ function mfl.note_random(osc_num, notes)
   end
 end
 
+-- Fade an oscillator towards the target amplitude
 function mfl.fade(osc_num, target_amp, speed)
   -- Fade an oscillator's amplitude to a target value
   local current_amp = amp_get(osc_num)
@@ -86,6 +92,22 @@ function mfl.fade(osc_num, target_amp, speed)
     -- Fade out
     amp_set(osc_num, math.max(current_amp - speed / 1000, target_amp))
   end
+end
+
+-- Supply a wave function where x is in the range [0, 2π]
+function mfl.make_wave(wave_name, wave_fn)
+  local wav = {}
+  for i = 1, TABLE_SIZE do
+    local x = (i - 1) / TABLE_SIZE * math.pi * 2
+    wav[i] = wave_fn(x)
+  end
+  custom_wave_set(wave_name, wav)
+end
+
+-- Generate a noise sample
+function mfl.noise(amp)
+  local n = math.random() * 2 - 1 -- Generate a random float in the range [-1, 1]
+  return n * amp
 end
 
 return mfl

@@ -1,5 +1,13 @@
 local mfl = require("mflib")
 
+local wav = {}
+for i = 1, 200 do
+  wav[i] = 0
+end
+-- custom_wave_set("CA", { 0 })
+custom_wave_set("CA", wav)
+
+
 -- Initial setup
 wave_set(1, "SQUARE")
 amp_set(1, 0.5)

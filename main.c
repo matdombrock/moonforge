@@ -79,11 +79,12 @@ int main(int argc, char *argv[]) {
   }
   fclose(file);
 
-  mf_wave_data data = mf_init();
+  // mf_wave_data data = mf_init();
+  mf_init();
   Pa_Initialize();
   PaStream *stream;
   Pa_OpenDefaultStream(&stream, 0, 2, paFloat32, SAMPLE_RATE, FRAMES_PER_BUFFER,
-                       paCallback, &data);
+                       paCallback, &wave_data);
   Pa_StartStream(stream);
 
   // Clear the console

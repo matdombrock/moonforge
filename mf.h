@@ -37,6 +37,7 @@ typedef struct {
 } mf_state;
 
 extern mf_state state;
+extern mf_wave_data wave_data;
 
 // User functions
 int mf_beat_to_ticks(float bpm, float beat);
@@ -51,7 +52,7 @@ int mf_pan_set(int osc_num, float pan_l, float pan_r);
 int mf_mute_all();
 
 // System functions
-mf_wave_data mf_init();
+int mf_init();
 int mf_init_lua(char *script_path);
 int mf_run_lua(lua_State *L);
 void mf_loop(char *script_path);

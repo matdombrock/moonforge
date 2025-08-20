@@ -8,7 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-mf_state state = {};
+mf_state state = {}; // Global state
+mf_wave_data wave_data; // Global wave data
 
 ///////
 /// Core functions
@@ -107,6 +108,29 @@ int mf_mute_all() {
     state.osc[i].amp = 0.0f; // Mute all oscillators
   }
   return 0; // Success
+}
+
+int mf_custom_wave_set(enum Wave wave, float *data) {
+  if (wave < CA || wave > CD) {
+    return -2; // Invalid custom wave type
+  }
+  switch (wave) {
+    case CA:
+      memcpy(wave_data.ca, data, sizeof(float) * TABLE_SIZE);
+      break;
+    case CB:
+      memcpy(wave_data.cb, data, sizeof(float) * TABLE_SIZE);
+      break;
+    case CC:
+      memcpy(wave_data.cc, data, sizeof(float) * TABLE_SIZE);
+      break;
+    case CD:
+      memcpy(wave_data.cd, data, sizeof(float) * TABLE_SIZE);
+      break;
+    default:
+      return -3; // Unsupported wave type
+  }
+  return 0;                       // Success
 }
 
 ///////
@@ -232,6 +256,35 @@ static int l_mf_mute_all(lua_State *L) {
   return 1; // Return the number of results
 }
 
+static int l_mf_custom_wave_set(lua_State *L) {
+  const char *waveStr = luaL_checkstring(L, 1);
+  enum Wave wave;
+
+  if (strcmp(waveStr, "CA") == 0) {
+    wave = CA;
+  } else if (strcmp(waveStr, "CB") == 0) {
+    wave = CB;
+  } else if (strcmp(waveStr, "CC") == 0) {
+    wave = CC;
+  } else if (strcmp(waveStr, "CD") == 0) {
+    wave = CD;
+  } else {
+    return luaL_error(L, "Invalid custom wave type: %s", waveStr);
+  }
+  //
+  luaL_checktype(L, 2, LUA_TTABLE);
+  float data[TABLE_SIZE];
+  for (int i = 0; i < TABLE_SIZE; i++) {
+    lua_rawgeti(L, 2, i + 1); // Lua arrays are 1-based
+    data[i] = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+  }
+  //
+  int result = mf_custom_wave_set(wave, data);
+  lua_pushinteger(L, result);
+  return 1; // Return the number of results
+}
+
 static const struct luaL_Reg mf_funcs[] = {
     {"beat_to_ticks", l_mf_beat_to_ticks},
     {"wave_set", l_mf_wave_set},
@@ -243,6 +296,7 @@ static const struct luaL_Reg mf_funcs[] = {
     {"amp_get", l_mf_amp_get},
     {"pan_set", l_mf_pan_set},
     {"mute_all", l_mf_mute_all},
+    {"custom_wave_set", l_mf_custom_wave_set},
     {NULL, NULL} // Sentinel
 };
 
@@ -261,6 +315,8 @@ lua_State *mf_lua_init(char *script_path) {
   lua_pushglobaltable(L);
   luaL_setfuncs(L, mf_funcs, 0);
   lua_pop(L, 1); // Remove mf module from stack
+  lua_pushnumber(L, TABLE_SIZE); // Push TABLE_SIZE to Lua
+  lua_setglobal(L, "TABLE_SIZE");
   if (luaL_dofile(L, script_path) != LUA_OK) {
     fprintf(stderr, "Error running Lua script: %s\n", lua_tostring(L, -1));
     lua_pop(L, 1); // Remove error message from stack
@@ -268,7 +324,7 @@ lua_State *mf_lua_init(char *script_path) {
   return L;
 }
 
-mf_wave_data mf_init() {
+int mf_init() {
   // Initialize oscillators
   for (int i = 0; i < OSC_COUNT; i++) {
     state.osc[i].freq = 440.0f;
@@ -282,22 +338,22 @@ mf_wave_data mf_init() {
   state.flags.exit = 0;
 
   // Init wave data
-  mf_wave_data data;
   for (int i = 0; i < TABLE_SIZE; i++) {
-    data.sine[i] =
+    wave_data.sine[i] =
         AMPLITUDE * (float)sin((double)i / (double)TABLE_SIZE * M_PI * 2);
-    data.square[i] = (i < TABLE_SIZE / 2) ? AMPLITUDE : -AMPLITUDE;
-    data.triangle[i] =
+    wave_data.square[i] = (i < TABLE_SIZE / 2) ? AMPLITUDE : -AMPLITUDE;
+    wave_data.triangle[i] =
         AMPLITUDE * (1.0f - 2.0f * fabsf((float)i / (float)TABLE_SIZE - 0.5f));
-    data.saw[i] = AMPLITUDE * (2.0f * (float)i / (float)TABLE_SIZE - 1.0f);
-    data.noise[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
-    data.ca[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
-    data.cb[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
-    data.cc[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
-    data.cd[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
+    wave_data.saw[i] = AMPLITUDE * (2.0f * (float)i / (float)TABLE_SIZE - 1.0f);
+    wave_data.noise[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
+    wave_data.ca[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
+    wave_data.cb[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
+    wave_data.cc[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
+    wave_data.cd[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
   }
-  return data; // Success
+  return 0; // Success
 }
+
 
 int tick = 0;
 int mf_run_lua(lua_State *L) {

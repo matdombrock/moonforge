@@ -21,7 +21,8 @@
         "amp_get",
         "pan_set",
         "mute_all",
-        ""
+        "custom_wave_set",
+        "TABLE_SIZE",
       ]
     }
   }
