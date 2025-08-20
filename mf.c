@@ -15,13 +15,6 @@ mf_wave_data wave_data; // Global wave data
 /// Core functions
 ///////
 
-int mf_beat_to_ticks(float bpm, float beat) {
-  beat = beat - 1.0f;
-  float ticks_per_second = 1000.0f / TICK_WAIT; // 1 tick = 1 ms
-  float seconds_per_beat = 60.0f / bpm;
-  return floor(beat * seconds_per_beat * ticks_per_second);
-}
-
 int mf_wave_set(int osc_num, enum Wave wave) {
   if (osc_num < 0 || osc_num >= OSC_COUNT) {
     return -1; // Invalid oscillator index
@@ -42,14 +35,6 @@ int mf_freq_set(int osc_num, float freq) {
   return 0; // Success
 }
 
-int mf_freq_change(int osc_num, float freq_mod) {
-  if (osc_num < 0 || osc_num >= OSC_COUNT) {
-    return -1; // Invalid oscillator index
-  }
-  state.osc[osc_num].freq += freq_mod;
-  return 0; // Success
-}
-
 float mf_freq_get(int osc_num) {
   if (osc_num < 0 || osc_num >= OSC_COUNT) {
     return -1; // Invalid oscillator index
@@ -67,19 +52,6 @@ int mf_amp_set(int osc_num, float amp) {
   }
   state.osc[osc_num].amp =
       amp;  // Set the amplitude for the specified oscillator
-  return 0; // Success
-}
-
-int mf_amp_change(int osc_num, float amp_mod) {
-  if (osc_num < 0 || osc_num >= OSC_COUNT) {
-    return -1; // Invalid oscillator index
-  }
-  state.osc[osc_num].amp += amp_mod;
-  if (state.osc[osc_num].amp < 0.0f) {
-    state.osc[osc_num].amp = 0.0f; // Ensure amplitude does not go below 0
-  } else if (state.osc[osc_num].amp > 1.0f) {
-    state.osc[osc_num].amp = 1.0f; // Ensure amplitude does not exceed 1
-  }
   return 0; // Success
 }
 
@@ -146,14 +118,6 @@ static int _l_mf_lua_index(int input) {
   return input - 1; // Lua uses 1-based indexing, C uses 0-based
 }
 
-static int l_mf_beat_to_ticks(lua_State *L) {
-  float bpm = luaL_checknumber(L, 1);
-  float beat = luaL_checknumber(L, 2);
-  int ticks = mf_beat_to_ticks(bpm, beat);
-  lua_pushinteger(L, ticks);
-  return 1; // Return the number of results
-}
-
 static int l_mf_wave_set(lua_State *L) {
   int osc_num = luaL_checkinteger(L, 1);
   osc_num = _l_mf_lua_index(osc_num);
@@ -196,15 +160,6 @@ static int l_mf_freq_set(lua_State *L) {
   return 1; // Return the number of results
 }
 
-static int l_mf_freq_change(lua_State *L) {
-  int osc_num = luaL_checkinteger(L, 1);
-  osc_num = _l_mf_lua_index(osc_num);
-  float freqMod = luaL_checknumber(L, 2);
-  int result = mf_freq_change(osc_num, freqMod);
-  lua_pushinteger(L, result);
-  return 1; // Return the number of results
-}
-
 static int l_mf_freq_get(lua_State *L) {
   int osc_num = luaL_checkinteger(L, 1);
   osc_num = _l_mf_lua_index(osc_num);
@@ -221,15 +176,6 @@ static int l_mf_amp_set(lua_State *L) {
   osc_num = _l_mf_lua_index(osc_num);
   float amp = luaL_checknumber(L, 2);
   int result = mf_amp_set(osc_num, amp);
-  lua_pushinteger(L, result);
-  return 1; // Return the number of results
-}
-
-static int l_mf_amp_change(lua_State *L) {
-  int osc_num = luaL_checkinteger(L, 1);
-  osc_num = _l_mf_lua_index(osc_num);
-  float ampMod = luaL_checknumber(L, 2);
-  int result = mf_amp_change(osc_num, ampMod);
   lua_pushinteger(L, result);
   return 1; // Return the number of results
 }
@@ -297,13 +243,10 @@ static int l_mf_exit(lua_State *L) {
 }
 
 static const struct luaL_Reg mf_funcs[] = {
-    {"beat_to_ticks", l_mf_beat_to_ticks},
     {"wave_set", l_mf_wave_set},
     {"freq_set", l_mf_freq_set},
-    {"freq_change", l_mf_freq_change},
     {"freq_get", l_mf_freq_get},
     {"amp_set", l_mf_amp_set},
-    {"amp_change", l_mf_amp_change},
     {"amp_get", l_mf_amp_get},
     {"pan_set", l_mf_pan_set},
     {"mute_all", l_mf_mute_all},
@@ -329,6 +272,8 @@ lua_State *mf_lua_init(char *script_path) {
   lua_pop(L, 1); // Remove mf module from stack
   lua_pushnumber(L, TABLE_SIZE); // Push TABLE_SIZE to Lua
   lua_setglobal(L, "TABLE_SIZE");
+  lua_pushnumber(L, TICK_WAIT); // Push TABLE_SIZE to Lua
+  lua_setglobal(L, "TICK_WAIT");
   if (luaL_dofile(L, script_path) != LUA_OK) {
     fprintf(stderr, "Error running Lua script: %s\n", lua_tostring(L, -1));
     lua_pop(L, 1); // Remove error message from stack

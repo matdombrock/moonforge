@@ -14,16 +14,15 @@
         "beat_to_ticks",
         "wave_set", 
         "freq_set",
-        "freq_change",
         "freq_get",
         "amp_set",
-        "amp_change",
         "amp_get",
         "pan_set",
         "mute_all",
         "custom_wave_set",
         "exit",
         "TABLE_SIZE",
+        "TICK_WAIT",
       ]
     }
   }

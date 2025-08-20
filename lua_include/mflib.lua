@@ -6,15 +6,22 @@ function mfl.test()
   print("mflib test")
 end
 
+function mfl.beat_to_ticks(bpm, beat)
+  beat = beat - 1
+  local ticks_per_second = 1000 / TICK_WAIT
+  local seconds_per_beat = 60 / bpm
+  return math.floor(ticks_per_second * seconds_per_beat * beat)
+end
+
 -- Returns a tick modulo relative to the track length
 function mfl.track_tick(tick, bpm, track_len)
-  local tt = tick % beat_to_ticks(bpm, track_len + 1)
+  local tt = tick % mfl.beat_to_ticks(bpm, track_len + 1)
   return tt
 end
 
 -- Returns true if the tick is on the given beat
 function mfl.on_beat(tick, bpm, beat)
-  if beat_to_ticks(bpm, beat) == tick then
+  if mfl.beat_to_ticks(bpm, beat) == tick then
     return true
   end
   return false
@@ -108,6 +115,18 @@ end
 function mfl.noise(amp)
   local n = math.random() * 2 - 1 -- Generate a random float in the range [-1, 1]
   return n * amp
+end
+
+function mfl.freq_change(osc_num, change)
+  local current_freq = freq_get(osc_num)
+  local new_freq = current_freq + change
+  freq_set(osc_num, new_freq)
+end
+
+function mfl.amp_change(osc_num, change)
+  local current_amp = amp_get(osc_num)
+  local new_amp = current_amp + change
+  amp_set(osc_num, new_amp)
 end
 
 return mfl

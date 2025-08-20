@@ -89,13 +89,33 @@ int main(int argc, char *argv[]) {
 
   // Clear the console
   printf("\033[H\033[J");
-  printf("MOONFORGE\n");
+  printf(COL_YELLOW);
+  printf("X...................X\n");
+  printf(".....xxxxxxx.........\n");
+  printf(".........xxxxxx......\n");
+  printf("...........xxxxx.....\n");
+  printf("...........xxxxx.....\n");
+  printf(".........xxxxxx......\n");
+  printf(".....xxxxxxx.........\n");
+  printf("X...................X\n");
+  printf("☾ M O O N F O R G E ☽\n");
+  printf(COL_GREEN);
+  printf("Version %s\n", VERSION);
+  printf("File: %s\n", script_path);
+  printf(COL_CYAN);
+  printf("Press Ctrl+C to exit.\n");
+  printf(COL_GREEN);
+  printf("\n");
+  printf("Starting audio...\n");
+  printf(COL_RESET);
 
   while (state.flags.exit == 0) {
     mf_loop(script_path); // Call the Lua loop function
     Pa_Sleep(TICK_WAIT);
   }
+  printf(COL_GREEN);
   printf("Clean exit...\n");
+  printf(COL_RESET);
 
   Pa_StopStream(stream);
   Pa_CloseStream(stream);
