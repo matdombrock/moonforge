@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "const.h"
 #include "mf.h"
-#include "as_wrap.h"
+#include "as.h"
 #include "util.h"
 
 int main(int argc, char *argv[]) {

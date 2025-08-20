@@ -9,7 +9,7 @@
 #include "mf.h"
 
 // Main function handling the audio synthesis callback.
-int as_callback(const void *inputBuffer, void *outputBuffer,
+int as_synthesis_callback(const void *inputBuffer, void *outputBuffer,
                  unsigned long framesPerBuffer,
                  const PaStreamCallbackTimeInfo *timeInfo,
                  PaStreamCallbackFlags statusFlags, void *userData) {
@@ -73,7 +73,7 @@ PaStream *stream;
 int as_init() {
   Pa_Initialize();
   Pa_OpenDefaultStream(&stream, 0, 2, paFloat32, SAMPLE_RATE, FRAMES_PER_BUFFER,
-                       as_callback, &wave_data);
+                       as_synthesis_callback, &wave_data);
   Pa_StartStream(stream);
   return 0;
 }
