@@ -1,5 +1,5 @@
 # MOON FORGE
-
+![mf_logo](doc/mf.png)
 ## Build & Package
 ### Requirements:
 - Portaudio
