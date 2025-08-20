@@ -320,6 +320,7 @@ lua_State *mf_lua_init(char *script_path) {
   if (luaL_dofile(L, script_path) != LUA_OK) {
     fprintf(stderr, "Error running Lua script: %s\n", lua_tostring(L, -1));
     lua_pop(L, 1); // Remove error message from stack
+    exit(1); // Exit on error
   }
   return L;
 }
@@ -362,6 +363,7 @@ int mf_run_lua(lua_State *L) {
   if (lua_pcall(L, 1, 0, 0) != LUA_OK) { // Call function with 1 arg, 0 results
     fprintf(stderr, "Lua error: %s\n", lua_tostring(L, -1));
     lua_pop(L, 1);
+    exit(1); // Exit on error
   }
   tick++; // Increment tick count
   return 0;
