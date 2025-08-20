@@ -1,4 +1,4 @@
-# MOON FORGE
+# M O O N F O R G E
 ![mf_logo](doc/mf.png)
 ## Build & Package
 ### Requirements:
