@@ -1,4 +1,18 @@
 # MOON FORGE
+```
+ ☾ R E P L I C A T S ☽ 
+█▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█
+██...................██
+█.......▄▄▄▄▄▄........█
+█......▀...▀████▄.....█
+█............████▄....█
+█............████▀....█
+█......▄...▄████▀.....█
+█.......▀▀▀▀▀▀........█
+██...................██
+█▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█
+ ☾ M O O N F O R G E ☽ 
+```
 
 ## Build & Package
 ### Requirements:
@@ -26,6 +40,10 @@ Final packaged build files will be in `./dist`.
 
 ## Lua API
 
+### Global Constants
+- `TABLE_SIZE` - the amount of samples in a wavetable
+- `TICK_WAIT` - the time in ms between each tick
+
 ### Wave Names
 - `"SINE"` - sine wave
 - `"SQUARE"` - square wave
@@ -42,3 +60,37 @@ Sets the waveform for the given oscillator number.
 - `osc_num` - target oscillator
 - `wave_name` - the name of the waveform to use
 
+### `freq_set(osc_num, freq)` 
+Sets the frequency for the given oscillator. 
+- `osc_num` - target oscillator
+- `freq` - target frequency in Hz
+
+### `freq_get(osc_num)` 
+Returns the current frequency for the given oscillator. 
+- `osc_num` - target oscillator
+
+### `amp_set(osc_num, amp)` 
+Sets the amplitude for the given oscillator. 
+- `osc_num` - target oscillator
+- `amp` - target amp (0->1)
+
+### `amp_get(osc_num)` 
+Returns the current amplitude for the given oscillator. 
+- `osc_num` - target oscillator
+
+### `pan_set(osc_num, pan_l, pan_r)` 
+Sets the pan for the given oscillator. Does enforce inverse values.
+- `osc_num` - target oscillator
+- `pan_l` - target amplitude for the left channel
+- `pan_r` - target amplitude for the right channel
+
+### `mute_all()`
+Mutes all oscillators.
+
+### `custom_wave_set(wave_name, data)`
+Sets a custom wavetable.
+- `wave_name` - the name of the waveform to use
+- `data` - An array of `TABLE_LENGTH` sample values (-1->1)
+
+## Higher Level Libraries
+This project also includes `mflib.lua` which contains wrapper functions around the main API which make it easier to work with. 
