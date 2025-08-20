@@ -10,5 +10,5 @@ function Loop(tick)
   if tick > 1000 then
     exit()
   end
-  print("Tick: " .. tick)
+  -- print("Tick: " .. tick)
 end

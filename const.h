@@ -3,12 +3,12 @@
 #define SAMPLE_RATE 44100
 #define FRAMES_PER_BUFFER 256
 #define TABLE_SIZE 256
-#define AMPLITUDE 1
 #define A4 440.0f
 #define OSC_COUNT 8
-#define RAND_MAX 32767
 #define TICK_WAIT 1
+#define RAND_MAX 32767
 
+// Console color codes for terminal output
 #define COL_RED "\033[31m"
 #define COL_GREEN "\033[32m"
 #define COL_YELLOW "\033[33m"

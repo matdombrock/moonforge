@@ -297,17 +297,15 @@ int mf_init() {
 
   // Init wave data
   for (int i = 0; i < TABLE_SIZE; i++) {
-    wave_data.sine[i] =
-        AMPLITUDE * (float)sin((double)i / (double)TABLE_SIZE * M_PI * 2);
-    wave_data.square[i] = (i < TABLE_SIZE / 2) ? AMPLITUDE : -AMPLITUDE;
-    wave_data.triangle[i] =
-        AMPLITUDE * (1.0f - 2.0f * fabsf((float)i / (float)TABLE_SIZE - 0.5f));
-    wave_data.saw[i] = AMPLITUDE * (2.0f * (float)i / (float)TABLE_SIZE - 1.0f);
-    wave_data.noise[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
-    wave_data.ca[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
-    wave_data.cb[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
-    wave_data.cc[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
-    wave_data.cd[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
+    wave_data.sine[i] = (float)sin((double)i / (double)TABLE_SIZE * M_PI * 2);
+    wave_data.square[i] = (i < TABLE_SIZE / 2) ? 1 : -1;
+    wave_data.triangle[i] = (1.0f - 2.0f * fabsf((float)i / (float)TABLE_SIZE - 0.5f));
+    wave_data.saw[i] = (2.0f * (float)i / (float)TABLE_SIZE - 1.0f);
+    wave_data.noise[i] = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
+    wave_data.ca[i] = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
+    wave_data.cb[i] = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
+    wave_data.cc[i] = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
+    wave_data.cd[i] = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
   }
   return 0; // Success
 }

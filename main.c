@@ -101,7 +101,15 @@ int main(int argc, char *argv[]) {
   printf("☾ M O O N F O R G E ☽\n");
   printf(COL_GREEN);
   printf("Version %s\n", VERSION);
+  printf(COL_CYAN);
   printf("File: %s\n", script_path);
+  printf(COL_MAGENTA);
+  printf("Sample Rate: %d\n", SAMPLE_RATE);
+  printf("Frames per Buffer: %d\n", FRAMES_PER_BUFFER);
+  printf("Oscillators: %d\n", OSC_COUNT);
+  printf("Wave Table Size: %d\n", TABLE_SIZE);
+  printf("Tuning: %f (Hz)\n", A4);
+  printf("Tick Wait: %d ms\n", TICK_WAIT);
   printf(COL_CYAN);
   printf("Press Ctrl+C to exit.\n");
   printf(COL_GREEN);
