@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "const.h"
 #include "mf.h"
-#include "pa_wrap.h"
+#include "as_wrap.h"
 #include "util.h"
 
 int main(int argc, char *argv[]) {
@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
   mf_init();
 
   // Initalize audio system
-  paw_init();
+  as_init();
 
   // Clear the console
   printf("\033[H\033[J");
@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
   // Initialize Lua and run the script on a loop
   while (state.flags.exit == 0) {
     mf_loop(script_path); // Call the Lua loop function
-    paw_sleep(TICK_WAIT);
+    as_sleep(TICK_WAIT);
   }
 
   // Exit gracefully
@@ -32,6 +32,6 @@ int main(int argc, char *argv[]) {
   printf(COL_RESET);
 
   // Close audio system
-  paw_close();
+  as_close();
   return 0;
 }
