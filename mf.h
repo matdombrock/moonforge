@@ -10,9 +10,13 @@ typedef struct {
   float triangle[TABLE_SIZE];
   float saw[TABLE_SIZE];
   float noise[TABLE_SIZE];
+  float ca[TABLE_SIZE]; // Custom audio data
+  float cb[TABLE_SIZE]; // Custom audio data
+  float cc[TABLE_SIZE]; // Custom audio data
+  float cd[TABLE_SIZE]; // Custom audio data
 } mf_wave_data;
 
-enum Wave { SINE, SQUARE, TRIANGLE, SAW, NOISE };
+enum Wave { SINE, SQUARE, TRIANGLE, SAW, NOISE, CA, CB, CC, CD };
 
 typedef struct {
   float freq;

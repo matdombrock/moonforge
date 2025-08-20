@@ -1,12 +1,12 @@
-#include <math.h>
-#include <portaudio.h>
-#include <string.h>
+#include "mf.h"
 #include <lauxlib.h>
 #include <lua.h>
 #include <lualib.h>
+#include <math.h>
+#include <portaudio.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "mf.h"
+#include <string.h>
 
 mf_state state = {};
 
@@ -36,7 +36,8 @@ int mf_freq_set(int osc_num, float freq) {
   if (freq < 20.0f || freq > 20000.0f) {
     return -2; // Invalid frequency value
   }
-  state.osc[osc_num].freq = freq; // Set the frequency for the specified oscillator
+  state.osc[osc_num].freq =
+      freq; // Set the frequency for the specified oscillator
   return 0; // Success
 }
 
@@ -52,7 +53,8 @@ float mf_freq_get(int osc_num) {
   if (osc_num < 0 || osc_num >= OSC_COUNT) {
     return -1; // Invalid oscillator index
   }
-  return state.osc[osc_num].freq; // Return the frequency of the specified oscillator
+  return state.osc[osc_num]
+      .freq; // Return the frequency of the specified oscillator
 }
 
 int mf_amp_set(int osc_num, float amp) {
@@ -62,7 +64,8 @@ int mf_amp_set(int osc_num, float amp) {
   if (amp < 0.0f || amp > 1.0f) {
     return -2; // Invalid amplitude value
   }
-  state.osc[osc_num].amp = amp; // Set the amplitude for the specified oscillator
+  state.osc[osc_num].amp =
+      amp;  // Set the amplitude for the specified oscillator
   return 0; // Success
 }
 
@@ -83,7 +86,8 @@ float mf_amp_get(int osc_num) {
   if (osc_num < 0 || osc_num >= OSC_COUNT) {
     return -1; // Invalid oscillator index
   }
-  return state.osc[osc_num].amp; // Return the amplitude of the specified oscillator
+  return state.osc[osc_num]
+      .amp; // Return the amplitude of the specified oscillator
 }
 
 int mf_pan_set(int osc_num, float pan_l, float pan_r) {
@@ -95,7 +99,7 @@ int mf_pan_set(int osc_num, float pan_l, float pan_r) {
   }
   state.osc[osc_num].amp_l = pan_l; // Set left channel amplitude
   state.osc[osc_num].amp_r = pan_r; // Set right channel amplitude
-  return 0; // Success
+  return 0;                         // Success
 }
 
 int mf_mute_all() {
@@ -114,108 +118,118 @@ static int l_mf_lua_index(int input) {
 }
 
 static int l_mf_beat_to_ticks(lua_State *L) {
-    float bpm = luaL_checknumber(L, 1);
-    float beat = luaL_checknumber(L, 2);
-    int ticks = mf_beat_to_ticks(bpm, beat);
-    lua_pushinteger(L, ticks);
-    return 1; // Return the number of results
+  float bpm = luaL_checknumber(L, 1);
+  float beat = luaL_checknumber(L, 2);
+  int ticks = mf_beat_to_ticks(bpm, beat);
+  lua_pushinteger(L, ticks);
+  return 1; // Return the number of results
 }
 
 static int l_mf_wave_set(lua_State *L) {
-    int osc_num = luaL_checkinteger(L, 1);
-    osc_num = l_mf_lua_index(osc_num);
-    const char *waveStr = luaL_checkstring(L, 2);
-    enum Wave wave;
+  int osc_num = luaL_checkinteger(L, 1);
+  osc_num = l_mf_lua_index(osc_num);
+  const char *waveStr = luaL_checkstring(L, 2);
+  enum Wave wave;
 
-    if (strcmp(waveStr, "SINE") == 0) {
-        wave = SINE;
-    } else if (strcmp(waveStr, "SQUARE") == 0) {
-        wave = SQUARE;
-    } else if (strcmp(waveStr, "TRIANGLE") == 0) {
-        wave = TRIANGLE;
-    } else if (strcmp(waveStr, "SAW") == 0) {
-        wave = SAW;
-    } else {
-        return luaL_error(L, "Invalid wave type: %s", waveStr);
-    }
+  if (strcmp(waveStr, "SINE") == 0) {
+    wave = SINE;
+  } else if (strcmp(waveStr, "SQUARE") == 0) {
+    wave = SQUARE;
+  } else if (strcmp(waveStr, "TRIANGLE") == 0) {
+    wave = TRIANGLE;
+  } else if (strcmp(waveStr, "SAW") == 0) {
+    wave = SAW;
+  } else if (strcmp(waveStr, "NOISE") == 0) {
+    wave = NOISE;
+  } else if (strcmp(waveStr, "CA") == 0) {
+    wave = CA;
+  } else if (strcmp(waveStr, "CB") == 0) {
+    wave = CB;
+  } else if (strcmp(waveStr, "CC") == 0) {
+    wave = CC;
+  } else if (strcmp(waveStr, "CD") == 0) {
+    wave = CD;
+  } else {
+    return luaL_error(L, "Invalid wave type: %s", waveStr);
+  }
 
-    int result = mf_wave_set(osc_num, wave);
-    lua_pushinteger(L, result);
-    return 1; // Return the number of results
+  int result = mf_wave_set(osc_num, wave);
+  lua_pushinteger(L, result);
+  return 1; // Return the number of results
 }
 
 static int l_mf_freq_set(lua_State *L) {
-    int osc_num = luaL_checkinteger(L, 1);
-    osc_num = l_mf_lua_index(osc_num);
-    float freq = luaL_checknumber(L, 2);
-    int result = mf_freq_set(osc_num, freq);
-    lua_pushinteger(L, result);
-    return 1; // Return the number of results
+  int osc_num = luaL_checkinteger(L, 1);
+  osc_num = l_mf_lua_index(osc_num);
+  float freq = luaL_checknumber(L, 2);
+  int result = mf_freq_set(osc_num, freq);
+  lua_pushinteger(L, result);
+  return 1; // Return the number of results
 }
 
 static int l_mf_freq_change(lua_State *L) {
-    int osc_num = luaL_checkinteger(L, 1);
-    osc_num = l_mf_lua_index(osc_num);
-    float freqMod = luaL_checknumber(L, 2);
-    int result = mf_freq_change(osc_num, freqMod);
-    lua_pushinteger(L, result);
-    return 1; // Return the number of results
+  int osc_num = luaL_checkinteger(L, 1);
+  osc_num = l_mf_lua_index(osc_num);
+  float freqMod = luaL_checknumber(L, 2);
+  int result = mf_freq_change(osc_num, freqMod);
+  lua_pushinteger(L, result);
+  return 1; // Return the number of results
 }
 
 static int l_mf_freq_get(lua_State *L) {
-    int osc_num = luaL_checkinteger(L, 1);
-    osc_num = l_mf_lua_index(osc_num);
-    float freq = mf_freq_get(osc_num);
-    if (freq < 0) {
-        return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
-    }
-    lua_pushnumber(L, freq);
-    return 1; // Return the number of results
+  int osc_num = luaL_checkinteger(L, 1);
+  osc_num = l_mf_lua_index(osc_num);
+  float freq = mf_freq_get(osc_num);
+  if (freq < 0) {
+    return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
+  }
+  lua_pushnumber(L, freq);
+  return 1; // Return the number of results
 }
 
 static int l_mf_amp_set(lua_State *L) {
-    int osc_num = luaL_checkinteger(L, 1);
-    osc_num = l_mf_lua_index(osc_num);
-    float amp = luaL_checknumber(L, 2);
-    int result = mf_amp_set(osc_num, amp);
-    lua_pushinteger(L, result);
-    return 1; // Return the number of results
+  int osc_num = luaL_checkinteger(L, 1);
+  osc_num = l_mf_lua_index(osc_num);
+  float amp = luaL_checknumber(L, 2);
+  int result = mf_amp_set(osc_num, amp);
+  lua_pushinteger(L, result);
+  return 1; // Return the number of results
 }
 
 static int l_mf_amp_change(lua_State *L) {
-    int osc_num = luaL_checkinteger(L, 1);
-    osc_num = l_mf_lua_index(osc_num);
-    float ampMod = luaL_checknumber(L, 2);
-    int result = mf_amp_change(osc_num, ampMod);
-    lua_pushinteger(L, result);
-    return 1; // Return the number of results
+  int osc_num = luaL_checkinteger(L, 1);
+  osc_num = l_mf_lua_index(osc_num);
+  float ampMod = luaL_checknumber(L, 2);
+  int result = mf_amp_change(osc_num, ampMod);
+  lua_pushinteger(L, result);
+  return 1; // Return the number of results
 }
 
 static int l_mf_amp_get(lua_State *L) {
-    int osc_num = luaL_checkinteger(L, 1);
-    osc_num = l_mf_lua_index(osc_num);
-    float amp = mf_amp_get(osc_num);
-    if (amp < 0) {
-        return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
-    }
-    lua_pushnumber(L, amp);
-    return 1; // Return the number of results
+  int osc_num = luaL_checkinteger(L, 1);
+  osc_num = l_mf_lua_index(osc_num);
+  float amp = mf_amp_get(osc_num);
+  if (amp < 0) {
+    return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
+  }
+  lua_pushnumber(L, amp);
+  return 1; // Return the number of results
 }
 
 static int l_mf_pan_set(lua_State *L) {
-    int osc_num = luaL_checkinteger(L, 1);
-    osc_num = l_mf_lua_index(osc_num);
-    float pan_l = luaL_checknumber(L, 2);
-    float pan_r = luaL_checknumber(L, 3);
-    int result = mf_pan_set(osc_num, pan_l, pan_r);
-    lua_pushinteger(L, result);
-    return 1; // Return the number of results
+  int osc_num = luaL_checkinteger(L, 1);
+  osc_num = l_mf_lua_index(osc_num);
+  float pan_l = luaL_checknumber(L, 2);
+  float pan_r = luaL_checknumber(L, 3);
+  int result = mf_pan_set(osc_num, pan_l, pan_r);
+  lua_pushinteger(L, result);
+  return 1; // Return the number of results
 }
 
 static int l_mf_mute_all(lua_State *L) {
-    int result = mf_mute_all();
-    lua_pushinteger(L, result);
-    return 1; // Return the number of results
+  int result = mf_mute_all();
+  lua_pushinteger(L, result);
+  return 1; // Return the number of results
 }
 
 static const struct luaL_Reg mf_funcs[] = {
@@ -233,8 +247,8 @@ static const struct luaL_Reg mf_funcs[] = {
 };
 
 int luaopen_mf(lua_State *L) {
-    luaL_newlib(L, mf_funcs);
-    return 1; // Return the library table
+  luaL_newlib(L, mf_funcs);
+  return 1; // Return the library table
 }
 
 ///////
@@ -267,7 +281,6 @@ mf_wave_data mf_init() {
   // Set up flags
   state.flags.exit = 0;
 
-
   // Init wave data
   mf_wave_data data;
   for (int i = 0; i < TABLE_SIZE; i++) {
@@ -277,8 +290,11 @@ mf_wave_data mf_init() {
     data.triangle[i] =
         AMPLITUDE * (1.0f - 2.0f * fabsf((float)i / (float)TABLE_SIZE - 0.5f));
     data.saw[i] = AMPLITUDE * (2.0f * (float)i / (float)TABLE_SIZE - 1.0f);
-    data.noise[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f
-    - 1.0f);
+    data.noise[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
+    data.ca[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
+    data.cb[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
+    data.cc[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
+    data.cd[i] = AMPLITUDE * ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f);
   }
   return data; // Success
 }
@@ -286,7 +302,7 @@ mf_wave_data mf_init() {
 int tick = 0;
 int mf_run_lua(lua_State *L) {
   lua_getglobal(L, "Loop");              // Push function onto stack
-  lua_pushnumber(L, tick);              // Push argument
+  lua_pushnumber(L, tick);               // Push argument
   if (lua_pcall(L, 1, 0, 0) != LUA_OK) { // Call function with 1 arg, 0 results
     fprintf(stderr, "Lua error: %s\n", lua_tostring(L, -1));
     lua_pop(L, 1);
@@ -302,5 +318,3 @@ void mf_loop(char *script_path) {
   }
   mf_run_lua(L); // Call Lua main function on each loop iteration
 }
-
-

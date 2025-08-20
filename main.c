@@ -2,6 +2,7 @@
 #include "mf.h"
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 static int paCallback(const void *inputBuffer, void *outputBuffer,
                       unsigned long framesPerBuffer,
@@ -30,6 +31,21 @@ static int paCallback(const void *inputBuffer, void *outputBuffer,
         break;
       case SAW:
         sample += data->saw[(int)state.osc[osc].phase];
+        break;
+      case NOISE:
+        sample += data->noise[(int)state.osc[osc].phase];
+        break;
+      case CA:
+        sample += data->ca[(int)state.osc[osc].phase];
+        break;
+      case CB:
+        sample += data->cb[(int)state.osc[osc].phase];
+        break;
+      case CC:
+        sample += data->cc[(int)state.osc[osc].phase];
+        break;
+      case CD:
+        sample += data->cd[(int)state.osc[osc].phase];
         break;
       default:
         sample += 0.0f;
