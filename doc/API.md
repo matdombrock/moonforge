@@ -43,13 +43,25 @@ Returns the current amplitude for the given oscillator.
 ### `pan_set(osc_num, pan_l, pan_r)` 
 Sets the pan for the given oscillator. Does not enforce inverse values.
 - `osc_num` - target oscillator
-- `pan_l` - target amplitude for the left channel
-- `pan_r` - target amplitude for the right channel
+- `pan_l` - target amplitude for the left channel (0->1)
+- `pan_r` - target amplitude for the right channel (0->1)
+
+### `pan_get_l(osc_num)` 
+Returns the left channel pan amplitude. 
+- `osc_num` - target oscillator
+
+### `pan_get_r(osc_num)` 
+Returns the right channel pan amplitude. 
+- `osc_num` - target oscillator
 
 ### `lowpass_set(osc_num, cutoff)`
 Sets the a lowpass filter on the target oscillator.
 - `osc_num` - target oscillator
 - `cutoff` - cutoff frequency (Hz)
+
+### `lowpass_get(osc_num)`
+Returns the current lowpass cutoff for the target oscillator.
+- `osc_num` - target oscillator
 
 ### `mute_all()`
 Mutes all oscillators.
@@ -59,3 +71,5 @@ Sets a custom wavetable.
 - `wave_name` - the name of the waveform to use
 - `data` - An array of `TABLE_LENGTH` sample values (-1->1)
 
+### `exit()`
+Cleanly exit the program.

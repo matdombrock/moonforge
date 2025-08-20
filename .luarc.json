@@ -11,19 +11,21 @@
   "Lua": {
     "diagnostics": {
       "globals": [
-        "beat_to_ticks",
+        "TABLE_SIZE",
+        "TICK_WAIT",
         "wave_set", 
         "freq_set",
         "freq_get",
         "amp_set",
         "amp_get",
         "pan_set",
+        "pan_get_l",
+        "pan_get_r",
         "lowpass_set",
+        "lowpass_get",
         "mute_all",
         "custom_wave_set",
         "exit",
-        "TABLE_SIZE",
-        "TICK_WAIT",
       ]
     }
   }

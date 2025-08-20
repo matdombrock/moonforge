@@ -3,6 +3,7 @@
 typedef struct {
     float a;      // smoothing factor
     float y_prev; // previous output sample
+    float cutoff; // cutoff frequency cached val
 } Lowpass_Filter;
 
 void lowpass_init(Lowpass_Filter *filter, float cutoff);

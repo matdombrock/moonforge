@@ -76,6 +76,20 @@ int mf_pan_set(int osc_num, float pan_l, float pan_r) {
   return 0;                         // Success
 }
 
+float mf_pan_get_l(int osc_num) {
+  if (osc_num < 0 || osc_num >= OSC_COUNT) {
+    return -1; // Invalid oscillator index
+  }
+  return state.osc[osc_num].amp_l; // Return left channel amplitude
+}
+
+float mf_pan_get_r(int osc_num) {
+  if (osc_num < 0 || osc_num >= OSC_COUNT) {
+    return -1; // Invalid oscillator index
+  }
+  return state.osc[osc_num].amp_r; // Return right channel amplitude
+}
+
 int mf_lowpass_set(int osc_num, float cutoff) {
   if (osc_num < 0 || osc_num >= OSC_COUNT) {
     return -1; // Invalid oscillator index
@@ -85,6 +99,13 @@ int mf_lowpass_set(int osc_num, float cutoff) {
   }
   lowpass_set(&state.osc[osc_num].lp, cutoff); // Initialize lowpass filter
   return 0; // Success
+}
+
+float mf_lowpass_get(int osc_num) {
+  if (osc_num < 0 || osc_num >= OSC_COUNT) {
+    return -1; // Invalid oscillator index
+  }
+  return state.osc[osc_num].lp.cutoff;
 }
 
 int mf_mute_all() {
@@ -160,7 +181,7 @@ static int l_mf_wave_set(lua_State *L) {
 
   int result = mf_wave_set(osc_num, wave);
   lua_pushinteger(L, result);
-  return 1; // Return the number of results
+  return 1; // 
 }
 
 static int l_mf_freq_set(lua_State *L) {
@@ -169,7 +190,7 @@ static int l_mf_freq_set(lua_State *L) {
   float freq = luaL_checknumber(L, 2);
   int result = mf_freq_set(osc_num, freq);
   lua_pushinteger(L, result);
-  return 1; // Return the number of results
+  return 1; // 
 }
 
 static int l_mf_freq_get(lua_State *L) {
@@ -180,7 +201,7 @@ static int l_mf_freq_get(lua_State *L) {
     return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
   }
   lua_pushnumber(L, freq);
-  return 1; // Return the number of results
+  return 1; // 
 }
 
 static int l_mf_amp_set(lua_State *L) {
@@ -189,7 +210,7 @@ static int l_mf_amp_set(lua_State *L) {
   float amp = luaL_checknumber(L, 2);
   int result = mf_amp_set(osc_num, amp);
   lua_pushinteger(L, result);
-  return 1; // Return the number of results
+  return 1; // 
 }
 
 static int l_mf_amp_get(lua_State *L) {
@@ -200,7 +221,7 @@ static int l_mf_amp_get(lua_State *L) {
     return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
   }
   lua_pushnumber(L, amp);
-  return 1; // Return the number of results
+  return 1; // 
 }
 
 static int l_mf_pan_set(lua_State *L) {
@@ -210,7 +231,29 @@ static int l_mf_pan_set(lua_State *L) {
   float pan_r = luaL_checknumber(L, 3);
   int result = mf_pan_set(osc_num, pan_l, pan_r);
   lua_pushinteger(L, result);
-  return 1; // Return the number of results
+  return 1; // 
+}
+
+static int l_mf_pan_get_l(lua_State *L) {
+  int osc_num = luaL_checkinteger(L, 1);
+  osc_num = _l_mf_lua_index(osc_num);
+  float pan_l = mf_pan_get_l(osc_num);
+  if (pan_l < 0) {
+    return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
+  }
+  lua_pushnumber(L, pan_l);
+  return 1; // 
+}
+
+static int l_mf_pan_get_r(lua_State *L) {
+  int osc_num = luaL_checkinteger(L, 1);
+  osc_num = _l_mf_lua_index(osc_num);
+  float pan_r = mf_pan_get_r(osc_num);
+  if (pan_r < 0) {
+    return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
+  }
+  lua_pushnumber(L, pan_r);
+  return 1; // 
 }
 
 static int l_mf_lowpass_set(lua_State *L) {
@@ -219,13 +262,24 @@ static int l_mf_lowpass_set(lua_State *L) {
   float cutoff = luaL_checknumber(L, 2);
   int result = mf_lowpass_set(osc_num, cutoff);
   lua_pushinteger(L, result);
-  return 1; // Return the number of results
+  return 1; // 
+}
+
+static int l_mf_lowpass_get(lua_State *L) {
+  int osc_num = luaL_checkinteger(L, 1);
+  osc_num = _l_mf_lua_index(osc_num);
+  float cutoff = mf_lowpass_get(osc_num);
+  if (cutoff < 0) {
+    return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
+  }
+  lua_pushnumber(L, cutoff);
+  return 1; // 
 }
 
 static int l_mf_mute_all(lua_State *L) {
   int result = mf_mute_all();
   lua_pushinteger(L, result);
-  return 1; // Return the number of results
+  return 1; // 
 }
 
 static int l_mf_custom_wave_set(lua_State *L) {
@@ -254,13 +308,13 @@ static int l_mf_custom_wave_set(lua_State *L) {
   //
   int result = mf_custom_wave_set(wave, data);
   lua_pushinteger(L, result);
-  return 1; // Return the number of results
+  return 1; // 
 }
 
 static int l_mf_exit(lua_State *L) {
   int result = mf_exit();
   lua_pushinteger(L, result);
-  return 1; // Return the number of results
+  return 1; // 
 }
 
 static const struct luaL_Reg mf_funcs[] = {
@@ -270,7 +324,10 @@ static const struct luaL_Reg mf_funcs[] = {
     {"amp_set", l_mf_amp_set},
     {"amp_get", l_mf_amp_get},
     {"pan_set", l_mf_pan_set},
+    {"pan_get_l", l_mf_pan_get_l},
+    {"pan_get_r", l_mf_pan_get_r},
     {"lowpass_set", l_mf_lowpass_set},
+    {"lowpass_get", l_mf_lowpass_get},
     {"mute_all", l_mf_mute_all},
     {"custom_wave_set", l_mf_custom_wave_set},
     {"exit", l_mf_exit},

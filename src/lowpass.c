@@ -5,6 +5,7 @@
 
 // Initialize filter at cutoff frequency
 void lowpass_init(Lowpass_Filter *filter, float cutoff) {
+    filter->cutoff = cutoff; // Cache cutoff frequency
     float rc = 1.0f / (2.0f * M_PI * cutoff);
     float dt = 1.0f / SAMPLE_RATE;
     filter->a = dt / (rc + dt);
@@ -12,6 +13,7 @@ void lowpass_init(Lowpass_Filter *filter, float cutoff) {
 }
 
 void lowpass_set(Lowpass_Filter *filter, float cutoff) {
+    filter->cutoff = cutoff; // Cache cutoff frequency
     // Reinitialize filter with new cutoff frequency
     float prev = filter->y_prev;
     lowpass_init(filter, cutoff);

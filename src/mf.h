@@ -50,6 +50,10 @@ int mf_amp_set(int osc_num, float amp);
 int mf_amp_change(int osc_num, float amp_mod);
 float mf_amp_get(int osc_num);
 int mf_pan_set(int osc_num, float pan_l, float pan_r);
+float mf_pan_get_l(int osc_num);
+float mf_pan_get_r(int osc_num);
+int mf_lowpass_set(int osc_num, float cutoff);
+int mf_custom_wave_set(enum Wave wave, float *data);
 int mf_mute_all();
 int mf_exit();
 
