@@ -101,6 +101,19 @@ function mfl.fade(osc_num, target_amp, speed)
   end
 end
 
+-- Exponetially fade an oscillator towards the target amplitude
+function mfl.fadeExp(osc_num, target_amp, speed)
+  local current_amp = amp_get(osc_num)
+  local fade_factor = 0.01 * speed -- Adjust this for fade speed
+  if math.abs(current_amp - target_amp) < 0.0001 then
+    amp_set(osc_num, target_amp)
+    return
+  end
+  -- Exponential fade for smoother transition
+  local new_amp = current_amp + (target_amp - current_amp) * fade_factor
+  amp_set(osc_num, new_amp)
+end
+
 -- Supply a wave function where x is in the range [0, 2π]
 function mfl.wavetable_make(wave_name, wave_fn)
   local wav = {}

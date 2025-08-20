@@ -25,6 +25,7 @@
         "lowpass_get",
         "delay_set",
         "mute_all",
+        "bus_amp_set",
         "wavetable_write",
         "exit",
       ]

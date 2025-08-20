@@ -36,6 +36,7 @@ typedef struct {
 typedef struct {
   mf_osc osc[OSC_COUNT];
   mf_flags flags;
+  float bus_amp;
 } mf_state;
 
 extern mf_state state;
@@ -58,6 +59,7 @@ float mf_lowpass_get(int osc_num);
 int mf_delay_set(int osc_num, int delay_samples, float feedback, float mix);
 int mf_wavetable_write(enum Wave wave, float *data);
 int mf_mute_all();
+int mf_bus_amp_set(float amp);
 int mf_exit();
 
 // System functions

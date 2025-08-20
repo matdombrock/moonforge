@@ -42,7 +42,7 @@ Returns the current frequency for the given oscillator.
 ### `amp_set(osc_num, amp)` 
 Sets the amplitude for the given oscillator. 
 - `osc_num` - target oscillator
-- `amp` - target amp (0->1)
+- `amp` - target amp (0->4)
 
 ### `amp_get(osc_num)` 
 Returns the current amplitude for the given oscillator. 
@@ -80,6 +80,10 @@ Set a delay line on the target oscillator.
 
 ### `mute_all()`
 Mutes all oscillators.
+
+### `bus_amp_set(amp)`
+Sets the volume for the main bus. 
+- `amp` - target amp (0->4)
 
 ### `wavetable_write(wave_name, data)`
 Writes a custom wavetable. It is only possible to write to custom wavetables ("CA", "CB", "CC", "CD").

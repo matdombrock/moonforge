@@ -30,6 +30,8 @@ pan_set(5, 0, 1)
 lowpass_set(5, cut)
 delay_set(5, delay_len, delay_feedback, delay_mix * 1.5)
 
+bus_amp_set(2)
+
 local function init_wavetable()
   local down = math.random(1, 4)
   local harms = math.random(2, 8)

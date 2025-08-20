@@ -49,7 +49,7 @@ int mf_amp_set(int osc_num, float amp) {
   if (osc_num < 0 || osc_num >= OSC_COUNT) {
     return -1; // Invalid oscillator index
   }
-  if (amp < 0.0f || amp > 1.0f) {
+  if (amp < 0.0f || amp > 4.0f) {
     return -2; // Invalid amplitude value
   }
   state.osc[osc_num].amp =
@@ -126,6 +126,14 @@ int mf_mute_all() {
     state.osc[i].amp = 0.0f; // Mute all oscillators
   }
   return 0; // Success
+}
+
+int mf_bus_amp_set(float amp) {
+  if (amp < 0.0f || amp > 4.0f) {
+    return -1; // Invalid bus amplitude value
+  }
+  state.bus_amp = amp; // Set the bus amplitude
+  return 0;           // Success
 }
 
 int mf_wavetable_write(enum Wave wave, float *data) {
@@ -306,6 +314,13 @@ static int l_mf_mute_all(lua_State *L) {
   return 1; // 
 }
 
+static int l_mf_bus_amp_set(lua_State *L) {
+  float amp = luaL_checknumber(L, 1);
+  int result = mf_bus_amp_set(amp);
+  lua_pushinteger(L, result);
+  return 1; // 
+}
+
 static int l_mf_wavetable_write(lua_State *L) {
   const char *waveStr = luaL_checkstring(L, 1);
   enum Wave wave;
@@ -354,6 +369,7 @@ static const struct luaL_Reg mf_funcs[] = {
     {"lowpass_get", l_mf_lowpass_get},
     {"delay_set", l_mf_delay_set},
     {"mute_all", l_mf_mute_all},
+    {"bus_amp_set", l_mf_bus_amp_set},
     {"wavetable_write", l_mf_wavetable_write},
     {"exit", l_mf_exit},
     {NULL, NULL} // Sentinel
@@ -400,6 +416,9 @@ int mf_init() {
   }
   // Set up flags
   state.flags.exit = 0;
+
+  // Setup state vars
+  state.bus_amp = 1.0f; // Set default bus amplitude
 
   // Init wave data
   for (int i = 0; i < TABLE_SIZE; i++) {
