@@ -90,15 +90,18 @@ int main(int argc, char *argv[]) {
   // Clear the console
   printf("\033[H\033[J");
   printf(COL_YELLOW);
-  printf("X...................X\n");
-  printf(".....xxxxxxx.........\n");
-  printf(".........xxxxxx......\n");
-  printf("...........xxxxx.....\n");
-  printf("...........xxxxx.....\n");
-  printf(".........xxxxxx......\n");
-  printf(".....xxxxxxx.........\n");
-  printf("X...................X\n");
-  printf("☾ M O O N F O R G E ☽\n");
+  printf(" ☾ R E P L I C A T S ☽ \n");
+  printf("█▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█\n");
+  printf("██...................██\n");
+  printf("█.......▄▄▄▄▄▄........█\n");
+  printf("█......▀...▀████▄.....█\n");
+  printf("█............████▄....█\n");
+  printf("█............████▀....█\n");
+  printf("█......▄...▄████▀.....█\n");
+  printf("█.......▀▀▀▀▀▀........█\n");
+  printf("██...................██\n");
+  printf("█▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█\n");
+  printf(" ☾ M O O N F O R G E ☽ \n");
   printf(COL_GREEN);
   printf("Version %s\n", VERSION);
   printf(COL_CYAN);
