@@ -1,12 +1,20 @@
 # ☾ M O O N F O R G E ☽
 ![mf_logo](doc/mf.png)
 
-Moonforge is a minimalist audio lab written in C. It's scripted via it's built-in Lua interpreter using the [MF Lua API](doc/API.md). 
+MoonForge is a minimalist modular synthesis lab written in C. It's scripted via it's built-in Lua interpreter using the [MF Lua API](doc/API.md). 
+
+While MoonForge can be used as a semi-traditional synthesizer and tracker, it's built for evolving, generative audio soundscapes and procedural compositions. 
+
 
 ## Build & Package
 ### Requirements:
-- Portaudio
-- Lua
+- [Portaudio](https://www.portaudio.com/)
+- [Lua](https://www.lua.org/)
+- [A unix system](https://btxx.org/public/images/unix.gif)
+- A C compiler for your OS
+
+### Windows?
+No.
 
 ### Build
 ```bash
