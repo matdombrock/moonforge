@@ -1,23 +1,20 @@
 #pragma once
+
 ///////
 // Exposed to Lua
 ///////
+
 #define VERSION "0.1.0"
 #define SAMPLE_RATE 48000
 #define BLOCK_SIZE 32
 #define TABLE_SIZE 256
 #define TUNING 440.0f
 #define OSC_COUNT 8
-#define TICK_WAIT 1
-
-///////
-// Not exposed to Lua
-///////
-
-// Recording settings
+#define TICK_WAIT 1 ///////
+// Not exposed to Lua //// Recording settings
 // RECORDING_BUFFER_SIZE = 48000 * 60 * 2 = 5,760,000 samples per 60 seconds
 // Bytes = 5,760,000 * 4 = 23,040,000 bytes (23 MB)
-#define RECORDING_ENABLED 1 // Enabled recording greatly increases memory usage
+#define RECORDING_ENABLED 1 // Enabling recording greatly increases memory usage
 #define MAX_RECORDING_SECONDS 240 // The longer the recording, the more memory is used 
 #define RECORDING_BUFFER_SIZE (SAMPLE_RATE * MAX_RECORDING_SECONDS * 2) // Stereo buffer
 
