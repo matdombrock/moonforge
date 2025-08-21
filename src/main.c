@@ -12,7 +12,6 @@ int main(int argc, char *argv[]) {
   // Handle arguments
   char *script_path = util_get_args(argc, argv);
 
-  // srand(); // Seed the random number generator
   srand((unsigned int)time(NULL));
 
   // Init the global state
@@ -27,12 +26,7 @@ int main(int argc, char *argv[]) {
   // Print startup info
   util_print_startup_info(script_path);
 
-  // Initialize Lua and run the script on a loop
-  // while (state.flags.exit == 0) {
-  //   mf_loop(script_path); // Call the Lua loop function
-  //   as_sleep(TICK_WAIT);
-  // }
-   while (state.flags.exit == 0) {
+  while (state.flags.exit == 0) {
     struct timeval start, end;
     gettimeofday(&start, NULL);
     mf_loop(script_path); // Call the Lua loop function

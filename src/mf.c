@@ -390,10 +390,21 @@ lua_State *mf_lua_init(char *script_path) {
   lua_pushglobaltable(L);
   luaL_setfuncs(L, mf_funcs, 0);
   lua_pop(L, 1); // Remove mf module from stack
-  lua_pushnumber(L, TABLE_SIZE); // Push TABLE_SIZE to Lua
+  lua_pushnumber(L, OSC_COUNT);
+  lua_setglobal(L, "OSC_COUNT");
+  lua_pushnumber(L, TABLE_SIZE);
   lua_setglobal(L, "TABLE_SIZE");
-  lua_pushnumber(L, TICK_WAIT); // Push TABLE_SIZE to Lua
+  lua_pushnumber(L, TICK_WAIT);
   lua_setglobal(L, "TICK_WAIT");
+  lua_pushstring(L, VERSION);
+  lua_setglobal(L, "VERSION");
+  lua_pushnumber(L, SAMPLE_RATE);
+  lua_setglobal(L, "SAMPLE_RATE");
+  lua_pushnumber(L, BLOCK_SIZE);
+  lua_setglobal(L, "BLOCK_SIZE");
+  lua_pushnumber(L, TUNING);
+  lua_setglobal(L, "TUNING");
+
   if (luaL_dofile(L, script_path) != LUA_OK) {
     fprintf(stderr, "Error running Lua script: %s\n", lua_tostring(L, -1));
     lua_pop(L, 1); // Remove error message from stack

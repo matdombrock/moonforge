@@ -7,8 +7,13 @@ These are the core API functions which call C code directly.
 ## Global Constants
 
 There are a few contants available to the Lua runtime:
+- `VERSION` - mf version number (string)
+- `OSC_COUNT` - number of available oscillators
 - `TABLE_SIZE` - amount of samples in a wavetable
 - `TICK_WAIT` - time in ms between each tick
+- `SAMPLE_RATE` - samples per second
+- `BLOCK_SIZE` - number of samples in a block
+- `TUNING` - tuning of A4 in Hz
 
 ## Wave Names
 

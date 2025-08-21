@@ -56,10 +56,10 @@ void util_print_startup_info(char *script_path) {
   if (PRINT_STARTUP_CONSTS) {
     printf(COL_MAGENTA);
     printf("Sample Rate: %d\n", SAMPLE_RATE);
-    printf("Frames per Buffer: %d\n", FRAMES_PER_BUFFER);
+    printf("Frames per Buffer: %d\n", BLOCK_SIZE);
     printf("Oscillators: %d\n", OSC_COUNT);
     printf("Wave Table Size: %d\n", TABLE_SIZE);
-    printf("Tuning: %f (Hz)\n", A4);
+    printf("Tuning: %f (Hz)\n", TUNING);
     printf("Tick Wait: %d ms\n", TICK_WAIT);
   }
   printf(COL_RED);

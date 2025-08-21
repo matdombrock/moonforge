@@ -1,9 +1,9 @@
 #pragma once
 #define VERSION "0.1.0"
 #define SAMPLE_RATE 48000
-#define FRAMES_PER_BUFFER 32
+#define BLOCK_SIZE 32
 #define TABLE_SIZE 2048
-#define A4 440.0f
+#define TUNING 440.0f
 #define OSC_COUNT 8
 #define TICK_WAIT 1
 
