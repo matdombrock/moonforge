@@ -6,6 +6,13 @@ function mfl.test()
   print("mflib test")
 end
 
+function mfl.randomseed(seed)
+  -- Set the random seed for reproducibility
+  seed = seed or os.time()
+  math.randomseed(seed)
+  print("Random seed set to: " .. seed)
+end
+
 function mfl.beat_to_ticks(bpm, beat)
   beat = beat - 1
   local ticks_per_second = 1000 / TICK_WAIT

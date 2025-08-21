@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+// TODO: Do we need sys/time and time?
 #include <sys/time.h>
+#include <time.h>
 #include "const.h"
 #include "mf.h"
 #include "as.h"
@@ -10,7 +12,8 @@ int main(int argc, char *argv[]) {
   // Handle arguments
   char *script_path = util_get_args(argc, argv);
 
-  srand(99); // Seed the random number generator
+  // srand(); // Seed the random number generator
+  srand((unsigned int)time(NULL));
 
   // Init the global state
   mf_init();
