@@ -1,6 +1,7 @@
 #include "const.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 char *util_get_args(int argc, char *argv[]) {
   if (argc < 2) {
@@ -70,7 +71,29 @@ void util_print_startup_info(char *script_path) {
 }
 
 #include <stdint.h>
+#include <string.h>
+char *util_make_recording_filename(const char *filename) {
+    size_t len = strlen(filename) + 1 + 64 + 4 + 1; 
+    char *filename_full = malloc(len);
+    if (!filename_full) return NULL;
+
+    strcpy(filename_full, filename);
+    strcat(filename_full, "_");
+
+    char timestamp[64];
+    time_t now = time(NULL);
+    struct tm *tm_info = localtime(&now);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d_%H:%M:%S", tm_info);
+    strcat(filename_full, timestamp);
+
+    strcat(filename_full, ".wav");
+    return filename_full;
+}
 void util_write_wav(const char *filename, float *data, int num_frames, int sample_rate) {
+  if (filename == NULL || data == NULL || num_frames <= 0 || sample_rate <= 0) {
+    fprintf(stderr, "Invalid parameters for writing WAV file.\n");
+    return;
+  }
   FILE *f = fopen(filename, "wb");
   int num_channels = 2;
   int bits_per_sample = 32;

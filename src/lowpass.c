@@ -1,4 +1,3 @@
-#pragma once
 #include <math.h>
 #include "const.h"
 #include "lowpass.h"

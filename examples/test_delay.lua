@@ -21,4 +21,7 @@ function Loop(tick)
   else
     mfl.fade(1, 0.8, 16)
   end
+  if tick > 2000 then
+    exit()
+  end
 end
