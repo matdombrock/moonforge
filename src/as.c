@@ -28,7 +28,7 @@ int as_synthesis_callback(const void *input_buffer, void *output_buffer,
       // Adjust rate for sine wave frequency
       float freq = state.osc[osc].freq / TUNING;
       int phase_index = (int)state.osc[osc].phase;
-      int phase_index_n = phase_index + 1 % TABLE_SIZE;
+      int phase_index_n = (phase_index + 1) % TABLE_SIZE;
       float phase_sub = state.osc[osc].phase - phase_index;
       switch (state.osc[osc].wave) {
       case SINE:
