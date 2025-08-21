@@ -31,6 +31,7 @@
         "delay_set",
         "mute_all",
         "bus_amp_set",
+        "bus_amp_get",
         "bus_lowpass_set",
         "bus_delay_set_l",
         "bus_delay_set_r",

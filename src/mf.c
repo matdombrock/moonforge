@@ -136,6 +136,10 @@ int mf_bus_amp_set(float amp) {
   return 0;           // Success
 }
 
+float mf_bus_amp_get() {
+  return state.bus_amp; // Return the bus amplitude
+}
+
 int bus_lowpass_set(float cutoff) {
   if (cutoff < 20.0f || cutoff > 20000.0f) {
     return -1; // Invalid cutoff frequency
@@ -348,6 +352,12 @@ static int l_mf_bus_amp_set(lua_State *L) {
   return 1; // 
 }
 
+static int l_mf_bus_amp_get(lua_State *L) {
+  float amp = mf_bus_amp_get();
+  lua_pushnumber(L, amp);
+  return 1; // 
+}
+
 static int l_mf_bus_lowpass_set(lua_State *L) {
   float cutoff = luaL_checknumber(L, 1);
   int result = bus_lowpass_set(cutoff);
@@ -422,6 +432,7 @@ static const struct luaL_Reg mf_funcs[] = {
     {"delay_set", l_mf_delay_set},
     {"mute_all", l_mf_mute_all},
     {"bus_amp_set", l_mf_bus_amp_set},
+    {"bus_amp_get", l_mf_bus_amp_get},
     {"bus_lowpass_set", l_mf_bus_lowpass_set},
     {"bus_delay_set_l", l_mf_bus_delay_set_l},
     {"bus_delay_set_r", l_mf_bus_delay_set_r},

@@ -64,6 +64,7 @@ int mf_delay_set(int osc_num, int delay_samples, float feedback, float mix);
 int mf_wavetable_write(enum Wave wave, float *data);
 int mf_mute_all();
 int mf_bus_amp_set(float amp);
+float mf_bus_amp_get();
 int mf_bus_lowpass_set(float cutoff);
 int mf_bus_delay_set_l(int delay_samples, float feedback, float mix);
 int mf_bus_delay_set_r(int delay_samples, float feedback, float mix);

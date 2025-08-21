@@ -2,6 +2,15 @@ local mfl = require("util.mflib")
 
 mfl.randomseed()
 
+local rec_time = 32    -- Record time in seconds
+local fade_time = 8    -- Fade out time in seconds
+local fade_time_ticks = mfl.seconds_to_ticks(fade_time)
+local fade_out = false -- Flag to fade out the end
+local fade_step = 0
+local bpm = 60
+local release = { false, false } -- Release flags for oscillators
+local off = { 0, 0, 0 }
+
 local cut = 800 -- Cutoff frequency for lowpass filter
 local delay_len = 70000
 local delay_feedback = 0.1
@@ -50,18 +59,12 @@ local function init_wavetable()
   end)
 end
 
-local bpm = 60
-
-local release = { false, false }
-
-local off = { 0, 0, 0 }
-
 function Loop(tick)
-  bpm = bpm + math.sin(tick / 10000) * 0.01 -- Slowly increase BP
+  bpm = bpm + math.sin(tick / 10000) * 0.01
   local tt = mfl.track_tick(tick, bpm, 4)
   if mfl.on_beat(tt, bpm, 1) then
     init_wavetable()
-    mfl.note_random(1, { "C3", "C4" }) -- Set note for oscillator 1
+    mfl.note_random(1, { "C3", "C4" })
     release[1] = false
     off[1] = math.random(1, 4)
     off[2] = math.random(1, 4)
@@ -69,30 +72,30 @@ function Loop(tick)
     print("off: " .. off[1] .. ", " .. off[2] .. ", " .. off[3])
   end
   if mfl.on_beat(tt, bpm, 1 + ((1 + off[1]) / 16)) then
-    mfl.note_random(1, { "D3", "D4" }) -- Set note for oscillator 1
+    mfl.note_random(1, { "D3", "D4" })
     release[1] = true
   end
   if mfl.on_beat(tt, bpm, 1 + ((2 + off[1] + off[2]) / 16)) then
-    mfl.note_random(2, { "E3", "E4" }) -- Set note for oscillator 1
+    mfl.note_random(2, { "E3", "E4" })
     release[2] = false
   end
   if mfl.on_beat(tt, bpm, 1 + ((4 + off[1] + off[2] + off[3]) / 16)) then
-    mfl.note_random(2, { "G4", "G5" }) -- Set note for oscillator 1
+    mfl.note_random(2, { "G4", "G5" })
     release[2] = true
   end
   if mfl.on_beat(tt, bpm, 1 + ((6 + off[1] + off[2] + off[3]) / 16)) then
     if math.random() < 0.5 then
-      mfl.note_random(2, { "G2", "A3" }) -- Set note for oscillator 1
+      mfl.note_random(2, { "G2", "A3" })
       release[2] = true
     end
   end
   if mfl.on_beat(tt, bpm, 2 + ((4 + off[1] + off[2] + off[3]) / 16)) then
-    mfl.note_random(3, { "G4", "G5" }) -- Set note for oscillator 1
+    mfl.note_random(3, { "G4", "G5" })
     release[3] = true
   end
   if mfl.on_beat(tt, bpm, 2 + ((6 + off[1] + off[2] + off[3]) / 16)) then
     if math.random() < 0.5 then
-      mfl.note_random(3, { "G2", "A3" }) -- Set note for oscillator 1
+      mfl.note_random(3, { "G2", "A3" })
       release[3] = true
     end
   end
@@ -115,6 +118,19 @@ function Loop(tick)
   mfl.warble(2, tt, 300, 0.6)
   mfl.warble(3, tt, 333, 1.6)
 
-  amp_set(4, math.sin(1000 - (tick / 1000)) * 0.2) -- Set noise amplitude
-  amp_set(5, math.sin((tt / 1000)) * 0.1)          -- Set noise amplitude
+  amp_set(4, math.sin(1000 - (tick / 1000)) * 0.2)
+  amp_set(5, math.sin((tt / 1000)) * 0.1)
+
+  -- Fade out at end
+  if mfl.on_second(tick, rec_time - fade_time) then
+    fade_out = true
+    fade_step = mfl.fade_step_calc(0, bus_amp_get(), fade_time_ticks)
+    print("Fading out...", fade_step)
+  end
+  if fade_out then
+    mfl.bus_fade_step(0, fade_step)
+  end
+  if mfl.on_second(tick, rec_time) then
+    exit()
+  end
 end

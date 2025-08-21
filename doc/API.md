@@ -90,6 +90,9 @@ Mutes all oscillators.
 Sets the volume for the main bus. 
 - `amp` - target amp (0->4)
 
+### `bus_amp_get()`
+Returns the main bus amplitude. 
+
 ### `bus_lowpass_set(cutoff)`
 Sets the lowpass filter on the output bus (master).
 - `osc_num` - target oscillator

@@ -78,7 +78,7 @@ int as_synthesis_callback(const void *input_buffer, void *output_buffer, unsigne
       // Apply lowpass filter
       sample = mfx_lowpass_process(&state.osc[osc].lp, sample);
       // Apply panning and amplitude
-      float amp = state.osc[osc].amp * state.bus_amp;
+      float amp = state.osc[osc].amp;
       sample_mix_l += sample * amp * state.osc[osc].amp_l;
       sample_mix_r += sample * amp * state.osc[osc].amp_r;
       // Apply delay effect
@@ -92,6 +92,9 @@ int as_synthesis_callback(const void *input_buffer, void *output_buffer, unsigne
     sample_mix_r = mfx_lowpass_process(&state.bus_lp_r, sample_mix_r);
     sample_mix_l = mfx_delay_process(&state.bus_delay_l, sample_mix_l);
     sample_mix_r = mfx_delay_process(&state.bus_delay_r, sample_mix_r);
+    // Apply bus amplitude
+    sample_mix_l *= state.bus_amp;
+    sample_mix_r *= state.bus_amp;
     // Add samples to the buffer
     // Samples are read in pairs with odd samples being left and even being right
     *out++ = sample_mix_l; // Left
