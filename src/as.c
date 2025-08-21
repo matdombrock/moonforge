@@ -17,6 +17,9 @@ int as_synthesis_callback(const void *input_buffer, void *output_buffer, unsigne
                           void *user_data) {
 
   // TODO: None of this contains PA logic and it could be split out for clarity
+  if (state.flags.exit) {
+    return paComplete; // Exit if the exit flag is set
+  }
   mf_wave_data *data = (mf_wave_data *)user_data;
   float *out = (float *)output_buffer;
   unsigned int i;

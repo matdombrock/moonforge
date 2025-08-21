@@ -66,7 +66,7 @@ void util_print_startup_info(char *script_path) {
   printf("Press Ctrl+C to exit.\n");
   printf(COL_GREEN);
   printf("\n");
-  printf("Starting audio...\n");
+  printf("///////\n//Starting audio...\n///////\n");
   printf(COL_RESET);
 }
 

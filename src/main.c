@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 
   // Exit gracefully
   printf(COL_GREEN);
-  printf("Clean exit...\n");
+  printf("///////\n//Clean exit...\n///////\n");
   printf(COL_RESET);
 
   // Close audio system

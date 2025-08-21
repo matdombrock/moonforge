@@ -68,8 +68,16 @@ void rec_write_wav(const char *filename, float *data, int num_frames, int sample
   fwrite(&data_size, 4, 1, f);
   fwrite(data, sizeof(float), num_frames * num_channels, f);
 
+  float seconds = (float)num_frames / sample_rate;
   fclose(f);
-  printf("WAV file '%s' written successfully with %d frames at %d Hz.\n", filename, num_frames, sample_rate);
+  printf(COL_YELLOW);
+  printf("///////\n");
+  printf("//WAV file written\n");
+  printf("//%s\n", filename);
+  printf("//%fs\n", seconds);
+  printf("//%d frames at %dHz.\n", num_frames, sample_rate);
+  printf("///////\n");
+  printf(COL_RESET);
 }
 
 // Initializes the recording buffer and sets the index to 0.
@@ -94,14 +102,26 @@ int rec_write_recording() {
 }
 
 // Writes a pair of stereo audio samples to the recording buffer.
+// void rec_write_sample(float sample_l, float sample_r) {
+//   // Record audio samples into the buffer
+//   if (recording_index < RECORDING_BUFFER_SIZE - 2) {
+//     recording_buffer[recording_index++] = sample_l; // Left channel
+//     recording_buffer[recording_index++] = sample_r; // Right channel
+//   } else {
+//     // Write the current buffer to file
+//     // recording_index is reset to 0 after writing
+//     rec_write_recording();
+//   }
+// }
 void rec_write_sample(float sample_l, float sample_r) {
   // Record audio samples into the buffer
-  if (recording_index < RECORDING_BUFFER_SIZE - 2) {
-    recording_buffer[recording_index++] = sample_l; // Left channel
-    recording_buffer[recording_index++] = sample_r; // Right channel
-  } else {
-    // Write the current buffer to file
-    // recording_index is reset to 0 after writing
+  if (recording_index < RECORDING_BUFFER_SIZE) {
+    recording_buffer[recording_index] = sample_l; // Left channel
+    recording_index++;
+    recording_buffer[recording_index] = sample_r; // Right channel
+    recording_index++;
+  }
+  if (recording_index >= RECORDING_BUFFER_SIZE) {
     rec_write_recording();
   }
 }

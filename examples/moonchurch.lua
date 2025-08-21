@@ -2,7 +2,7 @@ local mfl = require("util.mflib")
 
 mfl.randomseed()
 
-local rec_time = 32    -- Record time in seconds
+local rec_time = 9     -- Record time in seconds
 local fade_time = 8    -- Fade out time in seconds
 local fade_time_ticks = mfl.seconds_to_ticks(fade_time)
 local fade_out = false -- Flag to fade out the end
@@ -132,6 +132,7 @@ function Loop(tick)
     mfl.bus_fade_step(0, fade_step)
   end
   if mfl.on_second(tick, rec_time) then
+    print("Recording finished, exiting...")
     exit()
   end
 end
