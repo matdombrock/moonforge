@@ -54,7 +54,7 @@ Returns the current amplitude for the given oscillator.
 - `osc_num` - target oscillator
 
 ### `pan_set(osc_num, pan_l, pan_r)` 
-Sets the pan for the given oscillator. Does not enforce inverse values.
+Sets the pan for the given oscillator. This is effectively just a way to control the amplitude of each channel individually. That being said it does not override the main amplitude level and is applied as an additional multiplier. 
 - `osc_num` - target oscillator
 - `pan_l` - target amplitude for the left channel (0->1)
 - `pan_r` - target amplitude for the right channel (0->1)
@@ -91,7 +91,7 @@ Sets the volume for the main bus.
 - `amp` - target amp (0->4)
 
 ### `wavetable_write(wave_name, data)`
-Writes a custom wavetable. It is only possible to write to custom wavetables ("CA", "CB", "CC", "CD").
+Writes a wavetable to a custom wavetable slot. It is only possible to write to custom wavetables ("CA", "CB", "CC", "CD").
 - `wave_name` - the name of the waveform to use
 - `data` - An array of `TABLE_LENGTH` sample values (-1->1)
 

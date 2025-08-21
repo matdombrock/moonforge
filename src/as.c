@@ -11,11 +11,14 @@
 #include <stdlib.h>
 
 // Main function handling the audio synthesis callback.
+// time_info and user_data are not used here
+// no actual PortAudio code is used here
 int as_synthesis_callback(const void *input_buffer, void *output_buffer,
                           unsigned long frames_per_buffer,
                           const PaStreamCallbackTimeInfo *time_info,
                           PaStreamCallbackFlags status_flags, void *user_data) {
 
+  // TODO: None of this contains PA logic and it could be split out for clarity
   mf_wave_data *data = (mf_wave_data *)user_data;
   float *out = (float *)output_buffer;
   unsigned int i;
@@ -29,7 +32,6 @@ int as_synthesis_callback(const void *input_buffer, void *output_buffer,
       float freq = state.osc[osc].freq / TUNING;
       int phase_index = (int)state.osc[osc].phase;
       int phase_index_n = (phase_index + 1) % TABLE_SIZE;
-      float phase_sub = state.osc[osc].phase - phase_index;
       switch (state.osc[osc].wave) {
       case SINE:
         sample_a += data->sine[phase_index];
@@ -73,7 +75,8 @@ int as_synthesis_callback(const void *input_buffer, void *output_buffer,
         break;
       }
       // Interpolate the samples
-      float sample = (sample_a * (1.0f - phase_sub)) + (sample_b * phase_sub);
+      float phase_frac = state.osc[osc].phase - phase_index;
+      float sample = (sample_a * (1.0f - phase_frac)) + (sample_b * phase_frac);
       // Apply lowpass filter
       sample = lowpass_process(&state.osc[osc].lp, sample);
       // Apply panning and amplitude
@@ -83,10 +86,13 @@ int as_synthesis_callback(const void *input_buffer, void *output_buffer,
       // Apply delay effect
       sample_mix_l = delay_process(&state.osc[osc].delay, sample_mix_l);
       sample_mix_r = delay_process(&state.osc[osc].delay, sample_mix_r);
+      // Increment phase
       state.osc[osc].phase = fmod(
           state.osc[osc].phase + freq * (TUNING * TABLE_SIZE / SAMPLE_RATE),
           TABLE_SIZE);
     }
+    // Add samples to the buffer
+    // Samples are read in pairs with odd samples being left and even being right
     *out++ = sample_mix_l; // Left
     *out++ = sample_mix_r; // Right
   }
