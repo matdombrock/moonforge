@@ -23,41 +23,57 @@ int as_synthesis_callback(const void *input_buffer, void *output_buffer,
     float sample_mix_l = 0.0f;
     float sample_mix_r = 0.0f;
     for (int osc = 0; osc < OSC_COUNT; osc++) {
-      float sample = 0.0f;
-      float freq =
-          state.osc[osc].freq / TUNING; // Adjust rate for sine wave frequency
+      float sample_a = 0.0f;
+      float sample_b = 0.0f;
+      // Adjust rate for sine wave frequency
+      float freq = state.osc[osc].freq / TUNING;
+      int phase_index = (int)state.osc[osc].phase;
+      int phase_index_n = phase_index + 1 % TABLE_SIZE;
+      float phase_sub = state.osc[osc].phase - phase_index;
       switch (state.osc[osc].wave) {
       case SINE:
-        sample += data->sine[(int)state.osc[osc].phase];
+        sample_a += data->sine[phase_index];
+        sample_b += data->sine[phase_index_n];
         break;
       case SQUARE:
-        sample += data->square[(int)state.osc[osc].phase];
+        sample_a += data->square[phase_index];
+        sample_b += data->square[phase_index_n];
         break;
       case TRIANGLE:
-        sample += data->triangle[(int)state.osc[osc].phase];
+        sample_a += data->triangle[phase_index];
+        sample_b += data->triangle[phase_index_n];
         break;
       case SAW:
-        sample += data->saw[(int)state.osc[osc].phase];
+        sample_a += data->saw[phase_index];
+        sample_b += data->saw[phase_index_n];
         break;
       case NOISE:
-        sample += ((float)random() / (float)RAND_MAX) * 2.0f - 1.0f;
+        sample_a += ((float)random() / (float)RAND_MAX) * 2.0f - 1.0f;
+        sample_b += sample_a;
         break;
       case CA:
-        sample += data->ca[(int)state.osc[osc].phase];
+        sample_a += data->ca[phase_index];
+        sample_b += data->ca[phase_index_n];
         break;
       case CB:
-        sample += data->cb[(int)state.osc[osc].phase];
+        sample_a += data->cb[phase_index];
+        sample_b += data->cb[phase_index_n];
         break;
       case CC:
-        sample += data->cc[(int)state.osc[osc].phase];
+        sample_a += data->cc[phase_index];
+        sample_b += data->cc[phase_index_n];
         break;
       case CD:
-        sample += data->cd[(int)state.osc[osc].phase];
+        sample_a += data->cd[phase_index];
+        sample_b += data->cd[phase_index_n];
         break;
       default:
-        sample += 0.0f;
+        sample_a += 0.0f;
+        sample_b += 0.0f;
         break;
       }
+      // Interpolate the samples
+      float sample = (sample_a * (1.0f - phase_sub)) + (sample_b * phase_sub);
       // Apply lowpass filter
       sample = lowpass_process(&state.osc[osc].lp, sample);
       // Apply panning and amplitude
@@ -67,9 +83,9 @@ int as_synthesis_callback(const void *input_buffer, void *output_buffer,
       // Apply delay effect
       sample_mix_l = delay_process(&state.osc[osc].delay, sample_mix_l);
       sample_mix_r = delay_process(&state.osc[osc].delay, sample_mix_r);
-      state.osc[osc].phase =
-          fmod(state.osc[osc].phase + freq * (TUNING * TABLE_SIZE / SAMPLE_RATE),
-               TABLE_SIZE);
+      state.osc[osc].phase = fmod(
+          state.osc[osc].phase + freq * (TUNING * TABLE_SIZE / SAMPLE_RATE),
+          TABLE_SIZE);
     }
     *out++ = sample_mix_l; // Left
     *out++ = sample_mix_r; // Right

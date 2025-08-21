@@ -1,1 +1,3 @@
 Try calling a Lua "onBuffer" function that just lets lua handle the buffer directly if it wants. 
+
+interpolate
