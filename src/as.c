@@ -2,57 +2,12 @@
 // In thoery this is all that would need to be replaced to use a different
 // audio library, such as SDL, OpenAL, JUCE or a custom audio system.
 
+#include <math.h>
+#include <stdlib.h>
 #include "as.h"
 #include "const.h"
 #include "mf.h"
-#include <math.h>
-#include <stdlib.h>
-
-// A buffer to hold the audio data for recording.
-int recording_index = 0; // Current index in the recording buffer
-#if RECORDING_ENABLED
-#include <stdio.h>
-#include "util.h"
-float recording_buffer[RECORDING_BUFFER_SIZE];
-static void as_init_recording() {
-  // Initialize the recording buffer
-  recording_index = 0;
-  for (int i = 0; i < RECORDING_BUFFER_SIZE; i++) {
-    recording_buffer[i] = 0.0f; // Clear the buffer
-  }
-}
-static void as_record(float sample_l, float sample_r) {
-  // Record audio samples into the buffer
-  if (recording_index < RECORDING_BUFFER_SIZE - 2) {
-    recording_buffer[recording_index++] = sample_l; // Left channel
-    recording_buffer[recording_index++] = sample_r; // Right channel
-  } else {
-    // Buffer is full, handle overflow if needed
-    fprintf(stderr, "Recording buffer overflow, discarding samples\n");
-  }
-}
-static int as_write_recording() {
-  float *data = recording_buffer;
-  float num_frames = (int)(recording_index / 2); // Number of frames is half the buffer size
-  char *filename = "mf";
-  filename = util_make_recording_filename(filename);
-  util_write_wav(filename, data, num_frames, SAMPLE_RATE);
-  recording_index = 0;
-  return 0; // Success
-}
-#else
-float recording_buffer[1]; // Dummy buffer if recording is disabled
-static void as_init_recording() {
-  // No recording logic if RECORDING_ENABLED is 0
-}
-static int as_write_recording() {
-  // No recording logic if RECORDING_ENABLED is 0
-  return 0; // Success
-}
-static void as_record(float sample_l, float sample_r) {
-  // No recording logic if RECORDING_ENABLED is 0
-}
-#endif
+#include "recording.h"
 
 // Main function handling the audio synthesis callback.
 // time_info and user_data are not used here
@@ -141,14 +96,14 @@ int as_synthesis_callback(const void *input_buffer, void *output_buffer, unsigne
     // Samples are read in pairs with odd samples being left and even being right
     *out++ = sample_mix_l; // Left
     *out++ = sample_mix_r; // Right
-    as_record(sample_mix_l, sample_mix_r);
+    rec_write_sample(sample_mix_l, sample_mix_r);
   }
   return paContinue;
 }
 
 PaStream *stream;
 int as_init() {
-  as_init_recording(); 
+  rec_init(); 
   Pa_Initialize();
   Pa_OpenDefaultStream(&stream, 0, 2, paFloat32, SAMPLE_RATE, BLOCK_SIZE, as_synthesis_callback, &wave_data);
   Pa_StartStream(stream);
@@ -161,7 +116,7 @@ int as_sleep(int ms) {
 }
 
 int as_close() {
-  as_write_recording();
+  rec_write_recording();
   Pa_StopStream(stream);
   Pa_CloseStream(stream);
   Pa_Terminate();
