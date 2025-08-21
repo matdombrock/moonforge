@@ -2,13 +2,17 @@
 // In thoery this is all that would need to be replaced to use a different
 // audio library, such as SDL, OpenAL, JUCE or a custom audio system.
 
-#pragma once
 #include "as.h"
 #include "const.h"
+#include "util.h"
 #include "mf.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+// A buffer to hold the audio data for recording.
+float recording_buffer[RECORDING_BUFFER_SIZE];
+int recording_index = 0; // Current index in the recording buffer
 
 // Main function handling the audio synthesis callback.
 // time_info and user_data are not used here
@@ -97,9 +101,21 @@ int as_synthesis_callback(const void *input_buffer, void *output_buffer,
     sample_mix_l = mfx_delay_process(&state.bus_delay_l, sample_mix_l);
     sample_mix_r = mfx_delay_process(&state.bus_delay_r, sample_mix_r);
     // Add samples to the buffer
-    // Samples are read in pairs with odd samples being left and even being right
+    // Samples are read in pairs with odd samples being left and even being
+    // right
     *out++ = sample_mix_l; // Left
     *out++ = sample_mix_r; // Right
+    // Record samples if recording is enabled
+    if (recording_index < RECORDING_BUFFER_SIZE - 2) {
+      recording_buffer[recording_index++] = sample_mix_l; // Left
+      recording_buffer[recording_index++] = sample_mix_r; // Right
+    } else {
+      // Buffer is full, stop recording
+      printf("Recording buffer full, stopping recording.\n");
+      recording_index = RECORDING_BUFFER_SIZE; // Prevent further writes
+      util_write_wav("recording.wav", recording_buffer, recording_index / 2,
+                   SAMPLE_RATE);
+    }
   }
   return paContinue;
 }

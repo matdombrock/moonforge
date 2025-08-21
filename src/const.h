@@ -1,4 +1,5 @@
 #pragma once
+// Exposed to Lua
 #define VERSION "0.1.0"
 #define SAMPLE_RATE 48000
 #define BLOCK_SIZE 32
@@ -7,6 +8,9 @@
 #define OSC_COUNT 8
 #define TICK_WAIT 1
 
+// Not exposed to Lua
+#define MAX_RECORDING_SECONDS 8
+#define RECORDING_BUFFER_SIZE (SAMPLE_RATE * MAX_RECORDING_SECONDS * 2) // Stereo buffer
 #define PRINT_STARTUP_INFO 1
 #define PRINT_STARTUP_CONSTS 1
 
