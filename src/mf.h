@@ -24,8 +24,8 @@ typedef struct {
   float amp;
   float amp_l;
   float amp_r;
-  Lowpass_Filter lp;
-  Delay delay;
+  mfx_lowpass_state lp;
+  mfx_delay delay;
   enum Wave wave;
 } mf_osc;
 
@@ -37,6 +37,10 @@ typedef struct {
   mf_osc osc[OSC_COUNT];
   mf_flags flags;
   float bus_amp;
+  mfx_lowpass_state bus_lp_l;
+  mfx_lowpass_state bus_lp_r;
+  mfx_delay bus_delay_l;
+  mfx_delay bus_delay_r;
 } mf_state;
 
 extern mf_state state;
@@ -60,6 +64,9 @@ int mf_delay_set(int osc_num, int delay_samples, float feedback, float mix);
 int mf_wavetable_write(enum Wave wave, float *data);
 int mf_mute_all();
 int mf_bus_amp_set(float amp);
+int mf_bus_lowpass_set(float cutoff);
+int mf_bus_delay_set_l(int delay_samples, float feedback, float mix);
+int mf_bus_delay_set_r(int delay_samples, float feedback, float mix);
 int mf_exit();
 
 // System functions

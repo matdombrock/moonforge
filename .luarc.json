@@ -11,8 +11,13 @@
   "Lua": {
     "diagnostics": {
       "globals": [
+        "OSC_COUNT",
         "TABLE_SIZE",
         "TICK_WAIT",
+        "VERSION",
+        "SAMPLE_RATE",
+        "BLOCK_SIZE",
+        "TUNING",
         "wave_set", 
         "freq_set",
         "freq_get",
@@ -26,6 +31,9 @@
         "delay_set",
         "mute_all",
         "bus_amp_set",
+        "bus_lowpass_set",
+        "bus_delay_set_l",
+        "bus_delay_set_r",
         "wavetable_write",
         "exit",
       ]

@@ -98,7 +98,7 @@ int mf_lowpass_set(int osc_num, float cutoff) {
   if (cutoff < 20.0f || cutoff > 20000.0f) {
     return -2; // Invalid cutoff frequency
   }
-  lowpass_set(&state.osc[osc_num].lp, cutoff); // Initialize lowpass filter
+  mfx_lowpass_set(&state.osc[osc_num].lp, cutoff); // Initialize lowpass filter
   return 0; // Success
 }
 
@@ -117,7 +117,7 @@ int mf_delay_set(int osc_num, int delay_samples, float feedback, float mix) {
       mix > 1.0f) {
     return -2; // Invalid delay parameters
   }
-  delay_set(&state.osc[osc_num].delay, delay_samples, feedback, mix);
+  mfx_delay_set(&state.osc[osc_num].delay, delay_samples, feedback, mix);
   return 0; // Success
 }
 
@@ -134,6 +134,33 @@ int mf_bus_amp_set(float amp) {
   }
   state.bus_amp = amp; // Set the bus amplitude
   return 0;           // Success
+}
+
+int bus_lowpass_set(float cutoff) {
+  if (cutoff < 20.0f || cutoff > 20000.0f) {
+    return -1; // Invalid cutoff frequency
+  }
+  mfx_lowpass_set(&state.bus_lp_l, cutoff); // Set left channel lowpass filter
+  mfx_lowpass_set(&state.bus_lp_r, cutoff); // Set right channel lowpass filter
+  return 0; // Success
+}
+
+int mf_bus_delay_set_l(int delay_samples, float feedback, float mix) {
+  if (delay_samples < 0 || feedback < 0.0f || feedback >= 1.0f || mix < 0.0f ||
+      mix > 1.0f) {
+    return -1; // Invalid delay parameters
+  }
+  mfx_delay_set(&state.bus_delay_l, delay_samples, feedback, mix);
+  return 0; // Success
+}
+
+int mf_bus_delay_set_r(int delay_samples, float feedback, float mix) {
+  if (delay_samples < 0 || feedback < 0.0f || feedback >= 1.0f || mix < 0.0f ||
+      mix > 1.0f) {
+    return -1; // Invalid delay parameters
+  }
+  mfx_delay_set(&state.bus_delay_r, delay_samples, feedback, mix);
+  return 0; // Success
 }
 
 int mf_wavetable_write(enum Wave wave, float *data) {
@@ -321,6 +348,31 @@ static int l_mf_bus_amp_set(lua_State *L) {
   return 1; // 
 }
 
+static int l_mf_bus_lowpass_set(lua_State *L) {
+  float cutoff = luaL_checknumber(L, 1);
+  int result = bus_lowpass_set(cutoff);
+  lua_pushinteger(L, result);
+  return 1; // 
+}
+
+static int l_mf_bus_delay_set_l(lua_State *L) {
+  int delay_samples = luaL_checkinteger(L, 1);
+  float feedback = luaL_checknumber(L, 2);
+  float mix = luaL_checknumber(L, 3);
+  int result = mf_bus_delay_set_l(delay_samples, feedback, mix);
+  lua_pushinteger(L, result);
+  return 1; // 
+}
+
+static int l_mf_bus_delay_set_r(lua_State *L) {
+  int delay_samples = luaL_checkinteger(L, 1);
+  float feedback = luaL_checknumber(L, 2);
+  float mix = luaL_checknumber(L, 3);
+  int result = mf_bus_delay_set_r(delay_samples, feedback, mix);
+  lua_pushinteger(L, result);
+  return 1; // 
+}
+
 static int l_mf_wavetable_write(lua_State *L) {
   const char *waveStr = luaL_checkstring(L, 1);
   enum Wave wave;
@@ -370,6 +422,9 @@ static const struct luaL_Reg mf_funcs[] = {
     {"delay_set", l_mf_delay_set},
     {"mute_all", l_mf_mute_all},
     {"bus_amp_set", l_mf_bus_amp_set},
+    {"bus_lowpass_set", l_mf_bus_lowpass_set},
+    {"bus_delay_set_l", l_mf_bus_delay_set_l},
+    {"bus_delay_set_r", l_mf_bus_delay_set_r},
     {"wavetable_write", l_mf_wavetable_write},
     {"exit", l_mf_exit},
     {NULL, NULL} // Sentinel
@@ -422,14 +477,20 @@ int mf_init() {
     state.osc[i].amp_l = 1.0f;
     state.osc[i].amp_r = 1.0f;
     state.osc[i].wave = SINE; // Set default wave type
-    lowpass_init(&state.osc[i].lp, 20000.0f); // Initialize lowpass filter
-    delay_init(&state.osc[i].delay, 1, 0.0, 0.0); // Initialize delay
+    mfx_lowpass_init(&state.osc[i].lp, 20000.0f); // Initialize lowpass filter
+    mfx_delay_init(&state.osc[i].delay, 1, 0.0, 0.0); // Initialize delay
   }
   // Set up flags
   state.flags.exit = 0;
 
   // Setup state vars
   state.bus_amp = 1.0f; // Set default bus amplitude
+  
+  // Setup bus effects
+  mfx_lowpass_init(&state.bus_lp_l, 20000.0f);
+  mfx_lowpass_init(&state.bus_lp_r, 20000.0f);
+  mfx_delay_init(&state.bus_delay_l, 1, 0.0, 0.0);
+  mfx_delay_init(&state.bus_delay_r, 1, 0.0, 0.0);
 
   // Init wave data
   for (int i = 0; i < TABLE_SIZE; i++) {

@@ -78,19 +78,24 @@ int as_synthesis_callback(const void *input_buffer, void *output_buffer,
       float phase_frac = state.osc[osc].phase - phase_index;
       float sample = (sample_a * (1.0f - phase_frac)) + (sample_b * phase_frac);
       // Apply lowpass filter
-      sample = lowpass_process(&state.osc[osc].lp, sample);
+      sample = mfx_lowpass_process(&state.osc[osc].lp, sample);
       // Apply panning and amplitude
       float amp = state.osc[osc].amp * state.bus_amp;
       sample_mix_l += sample * amp * state.osc[osc].amp_l;
       sample_mix_r += sample * amp * state.osc[osc].amp_r;
       // Apply delay effect
-      sample_mix_l = delay_process(&state.osc[osc].delay, sample_mix_l);
-      sample_mix_r = delay_process(&state.osc[osc].delay, sample_mix_r);
+      sample_mix_l = mfx_delay_process(&state.osc[osc].delay, sample_mix_l);
+      sample_mix_r = mfx_delay_process(&state.osc[osc].delay, sample_mix_r);
       // Increment phase
       state.osc[osc].phase = fmod(
           state.osc[osc].phase + freq * (TUNING * TABLE_SIZE / SAMPLE_RATE),
           TABLE_SIZE);
     }
+    // Apply bus effects
+    sample_mix_l = mfx_lowpass_process(&state.bus_lp_l, sample_mix_l);
+    sample_mix_r = mfx_lowpass_process(&state.bus_lp_r, sample_mix_r);
+    sample_mix_l = mfx_delay_process(&state.bus_delay_l, sample_mix_l);
+    sample_mix_r = mfx_delay_process(&state.bus_delay_r, sample_mix_r);
     // Add samples to the buffer
     // Samples are read in pairs with odd samples being left and even being right
     *out++ = sample_mix_l; // Left

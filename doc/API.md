@@ -79,7 +79,7 @@ Returns the current lowpass cutoff for the target oscillator.
 ### `delay_set(osc_num, delay_time, feedback, mix)`
 Set a delay line on the target oscillator. 
 - `osc_num` - target oscillator
-- `delay_time` - delay time in ms
+- `delay_time` - delay time in samples
 - `feedback` - line feedback (0->1)
 - `mix` - wet/dry mix (0->1)
 
@@ -89,6 +89,23 @@ Mutes all oscillators.
 ### `bus_amp_set(amp)`
 Sets the volume for the main bus. 
 - `amp` - target amp (0->4)
+
+### `bus_lowpass_set(cutoff)`
+Sets the lowpass filter on the output bus (master).
+- `osc_num` - target oscillator
+- `cutoff` - cutoff frequency (Hz)
+
+### `bus_delay_set_l(delay_time, feedback, mix)`
+Set the delay on the output bus (master) left channel.
+- `delay_time` - delay time in samples
+- `feedback` - line feedback (0->1)
+- `mix` - wet/dry mix (0->1)
+
+### `bus_delay_set_r(delay_time, feedback, mix)`
+Set the delay on the output bus (master) left channel.
+- `delay_time` - delay time in samples
+- `feedback` - line feedback (0->1)
+- `mix` - wet/dry mix (0->1)
 
 ### `wavetable_write(wave_name, data)`
 Writes a wavetable to a custom wavetable slot. It is only possible to write to custom wavetables ("CA", "CB", "CC", "CD").

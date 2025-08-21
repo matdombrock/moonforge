@@ -1,9 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
-#include "const.h"
 #include "delay.h"
 
-void delay_init(Delay *delay, int delay_samples, float feedback, float mix) {
+void mfx_delay_init(mfx_delay *delay, int delay_samples, float feedback, float mix) {
     delay->buffer = (float*)malloc(sizeof(float) * delay_samples);
     memset(delay->buffer, 0, sizeof(float) * delay_samples);
     delay->size = delay_samples;
@@ -12,12 +11,12 @@ void delay_init(Delay *delay, int delay_samples, float feedback, float mix) {
     delay->mix = mix;
 }
 
-void delay_free(Delay *delay) {
+void mfx_delay_free(mfx_delay *delay) {
     free(delay->buffer);
     delay->buffer = NULL;
 }
 
-void delay_set(Delay *delay, int delay_samples, float feedback, float mix) {
+void mfx_delay_set(mfx_delay *delay, int delay_samples, float feedback, float mix) {
     float *new_buffer = (float*)realloc(delay->buffer, sizeof(float) * delay_samples);
     if (new_buffer) {
         delay->buffer = new_buffer;
@@ -28,7 +27,7 @@ void delay_set(Delay *delay, int delay_samples, float feedback, float mix) {
     // Do not reset buffer or index
 }
 
-float delay_process(Delay *delay, float x) {
+float mfx_delay_process(mfx_delay *delay, float x) {
     float delayed = delay->buffer[delay->index];
     float input = x + delayed * delay->feedback;
     delay->buffer[delay->index] = input;

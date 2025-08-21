@@ -5,9 +5,9 @@ typedef struct {
     int index;
     float feedback; // 0.0 to <1.0
     float mix;      // 0.0 (dry) to 1.0 (wet)
-} Delay;
+} mfx_delay;
 
-void delay_init(Delay *delay, int delay_samples, float feedback, float mix);
-void delay_free(Delay *delay);
-void delay_set(Delay *delay, int delay_samples, float feedback, float mix);
-float delay_process(Delay *delay, float x);
+void mfx_delay_init(mfx_delay *delay, int delay_samples, float feedback, float mix);
+void mfx_delay_free(mfx_delay *delay);
+void mfx_delay_set(mfx_delay *delay, int delay_samples, float feedback, float mix);
+float mfx_delay_process(mfx_delay *delay, float x);
