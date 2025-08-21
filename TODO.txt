@@ -1,3 +1,15 @@
 Try calling a Lua "onBuffer" function that just lets lua handle the buffer directly if it wants. 
 
-interpolate
+TICK_WAIT should be removed this doesnt really need to change
+ There is something weird about the concept of tick wait in general
+Changing the value changes the speed of the track which really shouldnt happen
+Right now this is processing a tick every 1ms
+This is 1000 ticks per second
+The block size is 32 samples
+The sample rate is 48000 samples per second
+There are 1500 blocks per second
+There should ideally be 1000 blocks per second
+Block size = Sample rate / Blocks per second  
+Block size = 48000 / 1000  
+Block size = 48 samples
+So, the block size should be **48 samples** to achieve 1000 blocks per second.

@@ -118,6 +118,7 @@ function Loop(tick)
   mfl.warble(2, tt, 300, 0.6)
   mfl.warble(3, tt, 333, 1.6)
 
+  -- Noise LFO
   amp_set(4, math.sin(1000 - (tick / 1000)) * 0.2)
   amp_set(5, math.sin((tt / 1000)) * 0.1)
 

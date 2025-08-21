@@ -6,12 +6,17 @@
 
 #define VERSION "0.1.0"
 #define SAMPLE_RATE 48000
-#define BLOCK_SIZE 32
+#define BLOCK_SIZE SAMPLE_RATE / 1000 // 1k ticks per second
 #define TABLE_SIZE 256
 #define TUNING 440.0f
 #define OSC_COUNT 8
-#define TICK_WAIT 1 ///////
-// Not exposed to Lua //// Recording settings
+#define TICK_WAIT 1 // 1ms per tick, this should likely not be changed
+
+///////
+// Not exposed to Lua  
+///////
+
+// Recording settings
 // RECORDING_BUFFER_SIZE = 48000 * 60 * 2 = 5,760,000 samples per 60 seconds
 // Bytes = 5,760,000 * 4 = 23,040,000 bytes (23 MB)
 #define RECORDING_ENABLED 1 // Enabling recording greatly increases memory usage
