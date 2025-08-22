@@ -7,8 +7,6 @@ function Loop(tick)
   if tick % 1000 == 0 then
     print("Tick: " .. tick)
   end
-  -- freq_set(1, 400 + math.sin(tick / 1000) * 300 + math.sin(tick / 200) * 64)
-  -- freq_set(2, 400 - math.sin(tick / 1000) * 300 - math.sin(tick / 200) * 64)
   freq_set(1, 440)
   freq_set(2, 880 + math.sin(tick / 400) * 440)
 end

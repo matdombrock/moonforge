@@ -12,6 +12,6 @@ mkdir -p dist
 rm -rf ./dist/*
 cp ./build/mf ./dist/mf
 mkdir -p ./dist/util
-cp ./lua_include/mflib.lua ./dist/util/mflib.lua
+cp ./lua_include/* ./dist/util/
 mkdir -p ./dist/examples
 cp -r ./examples/*.lua ./dist/examples/
