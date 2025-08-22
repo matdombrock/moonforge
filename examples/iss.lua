@@ -100,11 +100,15 @@ function Loop(tick)
   if diff ~= diff_live then
     diff = diff + (diff_live - diff) * LERP_SPEED
   end
+
   local diff_r = diff * FREQ_RANGE / 2 + 200
   local sin = math.sin(tick / (diff_r + 1)) / 4
   freq_set(3, sin)
   local pan = (math.sin(tick / (diff_r + 1)) + 1) / 2
   pan_set(3, 1 - pan, pan)
+  local pan = pan_get(3)
+  print("Pan3: " .. pan[1] .. ", " .. pan[2])
+
   if tick % 1000 == 0 then
     print("Tick: " .. tick)
     local data = grab("iss.json")

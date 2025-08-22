@@ -77,6 +77,16 @@ int mf_pan_set(int osc_num, float pan_l, float pan_r) {
   return 0;                         // Success
 }
 
+float *mf_pan_get(int osc_num) {
+  if (osc_num < 0 || osc_num >= OSC_COUNT) {
+    return NULL; // Invalid oscillator index
+  }
+  static float pan[2];
+  pan[0] = state.osc[osc_num].amp_l; // Left channel amplitude
+  pan[1] = state.osc[osc_num].amp_r; // Right channel amplitude
+  return pan;                        // Return panning array
+}
+
 float mf_pan_get_l(int osc_num) {
   if (osc_num < 0 || osc_num >= OSC_COUNT) {
     return -1; // Invalid oscillator index
@@ -308,6 +318,21 @@ static int l_mf_pan_get_r(lua_State *L) {
   return 1; // 
 }
 
+static int l_mf_pan_get(lua_State *L) {
+  int osc_num = luaL_checkinteger(L, 1);
+  osc_num = _l_mf_lua_index(osc_num);
+  float *pan = mf_pan_get(osc_num);
+  if (!pan) {
+    return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
+  }
+  lua_newtable(L);
+  lua_pushnumber(L, pan[0]);
+  lua_rawseti(L, -2, 1); // Lua arrays are 1-based
+  lua_pushnumber(L, pan[1]);
+  lua_rawseti(L, -2, 2);
+  return 1; // Return the table
+}
+
 static int l_mf_lowpass_set(lua_State *L) {
   int osc_num = luaL_checkinteger(L, 1);
   osc_num = _l_mf_lua_index(osc_num);
@@ -427,6 +452,7 @@ static const struct luaL_Reg mf_funcs[] = {
     {"pan_set", l_mf_pan_set},
     {"pan_get_l", l_mf_pan_get_l},
     {"pan_get_r", l_mf_pan_get_r},
+    {"pan_get", l_mf_pan_get},
     {"lowpass_set", l_mf_lowpass_set},
     {"lowpass_get", l_mf_lowpass_get},
     {"delay_set", l_mf_delay_set},

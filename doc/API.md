@@ -4,9 +4,43 @@ Moonforge provides a minimal Lua API which can be abstracted to enable more adva
 
 These are the core API functions which call C code directly.
 
+## Main `Loop(tick)` Function
+Every MoonForge Lua script must contain a main `Loop` function. 
+
+This function will be called once per "tick" (about 1ms). 
+
+The function call we will be supplied the `tick` parameter which indicated the current tick (loop iteration). 
+
+The most basic MoonForge script possible look like this:
+```lua
+function Loop(tick)
+    -- Do nothing
+end
+```
+
+This will not produce any audio. To make some noise we need to turn on an oscillator:
+```lua
+amp_set(1, 0.7) -- Set the amplitude (volume) of the first oscillator to 70% max volume
+function Loop(tick)
+end
+```
+
+Now we should hear a constant sine wave playing at 440Hz. To make it a bit more interesting, let's set the starting frequency to 880Hz and use an LFO to modulate it:
+```lua
+amp_set(1, 0.7) -- Set the amplitude (volume) of the first oscillator to 70% max volume
+freq_set(1, 880)
+function Loop(tick)
+    local lfo = math.sin(tick / 1000) -- A slow LFO
+    -- Normalize the lfo 0->1
+    lfo = 0.5 + lfo * 0.5
+    local freq = 20 + lfo * 440
+    freq_set(1, freq)
+end
+```
+
 ## Global Constants
 
-There are a few contants available to the Lua runtime:
+There are a few constants available to the Lua runtime:
 - `VERSION` - mf version number (string)
 - `OSC_COUNT` - number of available oscillators
 - `TABLE_SIZE` - amount of samples in a wavetable
@@ -35,6 +69,10 @@ Sets the waveform for the given oscillator number.
 - `osc_num` - target oscillator
 - `wave_name` - the name of the waveform to use
 
+### `wave_get(osc_num)` (planned)
+Returns the current wavetable name as a string.
+- `osc_num` - target oscillator
+
 ### `freq_set(osc_num, freq)` 
 Sets the frequency for the given oscillator. 
 - `osc_num` - target oscillator
@@ -59,12 +97,9 @@ Sets the pan for the given oscillator. This is effectively just a way to control
 - `pan_l` - target amplitude for the left channel (0->1)
 - `pan_r` - target amplitude for the right channel (0->1)
 
-### `pan_get_l(osc_num)` 
-Returns the left channel pan amplitude. 
-- `osc_num` - target oscillator
-
-### `pan_get_r(osc_num)` 
-Returns the right channel pan amplitude. 
+### `pan_get(osc_num)` 
+Returns a Lua array with 2 values:
+`{right, left}`.  
 - `osc_num` - target oscillator
 
 ### `lowpass_set(osc_num, cutoff)`
@@ -76,15 +111,20 @@ Sets the a lowpass filter on the target oscillator.
 Returns the current lowpass cutoff for the target oscillator.
 - `osc_num` - target oscillator
 
-### `delay_set(osc_num, delay_time, feedback, mix)`
+### `delay_set(osc_num, delay_samples, feedback, mix)`
 Set a delay line on the target oscillator. 
 - `osc_num` - target oscillator
-- `delay_time` - delay time in samples
+- `delay_samples` - delay time in samples
 - `feedback` - line feedback (0->1)
 - `mix` - wet/dry mix (0->1)
 
+### `delay_get(osc_num)` (planned)
+Returns the delay values for the target oscillator:
+`{delay_samples, feedback, mix}`
+- `osc_num` - target oscillator
+
 ### `mute_all()`
-Mutes all oscillators.
+Mutes all oscillators. The sets the amplitude for all oscillators to zero. It does not preserve the previous amplitude. If you want to mute a specific oscillator, just set its amp to zero. 
 
 ### `bus_amp_set(amp)`
 Sets the volume for the main bus. 
@@ -98,17 +138,29 @@ Sets the lowpass filter on the output bus (master).
 - `osc_num` - target oscillator
 - `cutoff` - cutoff frequency (Hz)
 
-### `bus_delay_set_l(delay_time, feedback, mix)`
+### `bus_lowpass_get()` (planned)
+Returns the current lowpass cutoff for the main bus.
+- `osc_num` - target oscillator
+
+### `bus_delay_set_l(delay_samples, feedback, mix)`
 Set the delay on the output bus (master) left channel.
-- `delay_time` - delay time in samples
+- `delay_samples` - delay time in samples
 - `feedback` - line feedback (0->1)
 - `mix` - wet/dry mix (0->1)
 
-### `bus_delay_set_r(delay_time, feedback, mix)`
+### `bus_delay_set_r(delay_samples, feedback, mix)`
 Set the delay on the output bus (master) left channel.
-- `delay_time` - delay time in samples
+- `delay_samples` - delay time in samples
 - `feedback` - line feedback (0->1)
 - `mix` - wet/dry mix (0->1)
+
+### `bus_delay_get_l()` (planned)
+Returns the delay values for the main bus left channel:
+`{delay_samples, feedback, mix}`
+
+### `bus_delay_get_r()` (planned)
+Returns the delay values for the main bus left channel:
+`{delay_samples, feedback, mix}`
 
 ### `wavetable_write(wave_name, data)`
 Writes a wavetable to a custom wavetable slot. It is only possible to write to custom wavetables ("CA", "CB", "CC", "CD").
@@ -116,4 +168,4 @@ Writes a wavetable to a custom wavetable slot. It is only possible to write to c
 - `data` - An array of `TABLE_LENGTH` sample values (-1->1)
 
 ### `exit()`
-Cleanly exit the program.
+Cleanly exit the program. If recording is enabled, this will save the current recording.
