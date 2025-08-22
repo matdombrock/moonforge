@@ -15,3 +15,7 @@ Block size = Sample rate / Blocks per second
 Block size = 48000 / 1000  
 Block size = 48 samples
 So, the block size should be **48 samples** to achieve 1000 blocks per second.
+
+curl "https://api.open-meteo.com/v1/forecast?l
+atitude=36.1699&longitude=-115.1398&current_weath
+er=true" 

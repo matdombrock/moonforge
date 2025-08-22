@@ -96,6 +96,7 @@ int as_synthesis_callback(const void *input_buffer, void *output_buffer, unsigne
     sample_mix_l = mfx_delay_process(&state.bus_delay_l, sample_mix_l);
     sample_mix_r = mfx_delay_process(&state.bus_delay_r, sample_mix_r);
     // Apply bus amplitude
+    state.bus_amp = mfx_lowpass_process(&state.bus_amp_lp, state.bus_amp);
     sample_mix_l *= state.bus_amp;
     sample_mix_r *= state.bus_amp;
     // Add samples to the buffer

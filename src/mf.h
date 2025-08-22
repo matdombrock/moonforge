@@ -37,6 +37,7 @@ typedef struct {
   mf_osc osc[OSC_COUNT];
   mf_flags flags;
   float bus_amp;
+  mfx_lowpass_state bus_amp_lp;
   mfx_lowpass_state bus_lp_l;
   mfx_lowpass_state bus_lp_r;
   mfx_delay bus_delay_l;

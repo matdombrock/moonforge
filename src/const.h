@@ -23,6 +23,12 @@
 #define MAX_RECORDING_SECONDS 240 // The longer the recording, the more memory is used 
 #define RECORDING_BUFFER_SIZE (SAMPLE_RATE * MAX_RECORDING_SECONDS * 2) // Stereo buffer
 
+// Param filtering
+// Parameters changed from lua can only affect the sound at block boundaries
+// Lowpass filtering these changes can help smooth out discontinuities
+// Too low a cutoff can make the synth feel unresponsive
+#define PARAM_LPC 5000 // Lowpass cutoff for parameter changes
+
 // Startup settings
 #define PRINT_STARTUP_INFO 1
 #define PRINT_STARTUP_CONSTS 1

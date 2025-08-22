@@ -503,6 +503,9 @@ int mf_init() {
   mfx_delay_init(&state.bus_delay_l, 1, 0.0, 0.0);
   mfx_delay_init(&state.bus_delay_r, 1, 0.0, 0.0);
 
+  // Param lowpass filter setup
+  mfx_lowpass_init(&state.bus_amp_lp, PARAM_LPC);
+
   // Init wave data
   for (int i = 0; i < TABLE_SIZE; i++) {
     wave_data.sine[i] = (float)sin((double)i / (double)TABLE_SIZE * M_PI * 2);
