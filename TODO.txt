@@ -1,5 +1,7 @@
 Try calling a Lua "onBuffer" function that just lets lua handle the buffer directly if it wants. 
 
+Write multiple short audio files for less ram usage and combine them at the end
+
 TICK_WAIT should be removed this doesnt really need to change
  There is something weird about the concept of tick wait in general
 Changing the value changes the speed of the track which really shouldnt happen

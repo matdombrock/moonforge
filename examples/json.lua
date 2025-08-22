@@ -1,9 +1,10 @@
 local json = require("util.json")
-
+amp_set(1, 0.5)
 local function curl_json(url)
   local handle = io.popen('curl -s "' .. url .. '"')
   local result = handle:read("*a")
   handle:close()
+  print("curl done")
   return result
 end
 
