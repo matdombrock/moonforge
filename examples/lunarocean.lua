@@ -12,8 +12,8 @@ local release = { false, false } -- Release flags for oscillators
 local off = { 0, 0, 0 }
 
 local cut = 800 -- Cutoff frequency for lowpass filter
-local delay_len = 70000
-local delay_feedback = 0.1
+local delay_len = 1400
+local delay_feedback = 0.4
 local delay_mix = 0.2
 wave_set(1, "CA")
 pan_set(1, 1, 0)
@@ -42,6 +42,8 @@ lowpass_set(5, cut)
 delay_set(5, delay_len, delay_feedback, delay_mix * 1.5)
 
 bus_amp_set(1.4)
+bus_delay_set_l(delay_len * 2, delay_feedback, delay_mix * 0.5)
+bus_delay_set_r(delay_len * 3, delay_feedback, delay_mix * 0.5)
 
 local function init_wavetable()
   local down = math.random(1, 4)
@@ -123,16 +125,16 @@ function Loop(tick)
   amp_set(5, math.sin((tt / 1000)) * 0.1)
 
   -- Fade out at end
-  if mfl.on_second(tick, rec_time - fade_time) then
-    fade_out = true
-    fade_step = mfl.fade_step_calc(0, bus_amp_get(), fade_time_ticks)
-    print("Fading out...", fade_step)
-  end
-  if fade_out then
-    mfl.bus_fade_step(0, fade_step)
-  end
-  if mfl.on_second(tick, rec_time) then
-    print("Recording finished, exiting...")
-    exit()
-  end
+  -- if mfl.on_second(tick, rec_time - fade_time) then
+  --   fade_out = true
+  --   fade_step = mfl.fade_step_calc(0, bus_amp_get(), fade_time_ticks)
+  --   print("Fading out...", fade_step)
+  -- end
+  -- if fade_out then
+  --   mfl.bus_fade_step(0, fade_step)
+  -- end
+  -- if mfl.on_second(tick, rec_time) then
+  --   print("Recording finished, exiting...")
+  --   exit()
+  -- end
 end

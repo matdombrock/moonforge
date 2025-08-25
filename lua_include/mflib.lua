@@ -108,6 +108,15 @@ function mfl.note_random(osc_num, notes)
   end
 end
 
+-- Arpeggiate through a list of notes based on the current tick and interval
+-- Example: mfl.arp({"C4", "E4", "G4"}, tick, 0.25, bpm)
+function mfl.arp(notes, tick, interval, bmp)
+  local step = tick / mfl.beat_to_ticks(bmp, 1 + interval)
+  step = math.floor(step)
+  local index = ((step - 1) % #notes) + 1
+  return notes[index]
+end
+
 -- Fade an oscillator towards the target amplitude
 function mfl.fade(osc_num, target_amp, speed)
   -- Fade an oscillator's amplitude to a target value
