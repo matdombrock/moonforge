@@ -212,6 +212,9 @@ int mf_exit() {
 static int _l_mf_lua_index(int input) {
   return input - 1; // Lua uses 1-based indexing, C uses 0-based
 }
+static int _l_mf_samples_to_ticks(int samples) {
+  return samples / (TICK_WAIT * 1000);
+}
 
 static int l_mf_wave_set(lua_State *L) {
   int osc_num = luaL_checkinteger(L, 1);
@@ -356,7 +359,8 @@ static int l_mf_lowpass_get(lua_State *L) {
 static int l_mf_delay_set(lua_State *L) {
   int osc_num = luaL_checkinteger(L, 1);
   osc_num = _l_mf_lua_index(osc_num);
-  int delay_samples = luaL_checkinteger(L, 2);
+  int delay_ticks = luaL_checkinteger(L, 2);
+  int delay_samples = _l_mf_samples_to_ticks(delay_ticks);
   float feedback = luaL_checknumber(L, 3);
   float mix = luaL_checknumber(L, 4);
   int result = mf_delay_set(osc_num, delay_samples, feedback, mix);
@@ -391,7 +395,8 @@ static int l_mf_bus_lowpass_set(lua_State *L) {
 }
 
 static int l_mf_bus_delay_set_l(lua_State *L) {
-  int delay_samples = luaL_checkinteger(L, 1);
+  int delay_ticks = luaL_checkinteger(L, 1);
+  int delay_samples = _l_mf_samples_to_ticks(delay_ticks);
   float feedback = luaL_checknumber(L, 2);
   float mix = luaL_checknumber(L, 3);
   int result = mf_bus_delay_set_l(delay_samples, feedback, mix);
@@ -400,7 +405,8 @@ static int l_mf_bus_delay_set_l(lua_State *L) {
 }
 
 static int l_mf_bus_delay_set_r(lua_State *L) {
-  int delay_samples = luaL_checkinteger(L, 1);
+  int delay_ticks = luaL_checkinteger(L, 1);
+  int delay_samples = _l_mf_samples_to_ticks(delay_ticks);
   float feedback = luaL_checknumber(L, 2);
   float mix = luaL_checknumber(L, 3);
   int result = mf_bus_delay_set_r(delay_samples, feedback, mix);
