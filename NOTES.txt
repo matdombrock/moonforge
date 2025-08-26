@@ -1,3 +1,23 @@
+-- Create a new lowpass effect
+-- `effect_id` is a unique string
+effect_lowpass(effect_id, cutoff)
+
+-- Create a new delay effect
+-- `effect_id` is a unique string
+effect_delay(effect_id, delay_ticks, feedback)
+
+-- Add an effect to the osc chain
+-- Chains flow in the order they are added to the bus
+-- `osc_num` 0 is main bus
+chain_add(osc_num, effect_id)
+
+-- Remove an effect from the osc chain
+-- `osc_num` 0 is main bus
+chain_remove(osc_num, effect_id)
+
+
+
+
 Try calling a Lua "onBuffer" function that just lets lua handle the buffer directly if it wants. 
 
 Write multiple short audio files for less ram usage and combine them at the end
