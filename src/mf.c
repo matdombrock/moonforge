@@ -609,8 +609,8 @@ int mf_init() {
     state.osc[i].amp_l = 1.0f;
     state.osc[i].amp_r = 1.0f;
     state.osc[i].wave = SINE; // Set default wave type
-    mfx_lowpass_init(&state.osc[i].lp, 20000.0f); // Initialize lowpass filter
-    mfx_delay_init(&state.osc[i].delay, 1, 0.0, 0.0); // Initialize delay
+    mfx_lowpass_init(&state.osc[i].lp); // Initialize lowpass filter
+    mfx_delay_init(&state.osc[i].delay); // Initialize delay
   }
   // Set up flags
   state.flags.exit = 0;
@@ -619,13 +619,14 @@ int mf_init() {
   state.bus_amp = 1.0f; // Set default bus amplitude
   
   // Setup bus effects
-  mfx_lowpass_init(&state.bus_lp_l, 20000.0f);
-  mfx_lowpass_init(&state.bus_lp_r, 20000.0f);
-  mfx_delay_init(&state.bus_delay_l, 1, 0.0, 0.0);
-  mfx_delay_init(&state.bus_delay_r, 1, 0.0, 0.0);
+  mfx_lowpass_init(&state.bus_lp_l);
+  mfx_lowpass_init(&state.bus_lp_r);
+  mfx_delay_init(&state.bus_delay_l);
+  mfx_delay_init(&state.bus_delay_r);
 
   // Param lowpass filter setup
-  mfx_lowpass_init(&state.bus_amp_lp, PARAM_LPC);
+  mfx_lowpass_init(&state.bus_amp_lp);
+  mfx_lowpass_set(&state.bus_amp_lp, PARAM_LPC);
 
   // Init wave data
   for (int i = 0; i < TABLE_SIZE; i++) {
