@@ -24,8 +24,6 @@ typedef struct {
   float amp;
   float amp_l;
   float amp_r;
-  mfx_lowpass_state lp;
-  mfx_delay delay;
   enum Wave wave;
 } mf_osc;
 
@@ -38,10 +36,6 @@ typedef struct {
   mf_flags flags;
   float bus_amp;
   mfx_lowpass_state bus_amp_lp; // Control smoothing for bus amp
-  mfx_lowpass_state bus_lp_l;
-  mfx_lowpass_state bus_lp_r;
-  mfx_delay bus_delay_l;
-  mfx_delay bus_delay_r;
 } mf_state;
 
 extern mf_state state;

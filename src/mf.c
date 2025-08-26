@@ -1,3 +1,7 @@
+#include "mf.h"
+#include "delay.h"
+#include "lowpass.h"
+#include "recording.h"
 #include <lauxlib.h>
 #include <lua.h>
 #include <lualib.h>
@@ -6,12 +10,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "mf.h"
-#include "recording.h"
-#include "lowpass.h"
-#include "delay.h"
 
-mf_state state = {}; // Global state
+mf_state state = {};    // Global state
 mf_wave_data wave_data; // Global wave data
 
 ///////
@@ -33,17 +33,15 @@ int mf_freq_set(int osc_num, float freq) {
   if (freq < 20.0f || freq > 20000.0f) {
     return -2; // Invalid frequency value
   }
-  state.osc[osc_num].freq =
-      freq; // Set the frequency for the specified oscillator
-  return 0; // Success
+  state.osc[osc_num].freq = freq; // Set the frequency for the specified oscillator
+  return 0;                       // Success
 }
 
 float mf_freq_get(int osc_num) {
   if (osc_num < 0 || osc_num >= OSC_COUNT) {
     return -1; // Invalid oscillator index
   }
-  return state.osc[osc_num]
-      .freq; // Return the frequency of the specified oscillator
+  return state.osc[osc_num].freq; // Return the frequency of the specified oscillator
 }
 
 int mf_amp_set(int osc_num, float amp) {
@@ -53,17 +51,15 @@ int mf_amp_set(int osc_num, float amp) {
   if (amp < 0.0f || amp > 4.0f) {
     return -2; // Invalid amplitude value
   }
-  state.osc[osc_num].amp =
-      amp;  // Set the amplitude for the specified oscillator
-  return 0; // Success
+  state.osc[osc_num].amp = amp; // Set the amplitude for the specified oscillator
+  return 0;                     // Success
 }
 
 float mf_amp_get(int osc_num) {
   if (osc_num < 0 || osc_num >= OSC_COUNT) {
     return -1; // Invalid oscillator index
   }
-  return state.osc[osc_num]
-      .amp; // Return the amplitude of the specified oscillator
+  return state.osc[osc_num].amp; // Return the amplitude of the specified oscillator
 }
 
 int mf_pan_set(int osc_num, float pan_l, float pan_r) {
@@ -102,36 +98,6 @@ float mf_pan_get_r(int osc_num) {
   return state.osc[osc_num].amp_r; // Return right channel amplitude
 }
 
-int mf_lowpass_set(int osc_num, float cutoff) {
-  if (osc_num < 0 || osc_num >= OSC_COUNT) {
-    return -1; // Invalid oscillator index
-  }
-  if (cutoff < 20.0f || cutoff > 20000.0f) {
-    return -2; // Invalid cutoff frequency
-  }
-  mfx_lowpass_set(&state.osc[osc_num].lp, cutoff); // Initialize lowpass filter
-  return 0; // Success
-}
-
-float mf_lowpass_get(int osc_num) {
-  if (osc_num < 0 || osc_num >= OSC_COUNT) {
-    return -1; // Invalid oscillator index
-  }
-  return state.osc[osc_num].lp.cutoff;
-}
-
-int mf_delay_set(int osc_num, int delay_samples, float feedback, float mix) {
-  if (osc_num < 0 || osc_num >= OSC_COUNT) {
-    return -1; // Invalid oscillator index
-  }
-  if (delay_samples < 0 || feedback < 0.0f || feedback >= 1.0f || mix < 0.0f ||
-      mix > 1.0f) {
-    return -2; // Invalid delay parameters
-  }
-  mfx_delay_set(&state.osc[osc_num].delay, delay_samples, feedback, mix);
-  return 0; // Success
-}
-
 int mf_mute_all() {
   for (int i = 0; i < OSC_COUNT; i++) {
     state.osc[i].amp = 0.0f; // Mute all oscillators
@@ -144,38 +110,11 @@ int mf_bus_amp_set(float amp) {
     return -1; // Invalid bus amplitude value
   }
   state.bus_amp = amp; // Set the bus amplitude
-  return 0;           // Success
+  return 0;            // Success
 }
 
 float mf_bus_amp_get() {
   return state.bus_amp; // Return the bus amplitude
-}
-
-int bus_lowpass_set(float cutoff) {
-  if (cutoff < 20.0f || cutoff > 20000.0f) {
-    return -1; // Invalid cutoff frequency
-  }
-  mfx_lowpass_set(&state.bus_lp_l, cutoff); // Set left channel lowpass filter
-  mfx_lowpass_set(&state.bus_lp_r, cutoff); // Set right channel lowpass filter
-  return 0; // Success
-}
-
-int mf_bus_delay_set_l(int delay_samples, float feedback, float mix) {
-  if (delay_samples < 0 || feedback < 0.0f || feedback >= 1.0f || mix < 0.0f ||
-      mix > 1.0f) {
-    return -1; // Invalid delay parameters
-  }
-  mfx_delay_set(&state.bus_delay_l, delay_samples, feedback, mix);
-  return 0; // Success
-}
-
-int mf_bus_delay_set_r(int delay_samples, float feedback, float mix) {
-  if (delay_samples < 0 || feedback < 0.0f || feedback >= 1.0f || mix < 0.0f ||
-      mix > 1.0f) {
-    return -1; // Invalid delay parameters
-  }
-  mfx_delay_set(&state.bus_delay_r, delay_samples, feedback, mix);
-  return 0; // Success
 }
 
 int mf_wavetable_write(enum Wave wave, float *data) {
@@ -183,27 +122,27 @@ int mf_wavetable_write(enum Wave wave, float *data) {
     return -2; // Invalid custom wave type
   }
   switch (wave) {
-    case CA:
-      memcpy(wave_data.ca, data, sizeof(float) * TABLE_SIZE);
-      break;
-    case CB:
-      memcpy(wave_data.cb, data, sizeof(float) * TABLE_SIZE);
-      break;
-    case CC:
-      memcpy(wave_data.cc, data, sizeof(float) * TABLE_SIZE);
-      break;
-    case CD:
-      memcpy(wave_data.cd, data, sizeof(float) * TABLE_SIZE);
-      break;
-    default:
-      return -3; // Unsupported wave type
+  case CA:
+    memcpy(wave_data.ca, data, sizeof(float) * TABLE_SIZE);
+    break;
+  case CB:
+    memcpy(wave_data.cb, data, sizeof(float) * TABLE_SIZE);
+    break;
+  case CC:
+    memcpy(wave_data.cc, data, sizeof(float) * TABLE_SIZE);
+    break;
+  case CD:
+    memcpy(wave_data.cd, data, sizeof(float) * TABLE_SIZE);
+    break;
+  default:
+    return -3; // Unsupported wave type
   }
-  return 0;                       // Success
+  return 0; // Success
 }
 
 int mf_exit() {
   state.flags.exit = 1; // Set exit flag
-  return 0;            // Success
+  return 0;             // Success
 }
 
 ///////
@@ -213,9 +152,7 @@ int mf_exit() {
 static int _l_mf_lua_index(int input) {
   return input - 1; // Lua uses 1-based indexing, C uses 0-based
 }
-static int _l_mf_ticks_to_samples(int ticks) {
-  return ticks * (int)(SAMPLE_RATE * (TICK_WAIT * 1000));
-}
+static int _l_mf_ticks_to_samples(int ticks) { return ticks * (int)(SAMPLE_RATE * (TICK_WAIT * 1000)); }
 
 static int l_mf_wave_set(lua_State *L) {
   int osc_num = luaL_checkinteger(L, 1);
@@ -247,7 +184,7 @@ static int l_mf_wave_set(lua_State *L) {
 
   int result = mf_wave_set(osc_num, wave);
   lua_pushinteger(L, result);
-  return 1; // 
+  return 1; //
 }
 
 static int l_mf_freq_set(lua_State *L) {
@@ -256,7 +193,7 @@ static int l_mf_freq_set(lua_State *L) {
   float freq = luaL_checknumber(L, 2);
   int result = mf_freq_set(osc_num, freq);
   lua_pushinteger(L, result);
-  return 1; // 
+  return 1; //
 }
 
 static int l_mf_freq_get(lua_State *L) {
@@ -267,7 +204,7 @@ static int l_mf_freq_get(lua_State *L) {
     return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
   }
   lua_pushnumber(L, freq);
-  return 1; // 
+  return 1; //
 }
 
 static int l_mf_amp_set(lua_State *L) {
@@ -276,7 +213,7 @@ static int l_mf_amp_set(lua_State *L) {
   float amp = luaL_checknumber(L, 2);
   int result = mf_amp_set(osc_num, amp);
   lua_pushinteger(L, result);
-  return 1; // 
+  return 1; //
 }
 
 static int l_mf_amp_get(lua_State *L) {
@@ -287,7 +224,7 @@ static int l_mf_amp_get(lua_State *L) {
     return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
   }
   lua_pushnumber(L, amp);
-  return 1; // 
+  return 1; //
 }
 
 static int l_mf_pan_set(lua_State *L) {
@@ -297,7 +234,7 @@ static int l_mf_pan_set(lua_State *L) {
   float pan_r = luaL_checknumber(L, 3);
   int result = mf_pan_set(osc_num, pan_l, pan_r);
   lua_pushinteger(L, result);
-  return 1; // 
+  return 1; //
 }
 
 static int l_mf_pan_get_l(lua_State *L) {
@@ -308,7 +245,7 @@ static int l_mf_pan_get_l(lua_State *L) {
     return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
   }
   lua_pushnumber(L, pan_l);
-  return 1; // 
+  return 1; //
 }
 
 static int l_mf_pan_get_r(lua_State *L) {
@@ -319,7 +256,7 @@ static int l_mf_pan_get_r(lua_State *L) {
     return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
   }
   lua_pushnumber(L, pan_r);
-  return 1; // 
+  return 1; //
 }
 
 static int l_mf_pan_get(lua_State *L) {
@@ -337,82 +274,23 @@ static int l_mf_pan_get(lua_State *L) {
   return 1; // Return the table
 }
 
-static int l_mf_lowpass_set(lua_State *L) {
-  int osc_num = luaL_checkinteger(L, 1);
-  osc_num = _l_mf_lua_index(osc_num);
-  float cutoff = luaL_checknumber(L, 2);
-  int result = mf_lowpass_set(osc_num, cutoff);
-  lua_pushinteger(L, result);
-  return 1; // 
-}
-
-static int l_mf_lowpass_get(lua_State *L) {
-  int osc_num = luaL_checkinteger(L, 1);
-  osc_num = _l_mf_lua_index(osc_num);
-  float cutoff = mf_lowpass_get(osc_num);
-  if (cutoff < 0) {
-    return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
-  }
-  lua_pushnumber(L, cutoff);
-  return 1; // 
-}
-
-static int l_mf_delay_set(lua_State *L) {
-  int osc_num = luaL_checkinteger(L, 1);
-  osc_num = _l_mf_lua_index(osc_num);
-  int delay_ticks = luaL_checkinteger(L, 2);
-  int delay_samples = _l_mf_ticks_to_samples(delay_ticks);
-  float feedback = luaL_checknumber(L, 3);
-  float mix = luaL_checknumber(L, 4);
-  int result = mf_delay_set(osc_num, delay_samples, feedback, mix);
-  lua_pushinteger(L, result);
-  return 1; // 
-}
-
 static int l_mf_mute_all(lua_State *L) {
   int result = mf_mute_all();
   lua_pushinteger(L, result);
-  return 1; // 
+  return 1; //
 }
 
 static int l_mf_bus_amp_set(lua_State *L) {
   float amp = luaL_checknumber(L, 1);
   int result = mf_bus_amp_set(amp);
   lua_pushinteger(L, result);
-  return 1; // 
+  return 1; //
 }
 
 static int l_mf_bus_amp_get(lua_State *L) {
   float amp = mf_bus_amp_get();
   lua_pushnumber(L, amp);
-  return 1; // 
-}
-
-static int l_mf_bus_lowpass_set(lua_State *L) {
-  float cutoff = luaL_checknumber(L, 1);
-  int result = bus_lowpass_set(cutoff);
-  lua_pushinteger(L, result);
-  return 1; // 
-}
-
-static int l_mf_bus_delay_set_l(lua_State *L) {
-  int delay_ticks = luaL_checkinteger(L, 1);
-  int delay_samples = _l_mf_ticks_to_samples(delay_ticks);
-  float feedback = luaL_checknumber(L, 2);
-  float mix = luaL_checknumber(L, 3);
-  int result = mf_bus_delay_set_l(delay_samples, feedback, mix);
-  lua_pushinteger(L, result);
-  return 1; // 
-}
-
-static int l_mf_bus_delay_set_r(lua_State *L) {
-  int delay_ticks = luaL_checkinteger(L, 1);
-  int delay_samples = _l_mf_ticks_to_samples(delay_ticks);
-  float feedback = luaL_checknumber(L, 2);
-  float mix = luaL_checknumber(L, 3);
-  int result = mf_bus_delay_set_r(delay_samples, feedback, mix);
-  lua_pushinteger(L, result);
-  return 1; // 
+  return 1; //
 }
 
 static int l_mf_wavetable_write(lua_State *L) {
@@ -441,13 +319,13 @@ static int l_mf_wavetable_write(lua_State *L) {
   //
   int result = mf_wavetable_write(wave, data);
   lua_pushinteger(L, result);
-  return 1; // 
+  return 1; //
 }
 
 static int l_mf_exit(lua_State *L) {
   int result = mf_exit();
   lua_pushinteger(L, result);
-  return 1; // 
+  return 0; //
 }
 
 static const struct luaL_Reg mf_funcs[] = {
@@ -460,15 +338,9 @@ static const struct luaL_Reg mf_funcs[] = {
     {"pan_get_l", l_mf_pan_get_l},
     {"pan_get_r", l_mf_pan_get_r},
     {"pan_get", l_mf_pan_get},
-    {"lowpass_set", l_mf_lowpass_set},
-    {"lowpass_get", l_mf_lowpass_get},
-    {"delay_set", l_mf_delay_set},
     {"mute_all", l_mf_mute_all},
     {"bus_amp_set", l_mf_bus_amp_set},
     {"bus_amp_get", l_mf_bus_amp_get},
-    {"bus_lowpass_set", l_mf_bus_lowpass_set},
-    {"bus_delay_set_l", l_mf_bus_delay_set_l},
-    {"bus_delay_set_r", l_mf_bus_delay_set_r},
     {"wavetable_write", l_mf_wavetable_write},
     {"exit", l_mf_exit},
     {NULL, NULL} // Sentinel
@@ -542,24 +414,14 @@ void mf_synth_callback(const void *output_buffer, unsigned long frames_per_buffe
       // Interpolate the samples
       float phase_frac = state.osc[osc].phase - phase_index;
       float sample = (sample_a * (1.0f - phase_frac)) + (sample_b * phase_frac);
-      // Apply lowpass filter
-      sample = mfx_lowpass_process(&state.osc[osc].lp, sample);
       // Apply panning and amplitude
       float amp = state.osc[osc].amp;
       sample_mix_l += sample * amp * state.osc[osc].amp_l;
       sample_mix_r += sample * amp * state.osc[osc].amp_r;
-      // Apply delay effect
-      sample_mix_l = mfx_delay_process(&state.osc[osc].delay, sample_mix_l);
-      sample_mix_r = mfx_delay_process(&state.osc[osc].delay, sample_mix_r);
       // Increment phase
       state.osc[osc].phase = fmod(state.osc[osc].phase + freq * (TUNING * TABLE_SIZE / SAMPLE_RATE), TABLE_SIZE);
     }
-    // Apply bus effects
-    sample_mix_l = mfx_lowpass_process(&state.bus_lp_l, sample_mix_l);
-    sample_mix_r = mfx_lowpass_process(&state.bus_lp_r, sample_mix_r);
-    sample_mix_l = mfx_delay_process(&state.bus_delay_l, sample_mix_l);
-    sample_mix_r = mfx_delay_process(&state.bus_delay_r, sample_mix_r);
-    // Apply bus amplitude
+    // Apply bus amp
     float bus_amp = mfx_lowpass_process(&state.bus_amp_lp, state.bus_amp);
     sample_mix_l *= bus_amp;
     sample_mix_r *= bus_amp;
@@ -595,7 +457,7 @@ lua_State *mf_lua_init(char *script_path) {
   if (luaL_dofile(L, script_path) != LUA_OK) {
     fprintf(stderr, "Error running Lua script: %s\n", lua_tostring(L, -1));
     lua_pop(L, 1); // Remove error message from stack
-    exit(1); // Exit on error
+    exit(1);       // Exit on error
   }
   return L;
 }
@@ -609,20 +471,12 @@ int mf_init() {
     state.osc[i].amp_l = 1.0f;
     state.osc[i].amp_r = 1.0f;
     state.osc[i].wave = SINE; // Set default wave type
-    mfx_lowpass_init(&state.osc[i].lp); // Initialize lowpass filter
-    mfx_delay_init(&state.osc[i].delay); // Initialize delay
   }
   // Set up flags
   state.flags.exit = 0;
 
   // Setup state vars
   state.bus_amp = 1.0f; // Set default bus amplitude
-  
-  // Setup bus effects
-  mfx_lowpass_init(&state.bus_lp_l);
-  mfx_lowpass_init(&state.bus_lp_r);
-  mfx_delay_init(&state.bus_delay_l);
-  mfx_delay_init(&state.bus_delay_r);
 
   // Control filters
   mfx_lowpass_init(&state.bus_amp_lp);
@@ -635,15 +489,14 @@ int mf_init() {
     wave_data.triangle[i] = (1.0f - 2.0f * fabsf((float)i / (float)TABLE_SIZE - 0.5f));
     wave_data.saw[i] = (2.0f * (float)i / (float)TABLE_SIZE - 1.0f);
     wave_data.ca[i] = 0;
-    wave_data.cb[i] = 0; 
-    wave_data.cc[i] = 0; 
-    wave_data.cd[i] = 0; 
+    wave_data.cb[i] = 0;
+    wave_data.cc[i] = 0;
+    wave_data.cd[i] = 0;
   }
 
   rec_init(); // Initialize recording system
-  return 0; // Success
+  return 0;   // Success
 }
-
 
 int tick = 0;
 int mf_run_lua(lua_State *L) {
