@@ -17,6 +17,7 @@
 ///////
 
 #define MAX_FX 8
+#define MAX_CHAIN 4 // Max effects per oscillator
 #define MAX_DELAY_SAMPLES 8 * SAMPLE_RATE // Max N seconds delay -- Uses a lot of memory
 
 // Recording settings

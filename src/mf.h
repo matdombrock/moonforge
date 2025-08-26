@@ -19,6 +19,11 @@ typedef struct {
 enum Wave { SINE, SQUARE, TRIANGLE, SAW, NOISE, CA, CB, CC, CD };
 
 typedef struct {
+  char id[8]; // Effect ID
+  mfx_delay_state delay_state; // Delay effect state
+} mf_delay_map;
+
+typedef struct {
   float freq;
   float phase;
   float amp; // Main amplitude
@@ -32,24 +37,10 @@ typedef struct {
 } mf_flags;
 
 typedef struct {
-  char *id;
-  int bus_num; // 0 is main bus, rest are osc bus
-  mfx_lowpass_state *state;
-} mf_lowpass_map;
-
-typedef struct {
-  char *id;
-  int bus_num; // 0 is main bus, rest are osc bus
-  mfx_delay_state *state;
-} mf_delay_map;
-
-typedef struct {
   mf_osc osc[OSC_COUNT];
   mf_flags flags;
   float bus_amp;
   mfx_lowpass_state bus_amp_lp; // Control smoothing for bus amp
-  mf_delay_map delay_map[MAX_FX];
-  mf_lowpass_map lowpass_map[MAX_FX];
 } mf_state;
 
 extern mf_state state;
@@ -64,10 +55,7 @@ int mf_amp_set(int osc_num, float amp);
 int mf_amp_change(int osc_num, float amp_mod);
 float mf_amp_get(int osc_num);
 int mf_pan_set(int osc_num, float pan_l, float pan_r);
-float mf_pan_get_l(int osc_num);
-float mf_pan_get_r(int osc_num);
 int mf_wavetable_write(enum Wave wave, float *data);
-int mf_mute_all();
 int mf_bus_amp_set(float amp);
 float mf_bus_amp_get();
 int mf_exit();

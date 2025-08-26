@@ -84,27 +84,6 @@ float *mf_pan_get(int osc_num) {
   return pan;                        // Return panning array
 }
 
-float mf_pan_get_l(int osc_num) {
-  if (osc_num < 0 || osc_num >= OSC_COUNT) {
-    return -1; // Invalid oscillator index
-  }
-  return state.osc[osc_num].amp_l; // Return left channel amplitude
-}
-
-float mf_pan_get_r(int osc_num) {
-  if (osc_num < 0 || osc_num >= OSC_COUNT) {
-    return -1; // Invalid oscillator index
-  }
-  return state.osc[osc_num].amp_r; // Return right channel amplitude
-}
-
-int mf_mute_all() {
-  for (int i = 0; i < OSC_COUNT; i++) {
-    state.osc[i].amp = 0.0f; // Mute all oscillators
-  }
-  return 0; // Success
-}
-
 int mf_bus_amp_set(float amp) {
   if (amp < 0.0f || amp > 4.0f) {
     return -1; // Invalid bus amplitude value
@@ -237,28 +216,6 @@ static int l_mf_pan_set(lua_State *L) {
   return 1; //
 }
 
-static int l_mf_pan_get_l(lua_State *L) {
-  int osc_num = luaL_checkinteger(L, 1);
-  osc_num = _l_mf_lua_index(osc_num);
-  float pan_l = mf_pan_get_l(osc_num);
-  if (pan_l < 0) {
-    return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
-  }
-  lua_pushnumber(L, pan_l);
-  return 1; //
-}
-
-static int l_mf_pan_get_r(lua_State *L) {
-  int osc_num = luaL_checkinteger(L, 1);
-  osc_num = _l_mf_lua_index(osc_num);
-  float pan_r = mf_pan_get_r(osc_num);
-  if (pan_r < 0) {
-    return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
-  }
-  lua_pushnumber(L, pan_r);
-  return 1; //
-}
-
 static int l_mf_pan_get(lua_State *L) {
   int osc_num = luaL_checkinteger(L, 1);
   osc_num = _l_mf_lua_index(osc_num);
@@ -272,12 +229,6 @@ static int l_mf_pan_get(lua_State *L) {
   lua_pushnumber(L, pan[1]);
   lua_rawseti(L, -2, 2);
   return 1; // Return the table
-}
-
-static int l_mf_mute_all(lua_State *L) {
-  int result = mf_mute_all();
-  lua_pushinteger(L, result);
-  return 1; //
 }
 
 static int l_mf_bus_amp_set(lua_State *L) {
@@ -335,10 +286,7 @@ static const struct luaL_Reg mf_funcs[] = {
     {"amp_set", l_mf_amp_set},
     {"amp_get", l_mf_amp_get},
     {"pan_set", l_mf_pan_set},
-    {"pan_get_l", l_mf_pan_get_l},
-    {"pan_get_r", l_mf_pan_get_r},
     {"pan_get", l_mf_pan_get},
-    {"mute_all", l_mf_mute_all},
     {"bus_amp_set", l_mf_bus_amp_set},
     {"bus_amp_get", l_mf_bus_amp_get},
     {"wavetable_write", l_mf_wavetable_write},
@@ -362,14 +310,14 @@ void mf_synth_callback(const void *output_buffer, unsigned long frames_per_buffe
   for (i = 0; i < frames_per_buffer; i++) {
     float sample_mix_l = 0.0f;
     float sample_mix_r = 0.0f;
-    for (int osc = 0; osc < OSC_COUNT; osc++) {
+    for (int osc_num = 0; osc_num < OSC_COUNT; osc_num++) {
       float sample_a = 0.0f;
       float sample_b = 0.0f;
       // Adjust rate for sine wave frequency
-      float freq = state.osc[osc].freq / TUNING;
-      int phase_index = (int)state.osc[osc].phase;
+      float freq = state.osc[osc_num].freq / TUNING;
+      int phase_index = (int)state.osc[osc_num].phase;
       int phase_index_n = (phase_index + 1) % TABLE_SIZE;
-      switch (state.osc[osc].wave) {
+      switch (state.osc[osc_num].wave) {
       case SINE:
         sample_a += data->sine[phase_index];
         sample_b += data->sine[phase_index_n];
@@ -412,14 +360,16 @@ void mf_synth_callback(const void *output_buffer, unsigned long frames_per_buffe
         break;
       }
       // Interpolate the samples
-      float phase_frac = state.osc[osc].phase - phase_index;
+      float phase_frac = state.osc[osc_num].phase - phase_index;
       float sample = (sample_a * (1.0f - phase_frac)) + (sample_b * phase_frac);
       // Apply panning and amplitude
-      float amp = state.osc[osc].amp;
-      sample_mix_l += sample * amp * state.osc[osc].amp_l;
-      sample_mix_r += sample * amp * state.osc[osc].amp_r;
+      float amp = state.osc[osc_num].amp;
+      sample_mix_l += sample * amp * state.osc[osc_num].amp_l;
+      sample_mix_r += sample * amp * state.osc[osc_num].amp_r;
+      // Apply effects chain
       // Increment phase
-      state.osc[osc].phase = fmod(state.osc[osc].phase + freq * (TUNING * TABLE_SIZE / SAMPLE_RATE), TABLE_SIZE);
+      state.osc[osc_num].phase =
+          fmod(state.osc[osc_num].phase + freq * (TUNING * TABLE_SIZE / SAMPLE_RATE), TABLE_SIZE);
     }
     // Apply bus amp
     float bus_amp = mfx_lowpass_process(&state.bus_amp_lp, state.bus_amp);

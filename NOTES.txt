@@ -23,6 +23,12 @@ chain_remove(osc_num, effect_id)
 -- Effects are processed in the order they are added
 -- 
 
+If each osc including main bus gets its own effect chain they should be be stored in local state for each bus?
+
+Total of 8 effects of each type. 
+A bus can chain to these effects.
+
+
 
 
 
