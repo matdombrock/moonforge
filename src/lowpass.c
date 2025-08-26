@@ -2,6 +2,7 @@
 #include "const.h"
 #include <math.h>
 
+// Set the cutoff frequency of the lowpass filter
 void mfx_lowpass_set(mfx_lowpass_state *filter, float cutoff) {
   filter->cutoff = cutoff; // Cache cutoff frequency
   float prev = filter->y_prev;
@@ -12,7 +13,7 @@ void mfx_lowpass_set(mfx_lowpass_state *filter, float cutoff) {
   filter->y_prev = prev;
 }
 
-// Initialize filter at cutoff frequency
+// Initialize filter at default cutoff frequency
 void mfx_lowpass_init(mfx_lowpass_state *filter) {
   mfx_lowpass_set(filter, 20000.0f);
 }
