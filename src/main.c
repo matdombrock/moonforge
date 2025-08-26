@@ -1,10 +1,10 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "as.h"
 #include "const.h"
 #include "mf.h"
 #include "recording.h"
 #include "util.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/time.h>
 #include <time.h>
 
@@ -34,12 +34,14 @@ int main(int argc, char *argv[]) {
     mf_loop(script_path);
     gettimeofday(&end, NULL);
 
-    double elapsed_ms = (end.tv_sec - start.tv_sec) * 1000.0 + (end.tv_usec - start.tv_usec) / 1000.0;
-    double wait_ms = TICK_WAIT - elapsed_ms;
+    // Calculate elapsed time in nanoseconds
+    long elapsed_ns = (end.tv_sec - start.tv_sec) * 1000000000L + (end.tv_usec - start.tv_usec) * 1000L;
 
-    if (wait_ms > 0) {
-      struct timespec ts = {.tv_sec = (time_t)(wait_ms / 1000),
-                            .tv_nsec = (long)((wait_ms - ((long)(wait_ms / 1000) * 1000)) * 1000000)};
+    // TICK_WAIT is assumed to be in milliseconds; convert to nanoseconds
+    long wait_ns = (long)(TICK_WAIT * 1000000L) - elapsed_ns;
+
+    if (wait_ns > 0) {
+      struct timespec ts = {.tv_sec = wait_ns / 1000000000L, .tv_nsec = wait_ns % 1000000000L};
       nanosleep(&ts, NULL);
     }
   }
