@@ -1,7 +1,5 @@
 local mfl = require("util.mflib")
 
--- lowpass_set(1, 8000)
-
 wave_set(1, "SINE")
 bus_amp_set(0.8)
 
