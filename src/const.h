@@ -6,9 +6,9 @@
 
 #define VERSION "0.1.0"
 #define SAMPLE_RATE 48000
-#define BLOCK_SIZE (SAMPLE_RATE / 1000) // 1k ticks per second
+#define BLOCK_SIZE (int)(SAMPLE_RATE / 1000) // 1k ticks per second
 #define TABLE_SIZE 256
-#define MAX_DELAY_SAMPLES (512 * 512)
+#define MAX_DELAY_SAMPLES 16 * SAMPLE_RATE // Max 16 seconds delay -- Uses a lot of memory
 #define TUNING 440.0f
 #define OSC_COUNT 8
 #define TICK_WAIT 1 // 1ms per tick, this should likely not be changed

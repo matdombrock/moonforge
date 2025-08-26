@@ -102,17 +102,6 @@ int rec_write_recording() {
 }
 
 // Writes a pair of stereo audio samples to the recording buffer.
-// void rec_write_sample(float sample_l, float sample_r) {
-//   // Record audio samples into the buffer
-//   if (recording_index < RECORDING_BUFFER_SIZE - 2) {
-//     recording_buffer[recording_index++] = sample_l; // Left channel
-//     recording_buffer[recording_index++] = sample_r; // Right channel
-//   } else {
-//     // Write the current buffer to file
-//     // recording_index is reset to 0 after writing
-//     rec_write_recording();
-//   }
-// }
 void rec_write_sample(float sample_l, float sample_r) {
   // Record audio samples into the buffer
   if (recording_index < RECORDING_BUFFER_SIZE) {

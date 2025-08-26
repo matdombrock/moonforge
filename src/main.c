@@ -18,10 +18,10 @@ int main(int argc, char *argv[]) {
 
   // Init the global state
   mf_init();
-  // Initalize audio system
-  as_init();
   // Initialize recording system
   rec_init();
+  // Initalize audio system
+  as_init();
 
   // Clear the console
   printf("\033[H\033[J");
