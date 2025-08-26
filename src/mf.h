@@ -21,9 +21,9 @@ enum Wave { SINE, SQUARE, TRIANGLE, SAW, NOISE, CA, CB, CC, CD };
 typedef struct {
   float freq;
   float phase;
-  float amp;
-  float amp_l;
-  float amp_r;
+  float amp; // Main amplitude
+  float amp_l; // Left pan
+  float amp_r; // Right pan
   enum Wave wave;
 } mf_osc;
 
@@ -32,17 +32,30 @@ typedef struct {
 } mf_flags;
 
 typedef struct {
+  char *id;
+  int bus_num; // 0 is main bus, rest are osc bus
+  mfx_lowpass_state *state;
+} mf_lowpass_map;
+
+typedef struct {
+  char *id;
+  int bus_num; // 0 is main bus, rest are osc bus
+  mfx_delay_state *state;
+} mf_delay_map;
+
+typedef struct {
   mf_osc osc[OSC_COUNT];
   mf_flags flags;
   float bus_amp;
   mfx_lowpass_state bus_amp_lp; // Control smoothing for bus amp
+  mf_delay_map delay_map[MAX_FX];
+  mf_lowpass_map lowpass_map[MAX_FX];
 } mf_state;
 
 extern mf_state state;
 extern mf_wave_data wave_data;
 
 // User functions
-int mf_beat_to_ticks(float bpm, float beat);
 int mf_wave_set(int osc_num, enum Wave wave);
 int mf_freq_set(int osc_num, float freq);
 int mf_freq_change(int osc_num, float freq_mod);
@@ -53,16 +66,10 @@ float mf_amp_get(int osc_num);
 int mf_pan_set(int osc_num, float pan_l, float pan_r);
 float mf_pan_get_l(int osc_num);
 float mf_pan_get_r(int osc_num);
-int mf_lowpass_set(int osc_num, float cutoff);
-float mf_lowpass_get(int osc_num);
-int mf_delay_set(int osc_num, int delay_samples, float feedback, float mix);
 int mf_wavetable_write(enum Wave wave, float *data);
 int mf_mute_all();
 int mf_bus_amp_set(float amp);
 float mf_bus_amp_get();
-int mf_bus_lowpass_set(float cutoff);
-int mf_bus_delay_set_l(int delay_samples, float feedback, float mix);
-int mf_bus_delay_set_r(int delay_samples, float feedback, float mix);
 int mf_exit();
 
 // System functions

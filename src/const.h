@@ -16,7 +16,8 @@
 // Not exposed to Lua  
 ///////
 
-#define MAX_DELAY_SAMPLES 16 * SAMPLE_RATE // Max 16 seconds delay -- Uses a lot of memory
+#define MAX_FX 8
+#define MAX_DELAY_SAMPLES 8 * SAMPLE_RATE // Max N seconds delay -- Uses a lot of memory
 
 // Recording settings
 // RECORDING_BUFFER_SIZE = 48000 * 60 * 2 = 5,760,000 samples per 60 seconds
