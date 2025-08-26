@@ -1,13 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
-// TODO: Do we need sys/time and time?
-#include <sys/time.h>
-#include <time.h>
+#include "as.h"
 #include "const.h"
 #include "mf.h"
-#include "as.h"
-#include "util.h"
 #include "recording.h"
+#include "util.h"
+#include <sys/time.h>
+#include <time.h>
 
 int main(int argc, char *argv[]) {
   // Handle arguments
@@ -29,15 +28,19 @@ int main(int argc, char *argv[]) {
   // Print startup info
   util_print_startup_info(script_path);
 
-  while (state.flags.exit == 0) {
+  while (!state.flags.exit) {
     struct timeval start, end;
     gettimeofday(&start, NULL);
-    mf_loop(script_path); // Call the Lua loop function
+    mf_loop(script_path);
     gettimeofday(&end, NULL);
-    long elapsed = (end.tv_sec - start.tv_sec) * 1000L + (end.tv_usec - start.tv_usec) / 1000L;
-    long sleep_time = TICK_WAIT - elapsed;
-    if (sleep_time > 0) {
-      as_sleep(sleep_time);
+
+    double elapsed_ms = (end.tv_sec - start.tv_sec) * 1000.0 + (end.tv_usec - start.tv_usec) / 1000.0;
+    double wait_ms = TICK_WAIT - elapsed_ms;
+
+    if (wait_ms > 0) {
+      struct timespec ts = {.tv_sec = (time_t)(wait_ms / 1000),
+                            .tv_nsec = (long)((wait_ms - ((long)(wait_ms / 1000) * 1000)) * 1000000)};
+      nanosleep(&ts, NULL);
     }
   }
 

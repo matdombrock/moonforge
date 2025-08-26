@@ -80,7 +80,7 @@ end
 -- Returns the current second based on the tick and BPM
 function mfl.time.seconds_to_ticks(seconds)
   -- Convert seconds to ticks
-  return math.floor(seconds * (1000 / TICK_WAIT))
+  return math.floor(seconds * (1000 * TICK_WAIT))
 end
 
 -- Returns true if the tick is on the given second

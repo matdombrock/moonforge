@@ -31,7 +31,7 @@ end
 
 function mfl.beat_to_ticks(bpm, beat)
   beat = beat - 1
-  local ticks_per_second = 1000 / TICK_WAIT
+  local ticks_per_second = 1000 * TICK_WAIT
   local seconds_per_beat = 60 / bpm
   return math.floor(ticks_per_second * seconds_per_beat * beat)
 end
@@ -53,7 +53,7 @@ end
 -- Returns the current second based on the tick and BPM
 function mfl.seconds_to_ticks(seconds)
   -- Convert seconds to ticks
-  return math.floor(seconds * (1000 / TICK_WAIT))
+  return math.floor(seconds * (1000 * TICK_WAIT))
 end
 
 -- Returns true if the tick is on the given second

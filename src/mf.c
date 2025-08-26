@@ -214,7 +214,7 @@ static int _l_mf_lua_index(int input) {
   return input - 1; // Lua uses 1-based indexing, C uses 0-based
 }
 static int _l_mf_ticks_to_samples(int ticks) {
-  return ticks * (int)(SAMPLE_RATE / (TICK_WAIT * 1000));
+  return ticks * (int)(SAMPLE_RATE * (TICK_WAIT * 1000));
 }
 
 static int l_mf_wave_set(lua_State *L) {
