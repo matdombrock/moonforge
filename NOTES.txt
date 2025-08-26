@@ -4,7 +4,12 @@ effect_lowpass(effect_id, cutoff)
 
 -- Create a new delay effect
 -- `effect_id` is a unique string
-effect_delay(effect_id, delay_ticks, feedback)
+effect_delay(effect_id, delay_ticks, feedback, mix)
+
+-- Returns the current paramters for the effect ID as a table
+-- The structure of the table depends on the effect type
+-- Always includes an "effect_type" property
+effect_get(effect_id)
 
 -- Add an effect to the osc chain
 -- Chains flow in the order they are added to the bus
@@ -14,6 +19,9 @@ chain_add(osc_num, effect_id)
 -- Remove an effect from the osc chain
 -- `osc_num` 0 is main bus
 chain_remove(osc_num, effect_id)
+
+-- Effects are processed in the order they are added
+-- 
 
 
 
