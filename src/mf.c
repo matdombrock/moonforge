@@ -560,10 +560,7 @@ void mf_synth_callback(const void *output_buffer, unsigned long frames_per_buffe
     sample_mix_l = mfx_delay_process(&state.bus_delay_l, sample_mix_l);
     sample_mix_r = mfx_delay_process(&state.bus_delay_r, sample_mix_r);
     // Apply bus amplitude
-    // printf("Bus Amp before LP: %f\n", state.bus_amp);
     float bus_amp = mfx_lowpass_process(&state.bus_amp_lp, state.bus_amp);
-    // float bus_amp = state.bus_amp;
-    // printf("Bus Amp after LP: %f\n", bus_amp);
     sample_mix_l *= bus_amp;
     sample_mix_r *= bus_amp;
     // Add samples to the buffer
