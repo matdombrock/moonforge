@@ -72,6 +72,7 @@ int mf_bus_delay_set_r(int delay_samples, float feedback, float mix);
 int mf_exit();
 
 // System functions
+void mf_synth_callback(const void *output_buffer, unsigned long frames_per_buffer, void *user_data);
 int mf_init();
 int mf_init_lua(char *script_path);
 int mf_run_lua(lua_State *L);

@@ -7,18 +7,21 @@
 #include "mf.h"
 #include "as.h"
 #include "util.h"
+#include "recording.h"
 
 int main(int argc, char *argv[]) {
   // Handle arguments
   char *script_path = util_get_args(argc, argv);
 
+  // Seed random number generator
   srand((unsigned int)time(NULL));
 
   // Init the global state
   mf_init();
-
   // Initalize audio system
   as_init();
+  // Initialize recording system
+  rec_init();
 
   // Clear the console
   printf("\033[H\033[J");
@@ -44,6 +47,7 @@ int main(int argc, char *argv[]) {
   printf(COL_RESET);
 
   // Close audio system
+  rec_write_recording(); // Write any remaining recording data to file
   as_close();
   return 0;
 }
