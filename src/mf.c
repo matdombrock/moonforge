@@ -560,8 +560,12 @@ void mf_synth_callback(const void *output_buffer, unsigned long frames_per_buffe
     sample_mix_l = mfx_delay_process(&state.bus_delay_l, sample_mix_l);
     sample_mix_r = mfx_delay_process(&state.bus_delay_r, sample_mix_r);
     // Apply bus amplitude
-    sample_mix_l *= state.bus_amp;
-    sample_mix_r *= state.bus_amp;
+    // printf("Bus Amp before LP: %f\n", state.bus_amp);
+    float bus_amp = mfx_lowpass_process(&state.bus_amp_lp, state.bus_amp);
+    // float bus_amp = state.bus_amp;
+    // printf("Bus Amp after LP: %f\n", bus_amp);
+    sample_mix_l *= bus_amp;
+    sample_mix_r *= bus_amp;
     // Add samples to the buffer
     // Samples are read in pairs with odd samples being left and even being right
     *out++ = sample_mix_l; // Left
@@ -622,6 +626,10 @@ int mf_init() {
   mfx_lowpass_init(&state.bus_lp_r);
   mfx_delay_init(&state.bus_delay_l);
   mfx_delay_init(&state.bus_delay_r);
+
+  // Control filters
+  mfx_lowpass_init(&state.bus_amp_lp);
+  mfx_lowpass_set(&state.bus_amp_lp, 400.0f); // Default cutoff
 
   // Init wave data
   for (int i = 0; i < TABLE_SIZE; i++) {
