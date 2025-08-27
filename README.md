@@ -65,3 +65,8 @@ See the [MF Lua API Docs](doc/API.md) for core API functions.
 This project also includes [`mflib.lua`](lua_include/mflib.lua) which contains wrapper functions around the core API which make it easier to work with. 
 
 The `mflib.lua` library is written in pure Lua, so anything it does can be done manually. Users are encouraged to write their own wrapper libraries (for fun). 
+
+### Recording
+MoonForge has built-in support for recording to WAV format. When a track is ended with the `exit()` API call a recording of your audio will be saved to your current directory. 
+
+The default max recording length is 240 seconds. When this limit is reached, the current recording will be written and a new one will start automatically. 
