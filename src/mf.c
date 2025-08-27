@@ -161,7 +161,6 @@ int mf_effect_set_lowpass(int osc_num, float cutoff) {
 // mix: wet/dry mix (0.0 to 1.0)
 // Returns 0 on success, non-zero on failure
 int mf_effect_set_delay(int osc_num, float delay_time, float feedback, float mix) {
-  printf("Setting delay effect on osc_num %d with delay_time %.2f, feedback %.2f, mix %.2f\n", osc_num, delay_time, feedback, mix);
   if (osc_num < -1 || osc_num >= OSC_COUNT) {
     return 1; // Invalid oscillator index
   }
@@ -370,7 +369,6 @@ static int l_mf_effect_set(lua_State *L) {
   } else if (strcmp(effectStr, "DELAY") == 0) {
     int delay_ticks = luaL_checknumber(L, 3);
     int delay_samples = _l_mf_ticks_to_samples(delay_ticks);
-    printf("Delay in samples: %d\n", delay_samples);
     float feedback = luaL_checknumber(L, 4);
     float mix = luaL_checknumber(L, 5);
     result = mf_effect_set_delay(osc_num, delay_samples, feedback, mix);
