@@ -182,9 +182,10 @@ end
 --------------
 
 -- Slowly modulate an oscillator's frequency over time
-function mfl.warble(osc_num, tick, time, amp)
+function mfl.modulate.warble(osc_num, tick, time, amp)
   local mod = math.sin(tick / time)
-  mfl.freq_change(osc_num, (mod / time) * amp)
+  local freq = freq_get(osc_num)
+  freq_set(osc_num, freq + ((mod / time) * amp))
 end
 
 return mfl
