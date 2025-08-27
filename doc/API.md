@@ -119,6 +119,8 @@ Writes a wavetable to a custom wavetable slot. It is only possible to write to c
 
 ### `effect_set(osc_num, effect_name, ...)`
 Adds/sets an effect on the current effects chain for the given oscillator.
+Effects are processed in the order they are added.
+The default amount of available effects slots is 4 per bus. 
 - `osc_num` - target oscillator, `0` for main bus
 - `effect_name` - one of "NONE", "DELAY", "LOWPASS"
 **Lowpass params:**
