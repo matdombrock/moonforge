@@ -14,7 +14,7 @@ static int _mfx_delay_safe(int delay_samples) {
   return delay_samples; // Valid
 }
 
-void mfx_delay_init(mfx_delay *delay) {
+void mfx_delay_init(mfx_delay_state *delay) {
   delay->buffer = (float *)malloc(sizeof(float) * MAX_DELAY_SAMPLES);
   memset(delay->buffer, 0, sizeof(float) * MAX_DELAY_SAMPLES);
   delay->size = MAX_DELAY_SAMPLES;
@@ -24,19 +24,19 @@ void mfx_delay_init(mfx_delay *delay) {
   delay->window = 1;
 }
 
-void mfx_delay_free(mfx_delay *delay) {
+void mfx_delay_free(mfx_delay_state *delay) {
   free(delay->buffer);
   delay->buffer = NULL;
 }
 
-void mfx_delay_set(mfx_delay *delay, int delay_samples, float feedback, float mix) {
+void mfx_delay_set(mfx_delay_state *delay, int delay_samples, float feedback, float mix) {
   delay->window = delay_samples;
   delay->feedback = feedback;
   delay->mix = mix;
   // Do not reset buffer or index
 }
 
-float mfx_delay_process(mfx_delay *delay, float x) {
+float mfx_delay_process(mfx_delay_state *delay, float x) {
   float delayed = 0.0f;
   // TODO: Is this really needed?
   if (delay->window > 0 && delay->window < delay->size) {

@@ -16,17 +16,35 @@ typedef struct {
   float cd[TABLE_SIZE]; // Custom audio data
 } mf_wave_data;
 
-enum Wave { SINE, SQUARE, TRIANGLE, SAW, NOISE, CA, CB, CC, CD };
+enum mf_wave { SINE, SQUARE, TRIANGLE, SAW, NOISE, CA, CB, CC, CD };
+
+typedef enum {
+  FX_NONE,
+  FX_DELAY,
+  FX_LOWPASS,
+  FX_HIGHPASS,
+  FX_REVERB
+} mf_fx_type;
+
+typedef struct {
+  mf_fx_type type;
+  union {
+    mfx_delay_state delay;
+    mfx_lowpass_state lowpass;
+    // Add other effect states here
+  } state;
+} mf_fx;
 
 typedef struct {
   float freq;
   float phase;
-  float amp;
-  float amp_l;
-  float amp_r;
-  mfx_lowpass_state lp;
-  mfx_delay delay;
-  enum Wave wave;
+  float amp; // Main amplitude
+  float amp_l; // Left pan
+  float amp_r; // Right pan
+  mfx_lowpass_state amp_lp; // Control smoothing
+  enum mf_wave wave;
+  mf_fx fx_chain[MAX_CHAIN];
+  int fx_slot_index; // For tracking which effect slot to use next
 } mf_osc;
 
 typedef struct {
@@ -36,20 +54,17 @@ typedef struct {
 typedef struct {
   mf_osc osc[OSC_COUNT];
   mf_flags flags;
-  float bus_amp;
-  mfx_lowpass_state bus_amp_lp; // Control smoothing for bus amp
-  mfx_lowpass_state bus_lp_l;
-  mfx_lowpass_state bus_lp_r;
-  mfx_delay bus_delay_l;
-  mfx_delay bus_delay_r;
+  float mb_amp;
+  mfx_lowpass_state mb_amp_lp; // Control smoothing for bus amp
+  mf_fx mb_fx_chain[MAX_CHAIN]; // Global bus effects
+  int mb_fx_slot_index; // For tracking which effect slot to use next
 } mf_state;
 
 extern mf_state state;
 extern mf_wave_data wave_data;
 
 // User functions
-int mf_beat_to_ticks(float bpm, float beat);
-int mf_wave_set(int osc_num, enum Wave wave);
+int mf_wave_set(int osc_num, enum mf_wave wave);
 int mf_freq_set(int osc_num, float freq);
 int mf_freq_change(int osc_num, float freq_mod);
 float mf_freq_get(int osc_num);
@@ -57,18 +72,9 @@ int mf_amp_set(int osc_num, float amp);
 int mf_amp_change(int osc_num, float amp_mod);
 float mf_amp_get(int osc_num);
 int mf_pan_set(int osc_num, float pan_l, float pan_r);
-float mf_pan_get_l(int osc_num);
-float mf_pan_get_r(int osc_num);
-int mf_lowpass_set(int osc_num, float cutoff);
-float mf_lowpass_get(int osc_num);
-int mf_delay_set(int osc_num, int delay_samples, float feedback, float mix);
-int mf_wavetable_write(enum Wave wave, float *data);
-int mf_mute_all();
+int mf_wavetable_write(enum mf_wave wave, float *data);
 int mf_bus_amp_set(float amp);
 float mf_bus_amp_get();
-int mf_bus_lowpass_set(float cutoff);
-int mf_bus_delay_set_l(int delay_samples, float feedback, float mix);
-int mf_bus_delay_set_r(int delay_samples, float feedback, float mix);
 int mf_exit();
 
 // System functions
