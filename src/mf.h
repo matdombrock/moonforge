@@ -41,6 +41,7 @@ typedef struct {
   float amp; // Main amplitude
   float amp_l; // Left pan
   float amp_r; // Right pan
+  mfx_lowpass_state amp_lp; // Control smoothing
   enum mf_wave wave;
   mf_fx fx_chain[MAX_CHAIN];
   int fx_slot_index; // For tracking which effect slot to use next

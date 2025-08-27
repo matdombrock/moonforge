@@ -19,6 +19,8 @@
 #define MAX_CHAIN 4 // Max effects per bus
 #define MAX_DELAY_SAMPLES 8 * SAMPLE_RATE // Max N seconds delay -- Uses a lot of memory
 
+#define PARAM_LPC 400.0f // Lowpass cutoff for control smoothing
+
 // Recording settings
 // RECORDING_BUFFER_SIZE = 48000 * 60 * 2 = 5,760,000 samples per 60 seconds
 // Bytes = 5,760,000 * 4 = 23,040,000 bytes (23 MB)

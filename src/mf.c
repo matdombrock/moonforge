@@ -472,6 +472,7 @@ void mf_synth_callback(const void *output_buffer, unsigned long frames_per_buffe
       float sample = (sample_a * (1.0f - phase_frac)) + (sample_b * phase_frac);
       // Apply panning and amplitude
       float amp = state.osc[osc_num].amp;
+      amp = mfx_lowpass_process(&state.osc[osc_num].amp_lp, amp); // Smooth amp changes
       sample_mix_l += sample * amp * state.osc[osc_num].amp_l;
       sample_mix_r += sample * amp * state.osc[osc_num].amp_r;
       // Apply effects chain
@@ -579,6 +580,9 @@ int mf_init() {
     for (int fx_num = 0; fx_num < MAX_CHAIN; fx_num++) {
       state.osc[i].fx_chain[fx_num].type = FX_NONE; // No effects by default
     }
+    // Initialize control filters
+    mfx_lowpass_init(&state.osc[i].amp_lp);
+    mfx_lowpass_set(&state.osc[i].amp_lp, PARAM_LPC);
   }
   // Initialize global bus effect chain
   state.mb_fx_slot_index = 0;
@@ -593,7 +597,7 @@ int mf_init() {
 
   // Control filters
   mfx_lowpass_init(&state.mb_amp_lp);
-  mfx_lowpass_set(&state.mb_amp_lp, 400.0f); // Default cutoff
+  mfx_lowpass_set(&state.mb_amp_lp, PARAM_LPC);
 
   // Init wave data
   for (int i = 0; i < TABLE_SIZE; i++) {

@@ -105,6 +105,12 @@ local function pads(tt)
     sequence(4, notes_a, tt, 2, bpm)
     sequence(5, notes_b, tt, 2, bpm)
   end
+  if release[4] == false and section == 3 then
+    local s2 = math.sin(tt / 600) * 0.5 + 0.5
+    local amp = math.sin(tt / (30 * s2)) * 0.5 + 0.5
+    amp_set(4, amp * 0.8)
+    amp_set(5, amp * 0.8)
+  end
 end
 
 
