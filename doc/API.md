@@ -123,8 +123,10 @@ Effects are processed in the order they are added.
 The default amount of available effects slots is 4 per bus. 
 - `osc_num` - target oscillator, `0` for main bus
 - `effect_name` - one of "NONE", "DELAY", "LOWPASS"
+
 **Lowpass params:**
 - `cutoff` - the cutoff frequency
+
 **Delay params:**
 - `delay_ticks` - the length of the delay in ticks
 - `feedback` - delay feedback (0->1)
