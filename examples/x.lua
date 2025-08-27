@@ -146,7 +146,7 @@ local function lead(tt)
     release[3] = true
     release_speeds[2] = 0.00025
     release_speeds[3] = 0.00025
-    det_f = 0.25
+    det_f = 0.025
   end
   mfl.modulate.warble(2, tt, 1000, 1)
   local det = freq_get(3)
