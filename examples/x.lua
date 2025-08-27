@@ -15,6 +15,8 @@ pan_set(4, 1, 0.25)
 wave_set(5, "SINE")
 pan_set(5, 0.25, 1)
 
+-- bus_amp_set(0.6)
+
 local section_len = 8
 local bpm = 120
 local release_speeds = {
@@ -39,11 +41,11 @@ local release = {
   false,
 }
 local mix = {
-  0.8,
-  0.7,
-  0.7,
-  0.8,
-  0.8,
+  0.3,
+  0.2,
+  0.2,
+  0.3,
+  0.3,
 }
 local section = 0
 local it_count = 0
@@ -108,8 +110,8 @@ local function pads(tt)
   if release[4] == false and section == 3 then
     local s2 = math.sin(tt / 600) * 0.5 + 0.5
     local amp = math.sin(tt / (30 * s2)) * 0.5 + 0.5
-    amp_set(4, amp * 0.8)
-    amp_set(5, amp * 0.8)
+    amp_set(4, amp * mix[4])
+    amp_set(5, amp * mix[5])
   end
 end
 
@@ -152,6 +154,17 @@ local function lead(tt)
   freq_set(3, det)
 end
 
+local function handle_rec()
+  if it_count == 4 then
+    local amp = mfl.util.eerp(bus_amp_get(), 0, 0.001)
+    -- print(amp)
+    bus_amp_set(amp)
+  end
+  if it_count == 5 then
+    exit()
+  end
+end
+
 function Loop(tick)
   local tt = mfl.time.track_tick(tick, bpm, section_len)
   if tt == 0 then
@@ -160,10 +173,8 @@ function Loop(tick)
       section = 1
     end
     it_count = it_count + 1
-    if it_count == 5 then
-      exit()
-    end
   end
+  handle_rec()
   bass(tt)
   pads(tt)
   lead(tt)
