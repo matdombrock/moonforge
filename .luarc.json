@@ -28,6 +28,7 @@
         "bus_amp_set",
         "bus_amp_get",
         "wavetable_write",
+        "effect_set",
         "exit",
       ]
     }

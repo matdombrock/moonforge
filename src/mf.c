@@ -18,7 +18,7 @@ mf_wave_data wave_data; // Global wave data
 /// Core functions
 ///////
 
-int mf_wave_set(int osc_num, enum Wave wave) {
+int mf_wave_set(int osc_num, enum mf_wave wave) {
   if (osc_num < 0 || osc_num >= OSC_COUNT) {
     return -1; // Invalid oscillator index
   }
@@ -88,15 +88,15 @@ int mf_bus_amp_set(float amp) {
   if (amp < 0.0f || amp > 4.0f) {
     return -1; // Invalid bus amplitude value
   }
-  state.bus_amp = amp; // Set the bus amplitude
+  state.mb_amp = amp; // Set the bus amplitude
   return 0;            // Success
 }
 
 float mf_bus_amp_get() {
-  return state.bus_amp; // Return the bus amplitude
+  return state.mb_amp; // Return the bus amplitude
 }
 
-int mf_wavetable_write(enum Wave wave, float *data) {
+int mf_wavetable_write(enum mf_wave wave, float *data) {
   if (wave < CA || wave > CD) {
     return -2; // Invalid custom wave type
   }
@@ -119,6 +119,89 @@ int mf_wavetable_write(enum Wave wave, float *data) {
   return 0; // Success
 }
 
+// Sets the lowpass effect on the specified oscillator or master bus
+// If the effect is already present in the chain, it updates the cutoff frequency
+// and does not reset
+// osc_num: -1 for master bus, 0 to OSC_COUNT-1 for specific oscillator
+// cutoff: cutoff frequency in Hz
+// Returns 0 on success, non-zero on failure
+int mf_effect_set_lowpass(int osc_num, float cutoff) {
+  if (osc_num < -1 || osc_num >= OSC_COUNT) {
+    return 1; // Invalid oscillator index
+  }
+  int cur_slot = -1;
+  mf_fx *fx = NULL;
+  if (osc_num == -1) {
+    cur_slot = state.mb_fx_slot_index;
+    fx = &state.mb_fx_chain[cur_slot];
+  }
+  else {
+    cur_slot = state.osc[osc_num].fx_slot_index;
+    fx = &state.osc[osc_num].fx_chain[cur_slot];
+  }
+  if (cur_slot >= MAX_CHAIN) {
+    return 2; // No available effect slots
+  }
+  // Find the effect we have in the current slot
+  if (fx->type != FX_LOWPASS) {
+    fx->type = FX_LOWPASS;
+    mfx_lowpass_init(&fx->state.lowpass);
+  }
+  mfx_lowpass_set(&fx->state.lowpass, cutoff);
+  state.osc[osc_num].fx_slot_index++;
+  return 0; // Success
+}
+
+// Sets the delay effect on the specified oscillator or master bus
+// If the effect is already present in the chain, it updates the parameters
+// and does not reset
+// osc_num: -1 for master bus, 0 to OSC_COUNT-1 for specific oscillator
+// delay_time: delay time in seconds (0.0 to 5.0)
+// feedback: feedback amount (0.0 to 0.95)
+// mix: wet/dry mix (0.0 to 1.0)
+// Returns 0 on success, non-zero on failure
+int mf_effect_set_delay(int osc_num, float delay_time, float feedback, float mix) {
+  printf("Setting delay effect on osc_num %d with delay_time %.2f, feedback %.2f, mix %.2f\n", osc_num, delay_time, feedback, mix);
+  if (osc_num < -1 || osc_num >= OSC_COUNT) {
+    return 1; // Invalid oscillator index
+  }
+  // if (delay_time < 0.0f || delay_time > 5.0f) {
+  //   return 2; // Invalid delay time
+  // }
+  if (feedback < 0.0f || feedback > 0.95f) {
+    return 3; // Invalid feedback value
+  }
+  if (mix < 0.0f || mix > 1.0f) {
+    return 4; // Invalid mix value
+  }
+  int cur_slot = -1;
+  mf_fx *fx = NULL;
+  if (osc_num == -1) {
+    cur_slot = state.mb_fx_slot_index;
+    fx = &state.mb_fx_chain[cur_slot];
+  } 
+  else {
+    cur_slot = state.osc[osc_num].fx_slot_index;
+    fx = &state.osc[osc_num].fx_chain[cur_slot];
+  }
+  if (cur_slot >= MAX_CHAIN) {
+    return 4; // No available effect slots
+  }
+  // Find the effect we have in the current slot
+  if (fx->type != FX_DELAY) {
+    fx->type = FX_DELAY;
+    mfx_delay_init(&fx->state.delay);
+  }
+  mfx_delay_set(&fx->state.delay, delay_time, feedback, mix);
+  if (osc_num == -1) {
+    state.mb_fx_slot_index++;
+  } 
+  else {
+    state.osc[osc_num].fx_slot_index++;
+  }
+  return 0; // Success
+}
+
 int mf_exit() {
   state.flags.exit = 1; // Set exit flag
   return 0;             // Success
@@ -131,13 +214,16 @@ int mf_exit() {
 static int _l_mf_lua_index(int input) {
   return input - 1; // Lua uses 1-based indexing, C uses 0-based
 }
-static int _l_mf_ticks_to_samples(int ticks) { return ticks * (int)(SAMPLE_RATE * (TICK_WAIT * 1000)); }
+static int _l_mf_ticks_to_samples(int ticks) { 
+  int ticks_per_second = 1000 / TICK_WAIT; // Assuming TICK_WAIT is in milliseconds 
+  return (ticks * SAMPLE_RATE) / ticks_per_second;
+}
 
 static int l_mf_wave_set(lua_State *L) {
   int osc_num = luaL_checkinteger(L, 1);
   osc_num = _l_mf_lua_index(osc_num);
   const char *waveStr = luaL_checkstring(L, 2);
-  enum Wave wave;
+  enum mf_wave wave;
 
   if (strcmp(waveStr, "SINE") == 0) {
     wave = SINE;
@@ -246,7 +332,7 @@ static int l_mf_bus_amp_get(lua_State *L) {
 
 static int l_mf_wavetable_write(lua_State *L) {
   const char *waveStr = luaL_checkstring(L, 1);
-  enum Wave wave;
+  enum mf_wave wave;
 
   if (strcmp(waveStr, "CA") == 0) {
     wave = CA;
@@ -273,6 +359,29 @@ static int l_mf_wavetable_write(lua_State *L) {
   return 1; //
 }
 
+static int l_mf_effect_set(lua_State *L) {
+  int osc_num = luaL_checkinteger(L, 1);
+  osc_num = _l_mf_lua_index(osc_num); // -1 for master bus
+  const char *effectStr = luaL_checkstring(L, 2);
+  int result = -1;
+  if (strcmp(effectStr, "LOWPASS") == 0) {
+    float cutoff = luaL_checknumber(L, 3);
+    result = mf_effect_set_lowpass(osc_num, cutoff);
+  } else if (strcmp(effectStr, "DELAY") == 0) {
+    int delay_ticks = luaL_checknumber(L, 3);
+    int delay_samples = _l_mf_ticks_to_samples(delay_ticks);
+    printf("Delay in samples: %d\n", delay_samples);
+    float feedback = luaL_checknumber(L, 4);
+    float mix = luaL_checknumber(L, 5);
+    result = mf_effect_set_delay(osc_num, delay_samples, feedback, mix);
+  } else {
+    return luaL_error(L, "Invalid effect type: %s", effectStr);
+  }
+
+  lua_pushinteger(L, result);
+  return 1; //
+}
+
 static int l_mf_exit(lua_State *L) {
   int result = mf_exit();
   lua_pushinteger(L, result);
@@ -290,6 +399,7 @@ static const struct luaL_Reg mf_funcs[] = {
     {"bus_amp_set", l_mf_bus_amp_set},
     {"bus_amp_get", l_mf_bus_amp_get},
     {"wavetable_write", l_mf_wavetable_write},
+    {"effect_set", l_mf_effect_set},
     {"exit", l_mf_exit},
     {NULL, NULL} // Sentinel
 };
@@ -367,12 +477,57 @@ void mf_synth_callback(const void *output_buffer, unsigned long frames_per_buffe
       sample_mix_l += sample * amp * state.osc[osc_num].amp_l;
       sample_mix_r += sample * amp * state.osc[osc_num].amp_r;
       // Apply effects chain
+      for (int fx_num = 0; fx_num < MAX_CHAIN; fx_num++) {
+        mf_fx *fx = &state.osc[osc_num].fx_chain[fx_num];
+        switch (fx->type) {
+        case FX_DELAY:
+          sample_mix_l = mfx_delay_process(&fx->state.delay, sample_mix_l);
+          sample_mix_r = mfx_delay_process(&fx->state.delay, sample_mix_r);
+          break;
+        case FX_LOWPASS:
+          sample_mix_l = mfx_lowpass_process(&fx->state.lowpass, sample_mix_l);
+          sample_mix_r = mfx_lowpass_process(&fx->state.lowpass, sample_mix_r);
+          break;
+        case FX_HIGHPASS:
+          // Implement highpass processing here
+          break;
+        case FX_REVERB:
+          // Implement reverb processing here
+          //   break;
+        case FX_NONE:
+        default:
+          break; // No effect
+        }
+      }
       // Increment phase
       state.osc[osc_num].phase =
           fmod(state.osc[osc_num].phase + freq * (TUNING * TABLE_SIZE / SAMPLE_RATE), TABLE_SIZE);
     }
+    // Apply global bus effects chain
+    for (int fx_num = 0; fx_num < MAX_CHAIN; fx_num++) {
+      mf_fx *fx = &state.mb_fx_chain[fx_num];
+      switch (fx->type) {
+      case FX_DELAY:
+        sample_mix_l = mfx_delay_process(&fx->state.delay, sample_mix_l);
+        sample_mix_r = mfx_delay_process(&fx->state.delay, sample_mix_r);
+        break;
+      case FX_LOWPASS:
+        sample_mix_l = mfx_lowpass_process(&fx->state.lowpass, sample_mix_l);
+        sample_mix_r = mfx_lowpass_process(&fx->state.lowpass, sample_mix_r);
+        break;
+      case FX_HIGHPASS:
+        // Implement highpass processing here
+        break;
+      case FX_REVERB:
+        // Implement reverb processing here
+        //   break;
+      case FX_NONE:
+      default:
+        break; // No effect
+      }
+    }
     // Apply bus amp
-    float bus_amp = mfx_lowpass_process(&state.bus_amp_lp, state.bus_amp);
+    float bus_amp = mfx_lowpass_process(&state.mb_amp_lp, state.mb_amp);
     sample_mix_l *= bus_amp;
     sample_mix_r *= bus_amp;
     // Add samples to the buffer
@@ -421,16 +576,26 @@ int mf_init() {
     state.osc[i].amp_l = 1.0f;
     state.osc[i].amp_r = 1.0f;
     state.osc[i].wave = SINE; // Set default wave type
+    // Initialize effect chains
+    state.osc[i].fx_slot_index = 0;
+    for (int fx_num = 0; fx_num < MAX_CHAIN; fx_num++) {
+      state.osc[i].fx_chain[fx_num].type = FX_NONE; // No effects by default
+    }
+  }
+  // Initialize global bus effect chain
+  state.mb_fx_slot_index = 0;
+  for (int fx_num = 0; fx_num < MAX_CHAIN; fx_num++) {
+    state.mb_fx_chain[fx_num].type = FX_NONE; // No effects by default
   }
   // Set up flags
   state.flags.exit = 0;
 
   // Setup state vars
-  state.bus_amp = 1.0f; // Set default bus amplitude
+  state.mb_amp = 1.0f; // Set default bus amplitude
 
   // Control filters
-  mfx_lowpass_init(&state.bus_amp_lp);
-  mfx_lowpass_set(&state.bus_amp_lp, 400.0f); // Default cutoff
+  mfx_lowpass_init(&state.mb_amp_lp);
+  mfx_lowpass_set(&state.mb_amp_lp, 400.0f); // Default cutoff
 
   // Init wave data
   for (int i = 0; i < TABLE_SIZE; i++) {
@@ -450,6 +615,10 @@ int mf_init() {
 
 int tick = 0;
 int mf_run_lua(lua_State *L) {
+  state.mb_fx_slot_index = 0; // Reset master bus effect slot index each tick
+  for (int i = 0; i < OSC_COUNT; i++) {
+    state.osc[i].fx_slot_index = 0; // Reset each oscillator's effect slot index each tick
+  }
   lua_getglobal(L, "Loop");              // Push function onto stack
   lua_pushnumber(L, tick);               // Push argument
   if (lua_pcall(L, 1, 0, 0) != LUA_OK) { // Call function with 1 arg, 0 results
