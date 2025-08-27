@@ -102,27 +102,6 @@ Returns a Lua array with 2 values:
 `{right, left}`.  
 - `osc_num` - target oscillator
 
-### `lowpass_set(osc_num, cutoff)`
-Sets the a lowpass filter on the target oscillator.
-- `osc_num` - target oscillator
-- `cutoff` - cutoff frequency (Hz)
-
-### `lowpass_get(osc_num)`
-Returns the current lowpass cutoff for the target oscillator.
-- `osc_num` - target oscillator
-
-### `delay_set(osc_num, delay_ticks, feedback, mix)`
-Set a delay line on the target oscillator. 
-- `osc_num` - target oscillator
-- `delay_ticks` - delay time in ticks
-- `feedback` - line feedback (0->1)
-- `mix` - wet/dry mix (0->1)
-
-### `delay_get(osc_num)` (planned)
-Returns the delay values for the target oscillator:
-`{delay_ticks, feedback, mix}`
-- `osc_num` - target oscillator
-
 ### `mute_all()`
 Mutes all oscillators. The sets the amplitude for all oscillators to zero. It does not preserve the previous amplitude. If you want to mute a specific oscillator, just set its amp to zero. 
 
@@ -133,39 +112,21 @@ Sets the volume for the main bus.
 ### `bus_amp_get()`
 Returns the main bus amplitude. 
 
-### `bus_lowpass_set(cutoff)`
-Sets the lowpass filter on the output bus (master).
-- `osc_num` - target oscillator
-- `cutoff` - cutoff frequency (Hz)
-
-### `bus_lowpass_get()` (planned)
-Returns the current lowpass cutoff for the main bus.
-- `osc_num` - target oscillator
-
-### `bus_delay_set_l(delay_ticks, feedback, mix)`
-Set the delay on the output bus (master) left channel.
-- `delay_ticks` - delay time in ticks
-- `feedback` - line feedback (0->1)
-- `mix` - wet/dry mix (0->1)
-
-### `bus_delay_set_r(delay_ticks, feedback, mix)`
-Set the delay on the output bus (master) left channel.
-- `delay_ticks` - delay time in ticks
-- `feedback` - line feedback (0->1)
-- `mix` - wet/dry mix (0->1)
-
-### `bus_delay_get_l()` (planned)
-Returns the delay values for the main bus left channel:
-`{delay_ticks, feedback, mix}`
-
-### `bus_delay_get_r()` (planned)
-Returns the delay values for the main bus left channel:
-`{delay_ticks, feedback, mix}`
-
 ### `wavetable_write(wave_name, data)`
 Writes a wavetable to a custom wavetable slot. It is only possible to write to custom wavetables ("CA", "CB", "CC", "CD").
 - `wave_name` - the name of the waveform to use
 - `data` - An array of `TABLE_LENGTH` sample values (-1->1)
+
+### `effect_set(osc_num, effect_name, ...)`
+Adds/sets an effect on the current effects chain for the given oscillator.
+- `osc_num` - target oscillator, `0` for main bus
+- `effect_name` - one of "NONE", "DELAY", "LOWPASS"
+**Lowpass params:**
+- `cutoff` - the cutoff frequency
+**Delay params:**
+- `delay_ticks` - the length of the delay in ticks
+- `feedback` - delay feedback (0->1)
+- `mix` - delay mix (0->1)
 
 ### `exit()`
 Cleanly exit the program. If recording is enabled, this will save the current recording.
