@@ -9,7 +9,7 @@ Every MoonForge Lua script must contain a main `Loop` function.
 
 This function will be called once per "tick" (about 1ms). 
 
-The function call we will be supplied the `tick` parameter which indicated the current tick (loop iteration). 
+This function call will be supplied the `tick` parameter which indicates the current tick (loop iteration). 
 
 The most basic MoonForge script possible look like this:
 ```lua
