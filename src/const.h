@@ -7,18 +7,18 @@
 #define VERSION "0.1.0"
 #define SAMPLE_RATE 48000
 #define BLOCK_SIZE (int)(SAMPLE_RATE / 1000) // 1k ticks per second
-#define TABLE_SIZE 256
-#define TUNING 440.0f
-#define OSC_COUNT 8
+#define TABLE_SIZE 256 // Size of wavetables in samples
+#define TUNING 440.0f // Frequency of A4
+#define OSC_COUNT 8 // Number of oscillators available
 #define TICK_WAIT 1 // 1ms per tick, this should likely not be changed
 
 ///////
 // Not exposed to Lua  
 ///////
 
+// Audio engine settings
 #define MAX_CHAIN 4 // Max effects per bus
 #define MAX_DELAY_SAMPLES 8 * SAMPLE_RATE // Max N seconds delay -- Uses a lot of memory
-
 #define PARAM_LPC 400.0f // Lowpass cutoff for control smoothing
 
 // Recording settings

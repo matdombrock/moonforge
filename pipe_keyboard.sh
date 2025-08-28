@@ -1,4 +1,5 @@
 #!/bin/bash
+# Sends computer keyboard input to a named pipe
 
 PIPE="mfpipe"
 

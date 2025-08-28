@@ -1,3 +1,6 @@
+-- This works but since IO is blocking, it will only "tick" when there's MIDI input
+-- This means we can't do anything fun
+-- Run `lua midi.lua` in another terminal to send MIDI events to the pipe
 local mfl = require "util.mflib"
 
 local pipe = io.open("../mfpipe", "r")

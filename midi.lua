@@ -1,3 +1,4 @@
+-- Read MIDI events from a specified device and write them to a named pipe.
 -- To list devices use `aseqdump -l`
 
 local pipe = "mfpipe"

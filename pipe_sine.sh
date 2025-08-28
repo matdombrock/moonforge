@@ -1,3 +1,5 @@
+#!/bin/bash
+# Pipes a sine wave to a named pipe
 freq=2
 amplitude=1
 dt=0.01

@@ -1,3 +1,4 @@
+-- Read arbitrary data from a named pipe
 local pipe = io.open("../mfpipe", "r")
 
 function Loop(tick)

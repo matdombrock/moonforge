@@ -1,3 +1,6 @@
+-- Get some keyboard input from a named pipe and play notes accordingly.
+-- Create the named pipe with `mkfifo ../mfpipe` in the terminal.
+-- Run the ./pt3.sh script to send keyboard input to the pipe.
 local mfl = require("util.mflib")
 local pipe = io.open("../mfpipe", "r")
 

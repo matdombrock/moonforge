@@ -1,3 +1,8 @@
+-- This allows for non-blocking reading of MIDI events from a named pipe
+-- and controlling sound parameters based on those events.
+-- It uses the 'posix' library to handle non-blocking I/O.
+-- Install with `luarocks install luaposix` if you don't have it.
+-- Run `lua midi.lua` in another terminal to send MIDI events to the pipe.
 local mfl = require "util.mflib"
 local posix = require "posix"
 
