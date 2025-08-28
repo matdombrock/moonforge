@@ -50,36 +50,47 @@ local function serialize(tbl)
   return serializeValue(tbl)
 end
 
--- Open the pipe for writing MIDI events to
+local posix = require("posix")
 local midi_pipe = io.open(pipe, "w")
 local handle = io.popen("aseqdump -p '" .. midi_dev .. "'")
 if not handle then
   print("Failed to open MIDI device")
   return
 end
-for line in handle:lines() do
-  print("\n>> " .. line) -- Process MIDI input here
-  local parsed = parse_line(line)
-  if parsed then
-    print("source", parsed.source)
-    print("event", parsed.event)
-    print("ch", parsed.ch)
-    for k, v in pairs(parsed.data) do
-      print("data ", k, v)
+
+-- Get the file descriptor and set it to non-blocking
+local fd = posix.fileno(handle)
+posix.fcntl(fd, posix.F_SETFL, posix.O_NONBLOCK)
+
+-- Non-blocking MIDI read function for main loop
+function midi_tick()
+  local line = handle:read("*l")
+  if line then
+    print("\n>> " .. line) -- Process MIDI input here
+    local parsed = parse_line(line)
+    if parsed then
+      print("source", parsed.source)
+      print("event", parsed.event)
+      print("ch", parsed.ch)
+      for k, v in pairs(parsed.data) do
+        print("data ", k, v)
+      end
+      if handle and midi_pipe then
+        midi_pipe:write(serialize(parsed) .. "\n")
+        midi_pipe:flush()
+      else
+        print("MIDI pipe not available")
+      end
     end
-    if handle and midi_pipe then
-      midi_pipe:write(serialize(parsed) .. "\n")
-      -- midi_pipe:write(serialize(parsed))
-      midi_pipe:flush()
-    else
-      print("MIDI pipe not available")
-    end
+    print("<<")
   end
-  print("<<")
 end
 
-print("MIDI input loop ended")
-
-if handle then
-  handle:close()
+function midi_cleanup()
+  if handle then
+    handle:close()
+  end
+  if midi_pipe then
+    midi_pipe:close()
+  end
 end

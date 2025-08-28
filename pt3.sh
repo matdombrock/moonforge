@@ -21,7 +21,7 @@ while true; do
         break
     fi
     echo -n "$c" > "$PIPE"
-    echo -n "$c"
+    echo -n "c$c"
 done
 
 # Restore terminal settings on exit
