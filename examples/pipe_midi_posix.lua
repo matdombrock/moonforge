@@ -12,7 +12,7 @@ local O_NONBLOCK = posix.fcntl.O_NONBLOCK
 local fd = posix.open("../mfpipe", O_RDONLY + O_NONBLOCK)
 local pipe_buffer = ""
 
-amp_set(1, 0.9)
+amp_set(1, 0.0)
 
 local freq = 440
 local note = 60
