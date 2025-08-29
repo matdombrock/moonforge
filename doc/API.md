@@ -62,7 +62,7 @@ When a function calls for a `wave_name` parameter, it may be one of the followin
 - `"CC"` - custom oscillator c
 - `"CD"` - custom oscillator d
 
-## `osc_num` vs `bus_num`
+## The `osc_num` & `bus_num` parameters
 The `osc_num` parameter refers to a specific oscillator. The given number may be between `1` and the max amount of available oscillators. By default there are `8` oscillators available. 
 
 The `bus_num` paramter refers to a specific bus. Each oscillator gets their own bus (`1->8`) which is fed into the main bus (`0`). 
