@@ -87,7 +87,7 @@ The `mflib.lua` library is written in pure Lua, so anything it does can be done 
 - A C compiler for your OS
 
 ### Windows?
-No.
+[No.](https://c.tenor.com/5N9derc9UcgAAAAC/no-bugs-bunny.gif)
 
 ### Build
 ```bash
