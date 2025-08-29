@@ -58,14 +58,14 @@ A basic script might look like this:
 ```lua
 -- Setup
 amp_set(1, 1) -- Set the amp of the first osc to 1
-local base = 440 -- Base frequency in Hz
+local base_freq = 440 -- Base frequency in Hz
 local lfo_range = 229 -- LFO range in Hz
 local lfo_time = 1000 -- Speed of the LFO in ticks
 -- Main loop
 -- Runs at about 1 KHz (1000 times per second)
 function Loop(tick)
     local lfo = math.sin(tick / lfo_time) * 0.5 + 0.5 -- Sine wave normalized to 0->1
-    freq_set(1, base + lfo * lfo_range) -- Set the frequnce of the first osc using the LFO
+    freq_set(1, base_freq + lfo * lfo_range) -- Set the frequncy of the first osc using the LFO
 end
 ```
 
