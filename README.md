@@ -6,27 +6,47 @@ MoonForge is a minimalist modular synthesis lab written in C. It's scripted via 
 While MoonForge can be used as a semi-traditional synthesizer and tracker, it's built for experimental, evolving, generative audio soundscapes and procedural compositions. 
 
 Features & Goals
+
 ✅ Fully controlled by Lua
+
 ✅ Simple API
+
 ✅ Wavetable sythesis engine
+
 ✅ Dynamic FX chain / routing
+
 ✅ Proceduaral / generative audio
+
 ✅ Music tracker
+
 ✅ Data sonification
+
 ⛔ 2D wavetables
+
 ⛔ MIDI support (live playing)
+
 ✅ Designed for embedded linux
+
 ✅ Automatic built-in recording
+
 ✅ Fun toy for audio nerds
 
 Available FX:
+
 ✅ All effects are written in C and controlled by Lua.
+
 ✅ Lowpass
+
 ✅ Delay
+
 ⛔ Highpass
+
 ⛔ Reverb
+
 ⛔ Waveshaping distortion
+
 ⛔ Bitcrusher
+
 ⛔ Downsample
 
 Note: MoonForge is not in any way a scientific instrument and generally is not intended to be used as such. Lua is only able to affect the audio data at block boundaries and thus is not capable of particularly precise, low-level DSP. 
