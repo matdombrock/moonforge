@@ -58,6 +58,9 @@ if not handle then
   print("Failed to open MIDI device")
   return
 end
+
+local msg_count = 0
+
 for line in handle:lines() do
   print("\n>> " .. line) -- Process MIDI input here
   local parsed = parse_line(line)
@@ -75,6 +78,8 @@ for line in handle:lines() do
     else
       print("MIDI pipe not available")
     end
+    msg_count = msg_count + 1
+    print("msg count: ", msg_count)
   end
   print("<<")
 end
