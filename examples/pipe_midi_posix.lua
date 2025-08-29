@@ -88,7 +88,7 @@ function Loop(tick)
           release = false
           note = midi.data.note or 60
           freq_target = mfl.frequency.from_midi(note)
-          velocity = cc_normalize(midi.data.velocity or 100) * 0.7
+          velocity = cc_normalize(midi.data.velocity or 100) * 0.5
         end
         if midi.event == "Note off" then
           local off_note = midi.data.note or 60

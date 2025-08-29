@@ -44,22 +44,29 @@ float mf_freq_get(int osc_num) {
   return state.osc[osc_num].freq; // Return the frequency of the specified oscillator
 }
 
-int mf_amp_set(int osc_num, float amp) {
-  if (osc_num < 0 || osc_num >= OSC_COUNT) {
+int mf_amp_set(int bus_num, float amp) {
+  if (bus_num < -1 || bus_num >= OSC_COUNT) {
     return -1; // Invalid oscillator index
   }
   if (amp < 0.0f || amp > 4.0f) {
     return -2; // Invalid amplitude value
   }
-  state.osc[osc_num].amp = amp; // Set the amplitude for the specified oscillator
+  if (bus_num == -1) {
+    state.mb_amp = amp; // Set master bus amplitude
+    return 0;          // Success
+  }
+  state.osc[bus_num].amp = amp; // Set the amplitude for the specified oscillator
   return 0;                     // Success
 }
 
-float mf_amp_get(int osc_num) {
-  if (osc_num < 0 || osc_num >= OSC_COUNT) {
+float mf_amp_get(int bus_num) {
+  if (bus_num < -1 || bus_num >= OSC_COUNT) {
     return -1; // Invalid oscillator index
   }
-  return state.osc[osc_num].amp; // Return the amplitude of the specified oscillator
+  if (bus_num == -1) {
+    return state.mb_amp; // Return master bus amplitude
+  }
+  return state.osc[bus_num].amp; // Return the amplitude of the specified oscillator
 }
 
 int mf_pan_set(int osc_num, float pan_l, float pan_r) {
@@ -82,18 +89,6 @@ float *mf_pan_get(int osc_num) {
   pan[0] = state.osc[osc_num].amp_l; // Left channel amplitude
   pan[1] = state.osc[osc_num].amp_r; // Right channel amplitude
   return pan;                        // Return panning array
-}
-
-int mf_bus_amp_set(float amp) {
-  if (amp < 0.0f || amp > 4.0f) {
-    return -1; // Invalid bus amplitude value
-  }
-  state.mb_amp = amp; // Set the bus amplitude
-  return 0;            // Success
-}
-
-float mf_bus_amp_get() {
-  return state.mb_amp; // Return the bus amplitude
 }
 
 int mf_wavetable_write(enum mf_wave wave, float *data) {
@@ -125,19 +120,19 @@ int mf_wavetable_write(enum mf_wave wave, float *data) {
 // osc_num: -1 for master bus, 0 to OSC_COUNT-1 for specific oscillator
 // cutoff: cutoff frequency in Hz
 // Returns 0 on success, non-zero on failure
-int mf_effect_set_lowpass(int osc_num, float cutoff) {
-  if (osc_num < -1 || osc_num >= OSC_COUNT) {
+int mf_effect_set_lowpass(int bus_num, float cutoff) {
+  if (bus_num < -1 || bus_num >= OSC_COUNT) {
     return 1; // Invalid oscillator index
   }
   int cur_slot = -1;
   mf_fx *fx = NULL;
-  if (osc_num == -1) {
+  if (bus_num == -1) {
     cur_slot = state.mb_fx_slot_index;
     fx = &state.mb_fx_chain[cur_slot];
   }
   else {
-    cur_slot = state.osc[osc_num].fx_slot_index;
-    fx = &state.osc[osc_num].fx_chain[cur_slot];
+    cur_slot = state.osc[bus_num].fx_slot_index;
+    fx = &state.osc[bus_num].fx_chain[cur_slot];
   }
   if (cur_slot >= MAX_CHAIN) {
     return 2; // No available effect slots
@@ -148,7 +143,7 @@ int mf_effect_set_lowpass(int osc_num, float cutoff) {
     mfx_lowpass_init(&fx->state.lowpass);
   }
   mfx_lowpass_set(&fx->state.lowpass, cutoff);
-  state.osc[osc_num].fx_slot_index++;
+  state.osc[bus_num].fx_slot_index++;
   return 0; // Success
 }
 
@@ -160,8 +155,8 @@ int mf_effect_set_lowpass(int osc_num, float cutoff) {
 // feedback: feedback amount (0.0 to 0.95)
 // mix: wet/dry mix (0.0 to 1.0)
 // Returns 0 on success, non-zero on failure
-int mf_effect_set_delay(int osc_num, float delay_time, float feedback, float mix) {
-  if (osc_num < -1 || osc_num >= OSC_COUNT) {
+int mf_effect_set_delay(int bus_num, float delay_time, float feedback, float mix) {
+  if (bus_num < -1 || bus_num >= OSC_COUNT) {
     return 1; // Invalid oscillator index
   }
   // if (delay_time < 0.0f || delay_time > 5.0f) {
@@ -175,13 +170,13 @@ int mf_effect_set_delay(int osc_num, float delay_time, float feedback, float mix
   }
   int cur_slot = -1;
   mf_fx *fx = NULL;
-  if (osc_num == -1) {
+  if (bus_num == -1) {
     cur_slot = state.mb_fx_slot_index;
     fx = &state.mb_fx_chain[cur_slot];
   } 
   else {
-    cur_slot = state.osc[osc_num].fx_slot_index;
-    fx = &state.osc[osc_num].fx_chain[cur_slot];
+    cur_slot = state.osc[bus_num].fx_slot_index;
+    fx = &state.osc[bus_num].fx_chain[cur_slot];
   }
   if (cur_slot >= MAX_CHAIN) {
     return 4; // No available effect slots
@@ -192,11 +187,11 @@ int mf_effect_set_delay(int osc_num, float delay_time, float feedback, float mix
     mfx_delay_init(&fx->state.delay);
   }
   mfx_delay_set(&fx->state.delay, delay_time, feedback, mix);
-  if (osc_num == -1) {
+  if (bus_num == -1) {
     state.mb_fx_slot_index++;
   } 
   else {
-    state.osc[osc_num].fx_slot_index++;
+    state.osc[bus_num].fx_slot_index++;
   }
   return 0; // Success
 }
@@ -272,20 +267,20 @@ static int l_mf_freq_get(lua_State *L) {
 }
 
 static int l_mf_amp_set(lua_State *L) {
-  int osc_num = luaL_checkinteger(L, 1);
-  osc_num = _l_mf_lua_index(osc_num);
+  int bus_num = luaL_checkinteger(L, 1);
+  bus_num = _l_mf_lua_index(bus_num);
   float amp = luaL_checknumber(L, 2);
-  int result = mf_amp_set(osc_num, amp);
+  int result = mf_amp_set(bus_num, amp);
   lua_pushinteger(L, result);
   return 1; //
 }
 
 static int l_mf_amp_get(lua_State *L) {
-  int osc_num = luaL_checkinteger(L, 1);
-  osc_num = _l_mf_lua_index(osc_num);
-  float amp = mf_amp_get(osc_num);
+  int bus_num = luaL_checkinteger(L, 1);
+  bus_num = _l_mf_lua_index(bus_num);
+  float amp = mf_amp_get(bus_num);
   if (amp < 0) {
-    return luaL_error(L, "Invalid oscillator index: %d", osc_num + 1);
+    return luaL_error(L, "Invalid oscillator index: %d", bus_num + 1);
   }
   lua_pushnumber(L, amp);
   return 1; //
@@ -314,19 +309,6 @@ static int l_mf_pan_get(lua_State *L) {
   lua_pushnumber(L, pan[1]);
   lua_rawseti(L, -2, 2);
   return 1; // Return the table
-}
-
-static int l_mf_bus_amp_set(lua_State *L) {
-  float amp = luaL_checknumber(L, 1);
-  int result = mf_bus_amp_set(amp);
-  lua_pushinteger(L, result);
-  return 1; //
-}
-
-static int l_mf_bus_amp_get(lua_State *L) {
-  float amp = mf_bus_amp_get();
-  lua_pushnumber(L, amp);
-  return 1; //
 }
 
 static int l_mf_wavetable_write(lua_State *L) {
@@ -359,19 +341,19 @@ static int l_mf_wavetable_write(lua_State *L) {
 }
 
 static int l_mf_effect_set(lua_State *L) {
-  int osc_num = luaL_checkinteger(L, 1);
-  osc_num = _l_mf_lua_index(osc_num); // -1 for master bus
+  int bus_num = luaL_checkinteger(L, 1);
+  bus_num = _l_mf_lua_index(bus_num); // -1 for master bus
   const char *effectStr = luaL_checkstring(L, 2);
   int result = -1;
   if (strcmp(effectStr, "LOWPASS") == 0) {
     float cutoff = luaL_checknumber(L, 3);
-    result = mf_effect_set_lowpass(osc_num, cutoff);
+    result = mf_effect_set_lowpass(bus_num, cutoff);
   } else if (strcmp(effectStr, "DELAY") == 0) {
     int delay_ticks = luaL_checknumber(L, 3);
     int delay_samples = _l_mf_ticks_to_samples(delay_ticks);
     float feedback = luaL_checknumber(L, 4);
     float mix = luaL_checknumber(L, 5);
-    result = mf_effect_set_delay(osc_num, delay_samples, feedback, mix);
+    result = mf_effect_set_delay(bus_num, delay_samples, feedback, mix);
   } else {
     return luaL_error(L, "Invalid effect type: %s", effectStr);
   }
@@ -394,8 +376,6 @@ static const struct luaL_Reg mf_funcs[] = {
     {"amp_get", l_mf_amp_get},
     {"pan_set", l_mf_pan_set},
     {"pan_get", l_mf_pan_get},
-    {"bus_amp_set", l_mf_bus_amp_set},
-    {"bus_amp_get", l_mf_bus_amp_get},
     {"wavetable_write", l_mf_wavetable_write},
     {"effect_set", l_mf_effect_set},
     {"exit", l_mf_exit},

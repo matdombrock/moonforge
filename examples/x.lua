@@ -156,9 +156,9 @@ end
 
 local function handle_rec()
   if it_count == 4 then
-    local amp = mfl.util.eerp(bus_amp_get(), 0, 0.001)
+    local amp = mfl.util.eerp(amp_get(0), 0, 0.001)
     -- print(amp)
-    bus_amp_set(amp)
+    amp_set(0, amp)
   end
   if it_count == 5 then
     exit()

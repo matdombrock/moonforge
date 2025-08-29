@@ -62,6 +62,11 @@ When a function calls for a `wave_name` parameter, it may be one of the followin
 - `"CC"` - custom oscillator c
 - `"CD"` - custom oscillator d
 
+## `osc_num` vs `bus_num`
+The `osc_num` parameter refers to a specific oscillator. The given number may be between `1` and the max amount of available oscillators. By default there are `8` oscillators available. 
+
+The `bus_num` paramter refers to a specific bus. Each oscillator gets their own bus (`1->8`) which is fed into the main bus (`0`). 
+
 ## Funtions
 
 ### `wave_set(osc_num, wave_name)` 
@@ -82,14 +87,14 @@ Sets the frequency for the given oscillator.
 Returns the current frequency for the given oscillator. 
 - `osc_num` - target oscillator
 
-### `amp_set(osc_num, amp)` 
+### `amp_set(bus_num, amp)` 
 Sets the amplitude for the given oscillator. 
-- `osc_num` - target oscillator
+- `bus_num` - target bus (`0` for main bus)
 - `amp` - target amp (0->4)
 
-### `amp_get(osc_num)` 
+### `amp_get(bus_num)` 
 Returns the current amplitude for the given oscillator. 
-- `osc_num` - target oscillator
+- `bus_num` - target bus (`0` for main bus)
 
 ### `pan_set(osc_num, pan_l, pan_r)` 
 Sets the pan for the given oscillator. This is effectively just a way to control the amplitude of each channel individually. That being said it does not override the main amplitude level and is applied as an additional multiplier. 
@@ -102,26 +107,16 @@ Returns a Lua array with 2 values:
 `{right, left}`.  
 - `osc_num` - target oscillator
 
-### `mute_all()`
-Mutes all oscillators. The sets the amplitude for all oscillators to zero. It does not preserve the previous amplitude. If you want to mute a specific oscillator, just set its amp to zero. 
-
-### `bus_amp_set(amp)`
-Sets the volume for the main bus. 
-- `amp` - target amp (0->4)
-
-### `bus_amp_get()`
-Returns the main bus amplitude. 
-
 ### `wavetable_write(wave_name, data)`
 Writes a wavetable to a custom wavetable slot. It is only possible to write to custom wavetables ("CA", "CB", "CC", "CD").
 - `wave_name` - the name of the waveform to use
 - `data` - An array of `TABLE_LENGTH` sample values (-1->1)
 
-### `effect_set(osc_num, effect_name, ...)`
+### `effect_set(bus_num, effect_name, ...)`
 Adds/sets an effect on the current effects chain for the given oscillator.
 Effects are processed in the order they are added.
 The default amount of available effects slots is 4 per bus. 
-- `osc_num` - target oscillator, `0` for main bus
+- `bus_num` - target bus (`0` for main bus)
 - `effect_name` - one of "NONE", "DELAY", "LOWPASS"
 
 **Lowpass params:**

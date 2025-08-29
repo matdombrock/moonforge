@@ -73,8 +73,6 @@ int mf_amp_change(int osc_num, float amp_mod);
 float mf_amp_get(int osc_num);
 int mf_pan_set(int osc_num, float pan_l, float pan_r);
 int mf_wavetable_write(enum mf_wave wave, float *data);
-int mf_bus_amp_set(float amp);
-float mf_bus_amp_get();
 int mf_exit();
 
 // System functions

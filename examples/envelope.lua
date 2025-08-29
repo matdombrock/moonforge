@@ -1,7 +1,7 @@
 local mfl = require("util.mflib")
 
 wave_set(1, "SINE")
-bus_amp_set(0.8)
+amp_set(0, 0.8)
 
 local bpm = 120
 
