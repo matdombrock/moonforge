@@ -88,7 +88,7 @@ function Loop(tick)
           release = false
           note = midi.data.note or 60
           freq_target = mfl.frequency.from_midi(note)
-          velocity = midi.data.velocity / 127
+          velocity = cc_normalize(midi.data.velocity or 100) * 0.7
         end
         if midi.event == "Note off" then
           local off_note = midi.data.note or 60
@@ -113,6 +113,14 @@ function Loop(tick)
             delay_time = cc_normalize(midi.data.value) * 1000
             print("delay_time", delay_time)
           end
+        end
+        if midi.event == "Pitch bend" then
+          print("pitch bend", midi.data.value)
+          local bend = (midi.data.value - 8192) / 8192
+          bend = bend * 0.5
+          bend = bend + 1.5
+          print("bend", bend)
+          freq_target = mfl.frequency.from_midi(note) * bend
         end
       end
     end

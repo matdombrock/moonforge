@@ -22,7 +22,7 @@ local function parse_line(line)
 
   -- Parse the data part (note X, velocity Y)
   local data = {}
-  for key, value in data_str:gmatch("(%w+)%s+(%d+)") do
+  for key, value in data_str:gmatch("(%w+)%s+(-?%d+)") do
     data[key] = tonumber(value)
   end
 
