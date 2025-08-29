@@ -51,6 +51,29 @@ While MoonForge can be used as a semi-traditional synthesizer and tracker, it's 
 
 Note: MoonForge is not in any way a scientific instrument and generally is not intended to be used as such. Lua is only able to affect the audio data at block boundaries and thus is not capable of particularly precise, low-level DSP. 
 
+## Lua Scripting
+All Lua scripts must contain a `Loop(tick)` function. The `tick` value represents the current iteration of the main loop. 
+
+A basic script might look like this:
+```lua
+-- Setup
+amp_set(1, 1) -- Set the amp of the first osc to 1
+-- Main loop
+function Loop(tick)
+    print(tick)
+end
+```
+
+For scripting examples see the [examples](examples) directory.
+
+## Lua API
+See the [MF Lua API Docs](doc/API.md) for core API functions.
+
+## Higher Level Libraries
+This project also includes [`mflib.lua`](lua_include/mflib.lua) which contains wrapper functions around the core API which make it easier to work with. 
+
+The `mflib.lua` library is written in pure Lua, so anything it does can be done manually. Users are encouraged to write their own wrapper libraries (for fun). 
+
 ## Build & Package
 ### Requirements:
 - [Portaudio](https://www.portaudio.com/)
@@ -79,29 +102,6 @@ Final packaged build files will be in `./dist`.
 ```bash
 ./mf examples/test.lua
 ```
-
-## Lua Scripting
-All Lua scripts must contain a `Loop(tick)` function. The `tick` value represents the current iteration of the main loop. 
-
-A basic script might look like this:
-```lua
--- Setup
-amp_set(1, 1) -- Set the amp of the first osc to 1
--- Main loop
-function Loop(tick)
-    print(tick)
-end
-```
-
-For scripting examples see the [examples](examples) directory.
-
-## Lua API
-See the [MF Lua API Docs](doc/API.md) for core API functions.
-
-## Higher Level Libraries
-This project also includes [`mflib.lua`](lua_include/mflib.lua) which contains wrapper functions around the core API which make it easier to work with. 
-
-The `mflib.lua` library is written in pure Lua, so anything it does can be done manually. Users are encouraged to write their own wrapper libraries (for fun). 
 
 ### Recording
 MoonForge has built-in support for recording to WAV format. When a track is ended with the `exit()` API call a recording of your audio will be saved to your current directory. 
