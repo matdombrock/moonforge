@@ -15,8 +15,6 @@ pan_set(4, 1, 0.25)
 wave_set(5, "SINE")
 pan_set(5, 0.25, 1)
 
--- bus_amp_set(0.6)
-
 local section_len = 8
 local bpm = 120
 local release_speeds = {
