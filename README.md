@@ -5,7 +5,7 @@ MoonForge is a minimalist modular synthesis lab written in C. It's scripted via 
 
 While MoonForge can be used as a semi-traditional synthesizer and tracker, it's built for experimental, evolving, generative audio soundscapes and procedural compositions. 
 
-Features & Goals
+**Features & Goals**
 
 ✅ Fully controlled by Lua
 
@@ -31,7 +31,7 @@ Features & Goals
 
 ✅ Fun toy for audio nerds
 
-Available FX:
+**Available FX**
 
 ✅ All effects are written in C and controlled by Lua.
 
