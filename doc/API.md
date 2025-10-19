@@ -110,7 +110,7 @@ Returns a Lua array with 2 values:
 ### `wavetable_write(wave_name, data)`
 Writes a wavetable to a custom wavetable slot. It is only possible to write to custom wavetables ("CA", "CB", "CC", "CD").
 - `wave_name` - the name of the waveform to use
-- `data` - An array of `TABLE_LENGTH` sample values (-1->1)
+- `data` - An array of `TABLE_SIZE` sample values (-1->1)
 
 ### `effect_set(bus_num, effect_name, ...)`
 Adds/sets an effect on the current effects chain for the given oscillator.
